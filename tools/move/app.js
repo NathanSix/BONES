@@ -430,11 +430,17 @@ function initRing() {
   upd();
 }
 function initArms() {
+  // Both rings use the same scale, so the size difference is the point of the picture.
   const SZ = { active: { non: [52, 34], thr: [62, 34] }, retired: { non: [52, 40], thr: [56, 40] } };
+  const TXT = {
+    active: { big: '≈ 2×', small: 'bone strength', note: 'Pitchers still playing.' },
+    retired: { big: '≈ 1.3×', small: 'a third of the gain kept', note: 'Pitchers retired for 50 years or more.' }
+  };
+  const one = (R, ri, big, small, name) => `<figure><svg viewBox="0 0 140 140" role="img" aria-label="${esc(name)} cross-section"><path class="cort" fill-rule="evenodd" d="${ringPath(70, 70, R, ri)}"/><circle class="marrow" cx="70" cy="70" r="${ri}"/></svg><figcaption><b>${esc(big)}</b><span>${esc(small)}</span><em>${esc(name)}</em></figcaption></figure>`;
   const render = (k) => {
-    const s = SZ[k];
-    const one = (R, ri, title, note) => `<figure><svg viewBox="0 0 140 140" role="img" aria-label="${esc(title)}"><path class="cort" fill-rule="evenodd" d="${ringPath(70, 70, R, ri)}"/><circle class="marrow" cx="70" cy="70" r="${ri}"/></svg><figcaption><b>${esc(note)}</b>${esc(title)}</figcaption></figure>`;
-    $('arms').innerHTML = one(s.non[0], s.non[1], 'Non-throwing arm', '1×') + one(s.thr[0], s.thr[1], 'Throwing arm', k === 'active' ? '≈ 2× strength' : '≈ ⅓ of the extra strength kept');
+    const s = SZ[k], t = TXT[k];
+    $('arms').innerHTML = one(s.non[0], s.non[1], '1×', 'bone strength', 'Non-throwing arm') + one(s.thr[0], s.thr[1], t.big, t.small, 'Throwing arm');
+    $('arms-note').textContent = t.note;
   };
   seg($('arm-mode'), 'arm', render);
   render('active');

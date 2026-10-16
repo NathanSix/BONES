@@ -77,12 +77,14 @@
 .mech-scale .z4 { background: color-mix(in srgb, var(--t4) 22%, var(--surface)); }
 .mech-state { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-size: var(--s-small); line-height: 1.6; min-height: 5.5em; }
 .arms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.arms figure { display: grid; gap: 6px; justify-items: center; text-align: center; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
-.arms svg { width: 100%; max-width: 150px; height: auto; display: block; }
+.arms figure { margin: 0; min-width: 0; display: grid; grid-template-rows: auto 1fr; gap: 10px; justify-items: center; text-align: center; padding: 14px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.arms svg { width: 100%; max-width: 140px; height: auto; display: block; }
 .arms .cort { fill: color-mix(in srgb, var(--h-library) 30%, var(--surface)); stroke: color-mix(in srgb, var(--h-library) 70%, var(--fg)); stroke-width: 1.5; }
 .arms .marrow { fill: color-mix(in srgb, var(--h-move) 18%, var(--bg)); }
-.arms figcaption { font-size: var(--s-small); line-height: 1.45; }
-.arms figcaption b { display: block; font-family: var(--f-display); font-weight: 400; font-size: 1.35rem; color: color-mix(in srgb, var(--h-library) 80%, var(--fg)); }
+.arms figcaption { min-width: 0; display: grid; gap: 2px; align-content: start; font-size: var(--s-small); line-height: 1.4; color: var(--muted); overflow-wrap: anywhere; }
+.arms figcaption b { font-family: var(--f-display); font-weight: 400; font-size: 1.5rem; line-height: 1.1; color: color-mix(in srgb, var(--h-library) 80%, var(--fg)); }
+.arms figcaption em { font-style: normal; color: var(--fg); margin-top: 4px; }
+.arms-note { margin: 0 0 10px; color: var(--muted); font-size: var(--s-small); }
 @media (max-width: 760px) { .ring-wrap { grid-template-columns: 1fr; } }
 
 /* Tissue clocks */
