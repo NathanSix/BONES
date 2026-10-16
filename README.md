@@ -11,6 +11,7 @@ search engines (every page carries `noindex`), but anyone with the link can open
 | --- | --- |
 | `/` | The BONES site (wireframe): home, pillars, library, tools |
 | `/fuel/` | Fuel |
+| `/move/` | Move (built from `tools/move/`; run `python3 tools/move/build.py`) |
 | `/staying-put/` | Staying Put |
 | `/other-senses/` | Other Senses |
 | `/shrinking-jaw/` | The Shrinking Jaw (draft) |
