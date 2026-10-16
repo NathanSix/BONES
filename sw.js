@@ -3,7 +3,7 @@
    Libraries and fonts from the CDNs the pages use: cache first. Their URLs are pinned to a
    version, so a cached copy never goes stale, and pages that need three.js keep working
    offline once they have been opened. */
-const CACHE = 'bones-v2';
+const CACHE = 'bones-v3';
 const CDN = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'unpkg.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -34,7 +34,12 @@ self.addEventListener('fetch', (event) => {
   }
   event.respondWith((async () => {
     try {
-      const res = await fetch(req);
+      // Pages ask the server whether they changed instead of trusting the browser's copy, which
+      // GitHub Pages allows to be up to 10 minutes old. Testers see a fix as soon as it is live.
+      const res = req.mode === 'navigate' ? await fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : await fetch(req);
+      // A page fetched this way may have followed a redirect (move → move/); browsers refuse to
+      // show a redirected response for a navigation, so pass the redirect on instead.
+      if (req.mode === 'navigate' && res.redirected) return Response.redirect(res.url, 302);
       if (res.ok) {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(req, copy));
