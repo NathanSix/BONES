@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="BONES">
 <meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<script src="../assets/bones.js" data-root="../" defer></script>
+<script src="../assets/bones.js" data-root="../"></script>
 <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Other Senses</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -623,6 +623,32 @@ span.tier { cursor: inherit; }
     a.href = SRC[k][1]; a.target = "_blank"; a.rel = "noopener"; a.textContent = SRC[k][0];
     li.appendChild(a); srcOl.appendChild(li);
   });
+
+  /* Evidence section: every graded claim with its full evidence. A grade chip jumps here
+     (see assets/bones.js) instead of opening the drawer. */
+  if (window.BONES && window.BONES.evidence) {
+    var evTN = typeof TN !== "undefined" ? TN : UI.tn, evIds = [];
+    $$(".tier[data-c], [data-open]").forEach(function (el) {
+      var k = el.dataset.c || el.dataset.open;
+      if (CL[k] && evIds.indexOf(k) < 0) evIds.push(k);
+    });
+    Object.keys(CL).forEach(function (k) { if (evIds.indexOf(k) < 0) evIds.push(k); });
+    var evBox = document.createElement("div");
+    evBox.innerHTML = window.BONES.evidence.section({
+      items: evIds.map(function (k) {
+        var c = CL[k];
+        return { id: k, t: c.t, grade: "T" + c.t + " " + evTN[c.t], claim: c.c,
+          rows: [["The evidence", c.w], ["Keep in mind", c.v]],
+          sources: (c.s || []).map(function (s) { return SRC[s]; }) };
+      })
+    });
+    var evFoot = document.querySelector("footer.foot");
+    evFoot.parentNode.insertBefore(evBox.firstChild, evFoot);
+    window.BONES.evidence.bind({
+      selector: "button.tier[data-c], [data-open]",
+      id: function (el) { return el.dataset.c || el.dataset.open; }
+    });
+  }
 
   /* Drawer */
   var dr = $("#drawer"), scrim = $("#scrim"), lastFocus = null;

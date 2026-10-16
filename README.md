@@ -27,6 +27,10 @@ Shared files:
 
 - `assets/bones.js` runs on every page. It registers the offline worker, keeps links between
   BONES pages in the same tab, and adds a "BONES" home link to pages that have none.
+- `assets/bones.js` also holds the evidence sections. Each content page ends with every
+  graded claim it uses; tapping a grade chip jumps to that claim's card, and a "Back to
+  where you were" button returns to the chip. Pages build their section with
+  `BONES.evidence.section()` and register their chips with `BONES.evidence.bind()`.
 - `sw.js` caches pages as they are visited, so the site keeps working with a weak signal.
   It always tries the network first, so testers see the latest version.
 - `manifest.webmanifest` and `assets/icons/` let the site be added to a phone home screen.

@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="BONES">
 <meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<script src="../assets/bones.js" data-root="../" defer></script>
+<script src="../assets/bones.js" data-root="../"></script>
 <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>BONES Fuel</title>
 <meta name="description" content="Food, from three million years of evolution to the label on the box: history, shopping, each macronutrient, and myths graded by evidence.">
@@ -2436,6 +2436,48 @@ document.addEventListener('keydown', (e) => {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 });
+
+/* ---------- Evidence sections: a grade chip jumps to its full evidence ----------
+   Each chapter ends with every graded claim it uses (see assets/bones.js). Built the first
+   time a chapter is shown, after its chips exist. Chips with no card still open the drawer. */
+const evBuilt = {};
+function evItem(key) {
+  if (key.startsWith('m:')) {
+    const m = MYTHS.find((x) => x.id === key.slice(2)); if (!m) return null;
+    return { id: key, t: m.t, grade: `${m.v} · ${tierText('health', m.t)}`, claim: `“${m.s}”`,
+      rows: [['Verdict', m.v], ['Why', m.e]], sources: m.src };
+  }
+  const c = CLAIMS[key]; if (!c) return null;
+  return { id: key, t: c.t, grade: tierText(c.rules, c.t), claim: c.text,
+    rows: [['Kind', CTYPE[c.ctype] || c.ctype], ['Design', c.design], ['Why this grade', c.why]], sources: c.src };
+}
+function evChipKey(b) { return b.dataset.claim || (b.dataset.myth ? 'm:' + b.dataset.myth : null); }
+function evBuild(v) {
+  if (evBuilt[v] || !(window.BONES && window.BONES.evidence)) return;
+  const sec = document.querySelector(`.view[data-view="${v}"]`); if (!sec) return;
+  evBuilt[v] = true;
+  const keys = [];
+  $$('button.tier', sec).forEach((b) => { const k = evChipKey(b); if (k && !keys.includes(k)) keys.push(k); });
+  if (v === 'myths') {
+    MYTHS.forEach((m) => { if (!keys.includes('m:' + m.id)) keys.push('m:' + m.id); });
+    Object.keys(CLAIMS).filter((k) => k.startsWith('f-') && !keys.includes(k)).forEach((k) => keys.push(k));
+  }
+  const items = keys.map(evItem).filter(Boolean);
+  if (!items.length) return;
+  const box = document.createElement('div');
+  box.innerHTML = window.BONES.evidence.section({
+    cls: 'sec', title: v === 'cover' ? 'Every graded claim on this page' : `Every graded claim in ${sec.dataset.title}`,
+    intro: `Tap a grade anywhere ${v === 'cover' ? 'on this page' : 'in this chapter'} to jump to its claim here, with the reason for the grade and the sources behind it. ${REVIEWED}.`,
+    items
+  });
+  const wrap = sec.querySelector(':scope > .wrap') || sec;
+  const pager = wrap.querySelector(':scope > nav.pager');
+  wrap.insertBefore(box.firstChild, pager || null);
+}
+window.addEventListener('fuel:view', (e) => evBuild(e.detail));
+if (window.BONES && window.BONES.evidence) {
+  window.BONES.evidence.bind({ selector: 'button.tier[data-claim], button.tier[data-myth]', id: evChipKey, scope: (b) => b.closest('.view') });
+}
 
 /* ---------- Chapter meta: claim count and tier mix ---------- */
 function chapterMeta(view) {
