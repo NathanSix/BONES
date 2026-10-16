@@ -29,9 +29,11 @@
   --s-label: 0.6875rem; --s-small: 0.8125rem; --s-ui: 0.9375rem;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
+/* Dark by default (BONES opens on Black). Lighter palettes chosen in Tune use the light set;
+   "Match device" (no data-palette) follows the phone. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #000000; --surface: #0E0D0B; --fg: #ECE8E1; --muted: #8C867B; --line: #2A2723;
+  :root:not([data-theme="light"]):not([data-palette]) {
+    --bg: #000000; --surface: #0E0D0B; --fg: #ECE8E1; --muted: #8C867B; --line: #423E38;
     --accent: #9DBBDD; --hatch: rgba(236, 232, 225, 0.07); --scrim: rgba(0, 0, 0, 0.6);
     --t1: #5DBB85; --t2: #5DB0CF; --t3: #D9A441; --t4: #E08350; --t5: #E06666;
     --h-move: #F2836A; --h-fuel: #E6B652; --h-recover: #93AAF5; --h-science: #B9A0F5;
@@ -40,8 +42,8 @@
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #000000; --surface: #0E0D0B; --fg: #ECE8E1; --muted: #8C867B; --line: #2A2723;
+:root[data-theme="dark"], :root[data-palette="black"], :root[data-palette="dot"] {
+  --bg: #000000; --surface: #0E0D0B; --fg: #ECE8E1; --muted: #8C867B; --line: #423E38;
   --accent: #9DBBDD; --hatch: rgba(236, 232, 225, 0.07); --scrim: rgba(0, 0, 0, 0.6);
   --t1: #5DBB85; --t2: #5DB0CF; --t3: #D9A441; --t4: #E08350; --t5: #E06666;
   --h-move: #F2836A; --h-fuel: #E6B652; --h-recover: #93AAF5; --h-science: #B9A0F5;
@@ -82,7 +84,7 @@ h1, h2, h3 { text-wrap: balance; }
 .ruler .rail { position: absolute; top: 0; bottom: 0; right: 14px; width: 1px; background: var(--line); }
 .ruler .tick { position: absolute; right: 14px; height: 1px; background: var(--muted); opacity: 0.5; width: 6px; }
 .ruler .tick.big { width: 12px; opacity: 0.8; }
-.ruler .tick span { position: absolute; right: 16px; top: -0.75em; font-size: 0.625rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ruler .tick span { position: absolute; right: 26px; top: -0.75em; font-size: 0.625rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .ruler .tick sup, .card .label sup { font-size: 0.8em; vertical-align: 0.45em; margin-left: 1px; }
 .ruler .stop { position: absolute; right: 8px; width: 13px; height: 13px; margin-top: -6.5px; border-radius: 50%; border: 2px solid var(--hc, var(--fg)); background: var(--bg); padding: 0; cursor: pointer; transition: transform 0.2s var(--ease), background-color 0.2s ease; }
 .ruler .stop:hover { transform: scale(1.25); }
@@ -93,7 +95,7 @@ h1, h2, h3 { text-wrap: balance; }
 .ruler .now::before { content: ""; position: absolute; left: -7px; top: -4px; border: 5px solid transparent; border-left-color: var(--fg); }
 .ruler .end { position: absolute; right: 0; font-size: 0.625rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
 
-.zctl { position: absolute; z-index: 3; right: calc(max(10px, env(safe-area-inset-right, 0px)) + 62px); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 6px; }
+.zctl { position: absolute; z-index: 3; right: calc(max(10px, env(safe-area-inset-right, 0px)) + 90px); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 6px; }
 .zctl button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 1.15rem; line-height: 1; display: grid; place-items: center; }
 .zctl button:hover { border-color: var(--fg); }
 
@@ -121,6 +123,8 @@ h1, h2, h3 { text-wrap: balance; }
   .zctl { display: none; }
   .hint { display: none; }
   .readout { top: 52px; }
+  .brand b { display: none; } /* the mark alone, so the exhibit tag fits on the same line */
+  .readout .fov { max-width: calc(100vw - 110px); }
 }
 
 /* ---------- Reader: a bone, from the surface in ---------- */
@@ -377,14 +381,14 @@ var STOPS = [
     topics: [{ t: 'The double-slit experiment', s: 'The experiment that showed light is stranger than it looks.', href: '../../science/double-slit/' }] },
   { id: 'lattice', e: -2.7, d: 'lattice', hue: '--h-move', name: 'Inside a bone', size: 'Struts a fraction of a millimeter thick',
     say: 'The spongy inside of bone is a lattice of thin struts. They line up along the directions load runs through the bone.',
-    topics: [{ t: 'How little you need', s: 'The case that a few hours a week of the right work captures most of the benefit.', href: SITE + '#how-little', draft: true }] },
+    topics: [{ t: 'How little you need', s: 'Move, chapter 1: where most of the benefit of strength work and walking sits.', href: SITE + 'move/#little' }] },
   { id: 'jaw', e: -1, d: 'jaw', anchorChild: [0.02, 0.06], hue: '--h-evolution', name: 'A human jaw', size: 'About 10 centimeters',
     say: 'Two million years of chewing less made it one of the smallest jaws in the human family.',
     topics: [{ t: 'The shrinking jaw', s: 'Open it here in layers: the short answer, how it works, then the evidence.', depth: true },
       { t: 'The shrinking jaw, full draft page', s: 'The current version, with the timeline and evidence drawer.', href: '../../shrinking-jaw/', draft: true }] },
   { id: 'body', e: 0.23, d: 'body', anchorChild: [0.006, -0.39], hue: '--h-move', name: 'You', size: 'About 1.7 meters tall',
     say: 'Start here. Your bones and muscles answer the load you give them.',
-    topics: [{ t: 'Move', s: 'Training, walking and the rule that load builds bone.', href: SITE + '#move' },
+    topics: [{ t: 'Move', s: 'Training, walking and the rule that load builds bone.', href: SITE + 'move/' },
       { t: 'Fuel', s: 'Three million years of eating, the label on the box, and every macro.', href: FUEL },
       { t: 'Recover', s: 'Sleep, rest and the slow work of repair.', href: SITE + '#recover' }] },
   { id: 'yard', e: 1, d: 'yard', anchorChild: [0.1, 0.08], hue: '--h-library', name: 'A backyard', size: 'About 10 meters',
@@ -479,7 +483,8 @@ function fmtLen(m) {
   else if (m >= 1e-6) { v = m * 1e6; u = 'µm'; }
   else { v = m * 1e9; u = 'nm'; }
   var digits = v >= 100 ? 0 : v >= 10 ? 0 : v >= 1 ? 1 : 2;
-  var str = v >= 1e6 ? v.toExponential(1).replace('e+', ' × 10^') : v.toLocaleString('en-US', { maximumFractionDigits: digits });
+  var SUP = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  var str = v >= 1e6 ? v.toExponential(1).replace(/e\+(\d+)/, function (_, d) { return ' × 10' + d.replace(/\d/g, function (c) { return SUP[c]; }); }) : v.toLocaleString('en-US', { maximumFractionDigits: digits });
   return str + ' ' + u;
 }
 var powEl = $('#pow'), fovEl = $('#fov'), sbBar = $('#sb-bar'), sbLab = $('#sb-lab');

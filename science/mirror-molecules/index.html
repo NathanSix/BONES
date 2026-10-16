@@ -34,14 +34,14 @@
   --body:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
+  :root:not([data-theme="light"]):not([data-palette]){
     --paper:#0e1522;--page:#172133;--ink:#e9eef7;--soft:#a3afc4;--line:#2b3850;
     --left:#6f9cff;--left-tint:#1d2f55;--right:#ff6f9f;--right-tint:#4a1d31;
     --good:#45c97f;--bad:#ff6b5f;--metal:#7d8798;--metal-dark:#4c5567;--skin:#e3b588;
     color-scheme:dark;
   }
 }
-:root[data-theme="dark"]{
+:root[data-theme="dark"], :root[data-palette="black"], :root[data-palette="dot"]{
   --paper:#0e1522;--page:#172133;--ink:#e9eef7;--soft:#a3afc4;--line:#2b3850;
   --left:#6f9cff;--left-tint:#1d2f55;--right:#ff6f9f;--right-tint:#4a1d31;
   --good:#45c97f;--bad:#ff6b5f;--metal:#7d8798;--metal-dark:#4c5567;--skin:#e3b588;
