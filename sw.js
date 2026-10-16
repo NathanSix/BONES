@@ -1,7 +1,10 @@
 /* BONES service worker: network first, cache as a fallback for offline use.
-   Only same-origin GET requests are handled. Fonts and libraries from CDNs go straight
-   to the network, so pages that need them work online only. */
-const CACHE = 'bones-v1';
+   Same-origin pages: network first, so testers always get the newest version.
+   Libraries and fonts from the CDNs the pages use: cache first. Their URLs are pinned to a
+   version, so a cached copy never goes stale, and pages that need three.js keep working
+   offline once they have been opened. */
+const CACHE = 'bones-v2';
+const CDN = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'unpkg.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -17,7 +20,18 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin) {
+    if (!CDN.includes(url.hostname)) return;
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      const hit = await cache.match(req);
+      if (hit) return hit;
+      const res = await fetch(req);
+      if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
+      return res;
+    })());
+    return;
+  }
   event.respondWith((async () => {
     try {
       const res = await fetch(req);

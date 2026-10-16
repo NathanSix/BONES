@@ -36,7 +36,7 @@ out = '\n'.join([
     '<style id="move-style">\n' + rd('shared/shell.css') + '\n' + rd('move/style.css') + '\n</style>',
     sprite,
     rd('move/body.html').strip(),
-    '<script>\n' + rd('move/claims.js') + '\n' + rd('move/app.js') + '\n</script>',
+    '<script>\n' + rd('move/claims.js') + '\n' + rd('move/figure.js') + '\n' + rd('move/app.js') + '\n</script>',
     '',
     '</body></html>',
 ])

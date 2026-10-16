@@ -11,7 +11,7 @@ search engines (every page carries `noindex`), but anyone with the link can open
 | --- | --- |
 | `/` | The BONES site (wireframe): home, pillars, library, tools |
 | `/fuel/` | Fuel |
-| `/move/` | Move (built from `tools/move/`; run `python3 tools/move/build.py`) |
+| `/move/` | Move |
 | `/staying-put/` | Staying Put |
 | `/other-senses/` | Other Senses |
 | `/shrinking-jaw/` | The Shrinking Jaw (draft) |
@@ -35,6 +35,22 @@ Shared files:
 - `sw.js` caches pages as they are visited, so the site keeps working with a weak signal.
   It always tries the network first, so testers see the latest version.
 - `manifest.webmanifest` and `assets/icons/` let the site be added to a phone home screen.
+  The icons are the white mark on black; rebuild them with `node tools/icons/make.js`.
+- `assets/fonts/` holds the shared typefaces, so each page no longer carries its own copy.
+- Pages open in the Black palette. The Tune panel (on Home, Fuel and Move) changes it, and the
+  choice carries across pages.
+- `404.html` is shown for addresses that don't exist.
+
+## Move
+
+`move/index.html` is built, not edited by hand. The sources are in `tools/move/`:
+`body.html` (text and markup), `claims.js` (graded claims), `figure.js` (the lift figures and
+their physics), `app.js` (everything interactive) and `style.css`, plus the shared shell in
+`tools/shared/`. Rebuild with `python3 tools/move/build.py`.
+
+`node tools/move/check-figure.js` checks every lift animation frame by frame: balance over the
+middle of the foot, bar paths, the bar resting on the floor in a deadlift and touching the chest
+in a bench press, elbows and knees bending the right way. Run it after changing any pose.
 
 ## Editing the wireframe
 

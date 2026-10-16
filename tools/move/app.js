@@ -178,185 +178,62 @@ function seg(group, attr, fn) {
   }));
 }
 
-/* ================= The figure: a side-view stick figure with joint angles ================= */
-/* Angles are in degrees, measured counterclockwise from pointing right (90 = straight up).
-   shin points ankle→knee, thigh knee→hip, torso hip→shoulder. Arms use angles (ua, fa) or a hand
-   target (hand: absolute, handRel: relative to the shoulder) solved with two-bone IK. */
-const SEG = { shin: 40, thigh: 42, torso: 52, ua: 29, fa: 27, head: 10, foot: 15 };
-const FLOOR = 178;
-const dir = (a) => [Math.cos(a * Math.PI / 180), -Math.sin(a * Math.PI / 180)];
-const add = (p, v, k) => [p[0] + v[0] * k, p[1] + v[1] * k];
-function solve(P) {
-  let ankle;
-  if (P.hip) ankle = add(add(P.hip, dir(P.thigh), -SEG.thigh), dir(P.shin), -SEG.shin);
-  else ankle = P.ankle;
-  const knee = add(ankle, dir(P.shin), SEG.shin);
-  const hip = add(knee, dir(P.thigh), SEG.thigh);
-  const sh = add(hip, dir(P.torso), SEG.torso);
-  const head = add(sh, dir(P.torso + (P.headTilt || 0)), SEG.head + 5);
-  let elbow, hand;
-  if (P.hand || P.handRel) {
-    const T = P.hand ? P.hand : [sh[0] + P.handRel[0], sh[1] + P.handRel[1]];
-    const dx = T[0] - sh[0], dy = T[1] - sh[1];
-    const d = clamp(Math.hypot(dx, dy), Math.abs(SEG.ua - SEG.fa) + 1, SEG.ua + SEG.fa - 0.01);
-    const th = Math.atan2(dy, dx);
-    const A = Math.acos(clamp((SEG.ua * SEG.ua + d * d - SEG.fa * SEG.fa) / (2 * SEG.ua * d), -1, 1));
-    const b = P.bend || 1;
-    elbow = [sh[0] + SEG.ua * Math.cos(th + b * A), sh[1] + SEG.ua * Math.sin(th + b * A)];
-    hand = [sh[0] + d * Math.cos(th), sh[1] + d * Math.sin(th)];
-  } else {
-    elbow = add(sh, dir(P.ua), SEG.ua);
-    hand = add(elbow, dir(P.fa), SEG.fa);
-  }
-  const toe = add(ankle, dir(P.foot == null ? -16 : P.foot), SEG.foot);
-  return { ankle, knee, hip, sh, head, elbow, hand, toe };
-}
-function mix(A, B, t) {
-  const o = {};
-  for (const k in A) {
-    const a = A[k], b = B[k];
-    if (Array.isArray(a)) o[k] = [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
-    else if (typeof a === 'number') o[k] = lerp(a, b == null ? a : b, t);
-    else o[k] = a;
-  }
-  return o;
-}
-const STAND = { ankle: [118, 172], shin: 89, thigh: 91, torso: 92 };
-
-/* Each lift: three rungs (none / db-kb / barbell). Each rung: two poses, the kit drawn at the hands,
-   the scenery, and the coaching text. */
-const LIFTS = {
-  squat: { name: 'Squat', trains: 'Thighs and glutes, and the bones of the hips and spine.', rungs: [
-    { rung: 'No equipment', title: 'Bodyweight squat', kit: 'none',
-      a: { ...STAND, ua: -95, fa: -92 }, b: { ankle: [118, 172], shin: 62, thigh: 170, torso: 55, ua: -8, fa: -2 },
-      cues: ['Feet about shoulder-width apart, toes turned out a little.', 'Sit down between your heels, knees tracking over your toes.', 'Go as low as you can keep your back flat, then stand up through your whole foot.'],
-      easier: 'Sit down to a chair and stand back up without using your hands.', harder: 'Take 3 seconds on the way down, or pause at the bottom.', mistake: 'Knees caving in. Push them out over your toes.' },
-    { rung: 'Dumbbell or kettlebell', title: 'Goblet squat', kit: 'kb-chest',
-      a: { ...STAND, ua: -80, fa: 60 }, b: { ankle: [118, 172], shin: 62, thigh: 170, torso: 58, ua: -78, fa: 55 },
-      cues: ['Hold the weight against your chest, elbows pointing down.', 'Sit down between your knees, chest tall.', 'Let your elbows brush the inside of your knees at the bottom, then stand.'],
-      easier: 'Use a lighter weight, or squat down to a box or chair.', harder: 'Go heavier, or pause for two seconds at the bottom.', mistake: 'Letting the weight drift away from your chest pulls you forward.' },
-    { rung: 'Barbell', title: 'Back squat', kit: 'bb-back', scene: 'rack',
-      a: { ...STAND, ua: -125, fa: 70 }, b: { ankle: [118, 172], shin: 60, thigh: 172, torso: 52, ua: -165, fa: 30 },
-      cues: ['Bar on your upper back, shoulder blades squeezed so it sits on muscle.', 'Take a big breath and brace your stomach, then sit down.', 'Drive up so the bar stays over the middle of your foot.'],
-      easier: 'The goblet squat builds the same pattern with less to manage.', harder: 'Add weight in small jumps, about 2 to 5 kg at a time.', mistake: 'Squatting without safety arms. Set them just below your lowest point, every time.' }
-  ] },
-  hinge: { name: 'Hinge', trains: 'Hamstrings, glutes and the long muscles of the back. The deadlift loads the whole skeleton.', rungs: [
-    { rung: 'No equipment', title: 'Hip hinge', kit: 'none',
-      a: { ...STAND, ua: -92, fa: -90 }, b: { ankle: [118, 172], shin: 82, thigh: 128, torso: 30, ua: -88, fa: -86 },
-      cues: ['Soft knees. Push your hips back, like closing a car door with your backside.', 'Keep your back flat as your hands slide down your thighs.', 'Stop when the backs of your legs stretch, then squeeze your glutes to stand.'],
-      easier: 'Glute bridge: lie on your back, knees bent, and lift your hips.', harder: 'Single-leg hinge, reaching one hand toward the floor.', mistake: 'Rounding your back to reach lower. The hips move; the back doesn’t.' },
-    { rung: 'Dumbbell or kettlebell', title: 'Kettlebell deadlift', kit: 'kb',
-      a: { ...STAND, hand: [119, 92], bend: 1 }, b: { ankle: [118, 172], shin: 70, thigh: 160, torso: 18, hand: [126, 158], bend: 1 },
-      cues: ['Stand over the bell, push your hips back and grip it with both hands.', 'Pull your shoulders down and back so your back is flat and tight.', 'Stand up by pushing the floor away, then hinge back down the same way.'],
-      easier: 'Use a lighter bell, or raise it on a step so you don’t go as low.', harder: 'Go heavier. Once the deadlift is solid, the kettlebell swing is next.', mistake: 'Squatting the bell up. Your hips should go back, not just down.' },
-    { rung: 'Barbell', title: 'Deadlift', kit: 'bb-floor',
-      a: { ...STAND, hand: [119, 92], bend: 1 }, b: { ankle: [118, 172], shin: 68, thigh: 165, torso: 20, hand: [128, 155], bend: 1 },
-      cues: ['Bar over the middle of your foot, shins almost touching it.', 'Hinge down, grip just outside your legs, chest up and back flat.', 'Push the floor away and keep the bar close to your legs all the way up.'],
-      easier: 'A trap-bar deadlift, or a lighter Romanian deadlift from standing.', harder: 'Add weight slowly. Sets of 3 to 5 are plenty.', mistake: 'Jerking the bar off the floor. Pull the slack out first, then push.' }
-  ] },
-  push: { name: 'Push', trains: 'Chest, shoulders and triceps, and the bones of the arms and wrists.', rungs: [
-    { rung: 'No equipment', title: 'Push-up', kit: 'none', floorKit: true,
-      a: { ankle: [42, 168], shin: 21, thigh: 21, torso: 21, hand: [170, 175], bend: 1, foot: -55, headTilt: -8 },
-      b: { ankle: [42, 168], shin: 5, thigh: 5, torso: 5, hand: [170, 175], bend: 1, foot: -55, headTilt: -5 },
-      cues: ['Hands just wider than your shoulders, body in one straight line.', 'Lower your chest to a fist’s height from the floor, elbows angled back.', 'Push the floor away until your arms are straight.'],
-      easier: 'Put your hands on a counter or a step. The higher your hands, the easier it is.', harder: 'Feet up on a step, or take 3 seconds on the way down.', mistake: 'Hips sagging. Squeeze your glutes and hold the line.' },
-    { rung: 'Dumbbell or kettlebell', title: 'Dumbbell overhead press', kit: 'db',
-      a: { ...STAND, handRel: [3, 2], bend: 1 }, b: { ...STAND, handRel: [2, -55], bend: 1 },
-      cues: ['Dumbbells at your shoulders, palms forward or facing in.', 'Squeeze your glutes and brace so your lower back doesn’t arch.', 'Press straight up until your arms are beside your ears.'],
-      easier: 'Press one arm at a time, or sit with your back supported.', harder: 'Heavier dumbbells, or a barbell press standing up.', mistake: 'Leaning back to finish the rep. Use a lighter weight and a tighter brace.' },
-    { rung: 'Barbell', title: 'Bench press', kit: 'bb-hand', scene: 'bench',
-      a: { hip: [132, 124], shin: 92, thigh: 171, torso: 180, handRel: [6, -54], bend: -1, foot: -10, headTilt: 0 },
-      b: { hip: [132, 124], shin: 92, thigh: 171, torso: 180, handRel: [10, -10], bend: -1, foot: -10, headTilt: 0 },
-      cues: ['Eyes under the bar, feet flat, shoulder blades squeezed together.', 'Lower the bar to the middle of your chest under control.', 'Press it back up, drifting slightly toward your face.'],
-      easier: 'Dumbbell bench press, or push-ups.', harder: 'Add weight in small jumps.', mistake: 'Benching alone without safety arms. Set them, or use dumbbells.' }
-  ] },
-  pull: { name: 'Pull', trains: 'Upper back, lats and biceps, and your grip.', rungs: [
-    { rung: 'No equipment', title: 'Doorframe row', kit: 'none', scene: 'door',
-      a: { ankle: [168, 172], shin: 110, thigh: 110, torso: 110, hand: [176, 70], bend: 1, foot: -4 },
-      b: { ankle: [168, 172], shin: 99, thigh: 99, torso: 99, hand: [176, 70], bend: 1, foot: -4 },
-      cues: ['Stand in a doorway with your toes near the frame and grip both sides at chest height.', 'Lean back until your arms are straight and your body is one straight line.', 'Pull your chest to your hands, squeezing your shoulder blades together.'],
-      easier: 'Stand more upright so you lean back less.', harder: 'Walk your feet closer to the frame so you lean back further, or pause at the top.', mistake: 'Using a frame that isn’t solid. Test it first, and keep your feet under you.' },
-    { rung: 'Dumbbell or kettlebell', title: 'Bent-over dumbbell row', kit: 'db',
-      a: { ankle: [118, 172], shin: 80, thigh: 140, torso: 22, handRel: [0, 53], bend: 1 }, b: { ankle: [118, 172], shin: 80, thigh: 140, torso: 22, handRel: [-26, 16], bend: 1 },
-      cues: ['Hinge forward with a flat back until your chest is low, knees soft.', 'Let the dumbbells hang, then pull them toward your hips.', 'Squeeze your shoulder blades at the top, then lower slowly.'],
-      easier: 'One arm at a time, with your other hand on a bench.', harder: 'Heavier dumbbells, or a pause at the top.', mistake: 'Jerking your body up to swing the weight.' },
-    { rung: 'Barbell rack', title: 'Pull-up', kit: 'none', scene: 'bar', noFloor: true,
-      a: { hip: [120, 112], shin: 45, thigh: 82, torso: 90, hand: [121, 2], bend: 1, foot: -70 },
-      b: { hip: [120, 64], shin: 45, thigh: 82, torso: 90, hand: [121, 2], bend: 1, foot: -70 },
-      cues: ['Hang with your hands a little wider than your shoulders, palms facing away.', 'Pull your shoulder blades down first, then drive your elbows toward your ribs.', 'Get your chin over the bar, then lower all the way down.'],
-      easier: 'Jump up and lower yourself slowly, use a resistance band, or do barbell rows.', harder: 'Add weight with a backpack or a dip belt.', mistake: 'Half reps. Go all the way down each time.' }
-  ] }
-};
-
-/* Draw one frame of a lift into an SVG */
+/* ================= Lift figures: drawing (the physics lives in figure.js) ================= */
+const LIFTS = FIG.LIFTS, FLOOR = FIG.FLOOR;
+const P2 = (p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1);
 function figureScene(svg, L) {
   svg.innerHTML = '';
   svg.setAttribute('viewBox', '0 -26 240 226');
-  const g = { scene: svg_g(svg, 'scene'), path: svg_g(svg, 'paths'), kitBack: svg_g(svg, 'kitback'), body: svg_g(svg, 'body'), kit: svg_g(svg, 'kit') };
+  const grp = (cls) => svgEl('g', { class: cls }, svg);
+  const g = { scene: grp('scene'), path: grp('paths'), kitBack: grp('kitback'), body: grp('body'), kit: grp('kit') };
+  const R = (x, y, w, h) => svgEl('rect', { x, y, width: w, height: h, rx: 1.5, class: 'furn' }, g.scene);
   if (!L.noFloor) svgEl('line', { x1: 8, y1: FLOOR, x2: 232, y2: FLOOR, class: 'floor' }, g.scene);
-  if (L.scene === 'bench') {
-    svgEl('rect', { x: 58, y: 128, width: 92, height: 9, rx: 3, class: 'furn' }, g.scene);
-    svgEl('rect', { x: 70, y: 137, width: 6, height: 41, class: 'furn' }, g.scene);
-    svgEl('rect', { x: 132, y: 137, width: 6, height: 41, class: 'furn' }, g.scene);
-    svgEl('rect', { x: 64, y: 40, width: 5, height: 138, class: 'furn' }, g.scene);
-  }
-  if (L.scene === 'rack') { svgEl('rect', { x: 166, y: 20, width: 6, height: 158, class: 'furn' }, g.scene); svgEl('rect', { x: 140, y: 104, width: 32, height: 5, class: 'furn' }, g.scene); }
-  if (L.scene === 'door') { svgEl('rect', { x: 176, y: -26, width: 10, height: 204, class: 'furn' }, g.scene); }
-  if (L.scene === 'bar') { svgEl('rect', { x: 64, y: -26, width: 6, height: 226, class: 'furn' }, g.scene); svgEl('rect', { x: 172, y: -26, width: 6, height: 226, class: 'furn' }, g.scene); svgEl('line', { x1: 64, y1: 2, x2: 178, y2: 2, class: 'kit-line' }, g.scene); }
-  // dotted path of the hands or bar through one rep
+  if (L.scene === 'bench') { R(44, 140, 100, 7); R(54, 147, 6, 31); R(128, 147, 6, 31); R(58, 58, 5, 120); R(58, 84, 14, 4); }
+  if (L.scene === 'rack') { const top = FIG.frame(L, 0).kit, bot = FIG.frame(L, 1).kit; R(170, 10, 6, 168); R(150, top[1] + 4, 26, 4); R(140, bot[1] + 6, 36, 4); }
+  if (L.scene === 'door') R(178, -26, 10, 204);
+  if (L.scene === 'bar') { R(62, -26, 6, 226); R(184, -26, 6, 226); svgEl('line', { x1: 62, y1: 2, x2: 190, y2: 2, class: 'kit-line' }, g.scene); }
   if (L.kit !== 'none') {
     let d = '';
-    for (let i = 0; i <= 24; i++) { const J = solve(mix(L.a, L.b, i / 24)); const p = kitPoint(L, J); d += (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }
+    for (let i = 0; i <= 40; i++) d += (i ? 'L' : 'M') + P2(FIG.frame(L, i / 40).kit);
     svgEl('path', { d, class: 'path' }, g.path);
   }
   const body = svgEl('path', { class: 'body' }, g.body);
-  const head = svgEl('circle', { r: SEG.head, class: 'head' }, g.body);
+  const head = svgEl('circle', { r: FIG.SEG.head, class: 'head' }, g.body);
   return { g, body, head, L };
 }
-function svg_g(svg, cls) { return svgEl('g', { class: cls }, svg); }
-function kitPoint(L, J) {
-  if (L.kit === 'bb-back') return [J.sh[0] - 5, J.sh[1] + 3];
-  if (L.kit === 'kb') return [J.hand[0], J.hand[1] + 11];
-  if (L.kit === 'bb-floor') return [J.hand[0], J.hand[1] + 5];
-  return J.hand;
-}
-function drawFrame(F, t) {
-  const L = F.L, J = solve(mix(L.a, L.b, t));
-  const P = (p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1);
-  F.body.setAttribute('d', `M${P(J.toe)}L${P(J.ankle)}L${P(J.knee)}L${P(J.hip)}L${P(J.sh)}M${P(J.sh)}L${P(J.elbow)}L${P(J.hand)}`);
+function drawFrame(F, s) {
+  const L = F.L, J = FIG.frame(L, s);
+  F.body.setAttribute('d', `M${P2(J.toe)}L${P2(J.ankle)}L${P2(J.knee)}L${P2(J.hip)}L${P2(J.sh)}M${P2(J.sh)}L${P2(J.elbow)}L${P2(J.hand)}`);
   F.head.setAttribute('cx', J.head[0].toFixed(1)); F.head.setAttribute('cy', J.head[1].toFixed(1));
-  const k = F.g.kit; k.innerHTML = ''; F.g.kitBack.innerHTML = '';
-  const kp = kitPoint(L, J);
-  if (L.kit === 'kb' || L.kit === 'kb-chest') {
-    const c = L.kit === 'kb' ? kp : [J.hand[0] + 4, J.hand[1] + 3];
-    svgEl('circle', { cx: c[0], cy: c[1], r: 8.5, class: 'kit' }, k);
-    svgEl('path', { d: `M${c[0] - 5} ${c[1] - 6}Q${c[0]} ${c[1] - 15} ${c[0] + 5} ${c[1] - 6}`, class: 'kit-line', 'stroke-width': 3 }, k);
+  const k = F.g.kit, kb = F.g.kitBack; k.innerHTML = ''; kb.innerHTML = '';
+  if (!J.kit) return;
+  const [x, y] = J.kit;
+  if (L.kit === 'kb') {
+    svgEl('circle', { cx: x, cy: y, r: FIG.KIT.kb.r, class: 'kit' }, k);
+    svgEl('path', { d: `M${(x - 7).toFixed(1)} ${(y - 6).toFixed(1)}Q${x.toFixed(1)} ${(J.hand[1] - 7).toFixed(1)} ${(x + 7).toFixed(1)} ${(y - 6).toFixed(1)}`, class: 'kit-line', 'stroke-width': 3 }, k);
   } else if (L.kit === 'db') {
-    svgEl('circle', { cx: kp[0], cy: kp[1], r: 6.5, class: 'kit' }, k);
-  } else if (L.kit === 'bb-back' || L.kit === 'bb-hand' || L.kit === 'bb-floor') {
-    const r = L.kit === 'bb-floor' ? 18 : 16;
-    svgEl('circle', { cx: kp[0], cy: kp[1], r, class: 'kit', opacity: L.kit === 'bb-floor' ? 0.85 : 0.55 }, F.g.kitBack);
-    svgEl('circle', { cx: kp[0], cy: kp[1], r: 3, fill: 'var(--surface)' }, k);
+    svgEl('circle', { cx: x, cy: y, r: FIG.KIT.db.r, class: 'kit' }, k);
+  } else if (L.kit === 'bb') {
+    svgEl('circle', { cx: x, cy: y, r: FIG.KIT.bb.r, class: 'kit', opacity: L.floorBar ? 0.85 : 0.5 }, kb);
+    svgEl('circle', { cx: x, cy: y, r: 3.2, class: 'hub' }, k);
   }
 }
-/* A looping animator for one SVG; returns controls */
-function animator(svg, onLoop) {
-  let F = null, t0 = performance.now(), on = true, vis = true, raf = 0, period = 3200;
+/* A looping animator for one SVG */
+function animator(svg) {
+  let F = null, t0 = 0, on = !REDUCE, vis = true, raf = 0;
+  const period = FIG.PERIOD;
   const tick = (now) => {
     raf = 0;
     if (!F) return;
-    const u = ((now - t0) % period) / period;
-    const b = (1 - Math.cos(u * 2 * Math.PI)) / 2;
-    drawFrame(F, b);
-    if (onLoop) { const n = Math.floor((now - t0) / period); if (n !== animator._n) { animator._n = n; } }
-    if (on && vis && !REDUCE) raf = requestAnimationFrame(tick);
+    drawFrame(F, FIG.phase(((now - t0) % period) / period));
+    if (on && vis) raf = requestAnimationFrame(tick);
   };
-  const kick = () => { if (!raf && on && vis && !REDUCE) raf = requestAnimationFrame(tick); };
+  const kick = () => { if (!raf && on && vis && F) raf = requestAnimationFrame(tick); };
   whenVisible(svg, (v) => { vis = v; kick(); });
   return {
-    set(L) { F = figureScene(svg, L); t0 = performance.now(); drawFrame(F, REDUCE ? 1 : 0); kick(); },
+    set(L) { F = figureScene(svg, L); t0 = performance.now(); drawFrame(F, on ? 0 : 1); kick(); },
     play(p) { on = p; if (p) { t0 = performance.now(); kick(); } else if (F) drawFrame(F, 1); },
-    elapsed() { return performance.now() - t0; }, period
+    period
   };
 }
 
@@ -615,8 +492,8 @@ inits.range = () => safeInit(initSitRise);
 
 /* ================= Look: palettes, type and the 1985 switch (same as Fuel) ================= */
 const PALETTES = [
-  { id: 'auto', name: 'Auto', c: ['#ECE9E2', '#000000', '#9DBBDD'] },
   { id: 'black', name: 'Black', c: ['#000000', '#ECE8E1', '#9DBBDD'] },
+  { id: 'auto', name: 'Match device', c: ['#ECE9E2', '#000000', '#9DBBDD'] },
   { id: 'paper', name: 'Paper', c: ['#ECE9E2', '#1C1B18', '#2E4C6E'] },
   { id: 'dot', name: 'Blue dot', c: ['#0A1220', '#E4E8EE', '#E2B04A'] },
   { id: 'field', name: 'Field', c: ['#E3E6DC', '#1D231B', '#46633A'] },
@@ -629,7 +506,7 @@ const ROOT = document.documentElement;
 const isDim = () => lk('dim') === 'neon';
 function applyLook() {
   if (isDim()) ROOT.setAttribute('data-dim', 'neon'); else ROOT.removeAttribute('data-dim');
-  const pal = lk('palette') || 'auto', ty = lk('type') || 'mono';
+  const pal = lk('palette') || 'black', ty = lk('type') || 'mono';
   if (pal === 'auto') ROOT.removeAttribute('data-palette'); else ROOT.setAttribute('data-palette', pal);
   if (ty === 'mono') ROOT.removeAttribute('data-type'); else ROOT.setAttribute('data-type', ty);
   const sw = document.querySelector('.dim-switch');
@@ -641,7 +518,7 @@ function renderTune() {
   const box = $('tune-panel'); if (!box) return;
   box.hidden = !tuneOpen; $('tune-btn').setAttribute('aria-expanded', String(tuneOpen));
   if (!tuneOpen) return;
-  const pal = lk('palette') || 'auto', ty = lk('type') || 'mono';
+  const pal = lk('palette') || 'black', ty = lk('type') || 'mono';
   box.innerHTML = `<div><h2>Palette</h2>${isDim() ? '<p class="fine" style="margin-bottom:8px">Palettes apply in the prime dimension.</p>' : ''}<div class="swatches">${PALETTES.map((p) => `<button class="sw" type="button" data-pal="${p.id}" aria-pressed="${p.id === pal}"><i aria-hidden="true">${p.c.map((c) => `<b style="background:${c}"></b>`).join('')}</i>${p.name}</button>`).join('')}</div></div>
     <div><h2>Type</h2><div class="opts">${TYPES.map((t) => `<button class="opt" type="button" data-ty="${t.id}" aria-pressed="${t.id === ty}"><span>${t.name}</span><span class="s">${t.s}</span></button>`).join('')}</div></div>`;
 }
@@ -653,7 +530,7 @@ function initLook() {
   $('tune-panel').addEventListener('click', (e) => {
     e.stopPropagation();
     const p = e.target.closest('[data-pal]'), t = e.target.closest('[data-ty]');
-    if (p) { lk('palette', p.dataset.pal === 'auto' ? null : p.dataset.pal); applyLook(); }
+    if (p) { lk('palette', p.dataset.pal === 'black' ? null : p.dataset.pal); applyLook(); }
     if (t) { lk('type', t.dataset.ty === 'mono' ? null : t.dataset.ty); applyLook(); }
   });
   document.addEventListener('click', () => { if (tuneOpen) { tuneOpen = false; renderTune(); } });

@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8>
+<!doctype html><html lang="en"><head><meta charset=utf8>
 <meta name="robots" content="noindex, nofollow">
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BONES">
-<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <script src="../../assets/bones.js" data-root="../../"></script>
 <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
@@ -699,7 +699,7 @@ select {
             <input type="range" id="cTurb" min="0" max="1" step="0.01">
           </div>
           <div class="ctl">
-            <label for="cSpeed">Time flow</label><output id="oSpeed" for="cSpeed">1.0×</output>
+            <label for="cSpeed">Time flow</label><output id="cSpeedOut" for="cSpeed">1.0×</output>
             <input type="range" id="cSpeed" min="0" max="4" step="0.05">
           </div>
         </fieldset>
@@ -2183,7 +2183,7 @@ void main() {
   });
   bindRange('cOut', 'oOut', { get: () => S.diskOut, set: (v) => { S.diskOut = v; }, format: (v) => v.toFixed(1).replace(/\.0$/, '') + ' M' });
   bindRange('cTurb', 'oTurb', { get: () => S.turb, set: (v) => { S.turb = v; }, format: (v) => v.toFixed(2) });
-  bindRange('cSpeed', 'oSpeed', { get: () => S.speed, set: (v) => { S.speed = v; }, format: (v) => (v === 0 ? 'paused' : v.toFixed(2).replace(/0$/, '') + '×') });
+  bindRange('cSpeed', 'cSpeedOut', { get: () => S.speed, set: (v) => { S.speed = v; }, format: (v) => (v === 0 ? 'paused' : v.toFixed(2).replace(/0$/, '') + '×') });
   bindRange('cEv', 'oEv', { get: () => S.ev, set: (v) => { S.ev = v; }, format: (v) => (v > 0 ? '+' : '') + v.toFixed(1) + ' EV' });
   bindRange('cBloom', 'oBloom', { get: () => S.bloom, set: (v) => { S.bloom = v; }, format: (v) => v.toFixed(2) });
   bindRange('cStars', 'oStars', { get: () => S.stars, set: (v) => { S.stars = v; }, format: (v) => v.toFixed(2).replace(/0$/, '') + '×' });

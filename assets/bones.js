@@ -9,6 +9,13 @@
   var root = (me && me.getAttribute('data-root')) || './';
   var rootURL = new URL(root, location.href).href;
 
+  /* Palette before first paint, so pages don't flash light. Black is the default; the Tune
+     panel on pages that have one stores another choice under the same key. */
+  try {
+    var pal = window.localStorage.getItem('bones-palette') || 'black';
+    if (pal !== 'auto') document.documentElement.setAttribute('data-palette', pal);
+  } catch (e) { document.documentElement.setAttribute('data-palette', 'black'); }
+
   /* Same-tab navigation inside the site. Capture phase, so it runs before the browser
      acts on target="_blank" in links that scripts build after the page loads. */
   document.addEventListener('click', function (e) {
@@ -59,6 +66,16 @@
     ]).join(';');
     document.body.appendChild(a);
   }
+  /* Bigger touch targets for small controls without changing how they look: grade chips are
+     about 21px tall, under the 24px minimum for a fingertip. An invisible ::after extends the
+     hit area. */
+  (function () {
+    var st = document.createElement('style');
+    st.id = 'bones-touch';
+    st.textContent = 'button.tier{position:relative}button.tier::after{content:"";position:absolute;inset:-6px -3px}';
+    (document.head || document.documentElement).appendChild(st);
+  })();
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addHome);
   else addHome();
 
