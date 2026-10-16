@@ -1,0 +1,780 @@
+<!doctype html><html><head><meta charset=utf8>
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BONES">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script src="../../assets/bones.js" data-root="../../" defer></script>
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Time Well</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one narrow column; each section is labeled by its physical scale, descending from deep space to a tossed ball */
+:root{
+  --void:#060913;
+  --panel:#0e1629;
+  --line:#22304d;
+  --ink:#e8ecf6;
+  --dim:#97a3bf;
+  --fast:#f2b54a;
+  --slow:#5ec4e6;
+  --earth:#3a6bd0;
+  --earth-hi:#86a8ec;
+  --fast-soft:rgba(242,181,74,.14);
+  --slow-soft:rgba(94,196,230,.14);
+  --ink-soft:rgba(232,236,246,.08);
+  --font-display:"Chakra Petch","Trebuchet MS",sans-serif;
+  --font-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html{background:var(--void)}
+body{background:var(--void);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin-inline:auto;padding-inline:18px;padding-block:24px 64px;display:flex;flex-direction:column;gap:64px}
+section,.hero{display:flex;flex-direction:column;gap:16px;min-width:0}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;text-wrap:balance;margin:0;letter-spacing:.01em}
+h1{font-size:clamp(2.7rem,12vw,4.4rem);line-height:.95;font-weight:700}
+h2{font-size:clamp(1.6rem,6vw,2rem);line-height:1.1}
+h3{font-size:1.1rem;line-height:1.2}
+p{margin:0;max-width:62ch}
+.eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:0}
+.lede{font-size:1.12rem;color:var(--ink)}
+.muted{color:var(--dim)}
+.small{font-size:.86rem}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.fast{color:var(--fast)}
+.slow{color:var(--slow)}
+a{color:var(--slow);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--fast);outline-offset:2px;border-radius:6px}
+
+/* hero well */
+.well{position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(ellipse 70% 55% at 50% 88%,rgba(58,107,208,.16),transparent 70%),var(--void)}
+.well canvas{display:block;width:100%;height:clamp(250px,66vw,350px)}
+.formula{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--font-mono);font-size:.8rem;color:var(--dim)}
+.formula b{color:var(--ink);font-weight:600;white-space:nowrap}
+
+/* rules */
+.rules{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:560px){.rules{grid-template-columns:1fr 1fr}}
+.rule{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);min-width:0}
+.rule svg{flex:none;width:56px;height:56px}
+.rule div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rule p{font-size:.95rem}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-family:var(--font-mono);font-size:.8rem;color:var(--dim)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.dot.f{background:var(--fast)} .dot.s{background:var(--slow)} .dot.n{background:var(--ink)}
+
+/* instruments */
+.instrument{display:flex;flex-direction:column;gap:16px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel);min-width:0}
+.scene svg{display:block;width:100%;height:auto;max-width:100%}
+.field{display:flex;flex-direction:column;gap:2px}
+.field-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 10px}
+.field label{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.field output{font-family:var(--font-mono);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:34px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--fast);border:4px solid var(--panel);box-shadow:0 0 0 1.5px var(--fast);margin-top:-9px}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--fast);border:4px solid var(--panel);box-shadow:0 0 0 1.5px var(--fast)}
+input[type=range]:focus-visible{outline:2px solid var(--fast);outline-offset:4px;border-radius:6px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:14px}
+.stat{display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .k{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.stat .v{font-family:var(--font-mono);font-size:1.2rem;font-weight:600;font-variant-numeric:tabular-nums}
+.verdict{font-size:.98rem}
+
+.callout{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:14px;background:var(--fast-soft);border:1px solid rgba(242,181,74,.35)}
+.callout h3{color:var(--fast)}
+.exps{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:560px){.exps{grid-template-columns:1fr 1fr}}
+.exp{display:flex;flex-direction:column;gap:4px;padding-left:14px;border-left:2px solid var(--line);min-width:0}
+.exp .yr{font-family:var(--font-mono);font-size:.78rem;color:var(--fast);letter-spacing:.06em}
+.exp p{font-size:.93rem}
+
+/* lab */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-family:var(--font-mono);font-size:.78rem;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;transition:background .2s,border-color .2s}
+.chip:hover{border-color:var(--dim)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--void);border-color:var(--ink)}
+.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{font:inherit;font-family:var(--font-mono);font-size:.78rem;color:var(--dim);background:transparent;border:0;border-radius:999px;padding:6px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--dim)}
+.lab-grid{display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
+@media(min-width:620px){.lab-grid{grid-template-columns:230px minmax(0,1fr)}}
+.orbit{display:flex;flex-direction:column;gap:4px;align-items:center}
+.orbit svg{width:100%;max-width:220px;height:auto;display:block}
+.readout{display:flex;flex-direction:column;gap:14px;min-width:0}
+.alt{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.alt .big{font-family:var(--font-display);font-size:1.7rem;font-weight:600;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:.75rem;padding:4px 10px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.pill.fast{background:var(--fast-soft)} .pill.slow{background:var(--slow-soft)} .pill.tie{color:var(--ink);background:var(--ink-soft)}
+
+.tug{display:flex;flex-direction:column;gap:2px}
+.tug-labels{display:flex;justify-content:space-between;gap:10px;font-family:var(--font-mono);font-size:.78rem}
+.tug-labels span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.tug-labels span:last-child{text-align:right}
+.tug-labels small{font-size:.68rem;color:var(--dim);letter-spacing:.04em}
+.track{position:relative;height:12px;border-radius:6px;background:var(--line);margin-block:8px 18px}
+.track .mid{position:absolute;left:50%;top:-5px;bottom:-5px;width:2px;margin-left:-1px;background:var(--dim)}
+.track .bar{position:absolute;top:0;bottom:0;transition:width .4s ease}
+.track .bar.f{left:50%;background:var(--fast);border-radius:0 6px 6px 0}
+.track .bar.s{right:50%;background:var(--slow);border-radius:6px 0 0 6px}
+.netmark{position:absolute;top:100%;margin-top:3px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:10px solid var(--ink);transform:translateX(-50%);transition:left .4s ease}
+.netlabel{font-family:var(--font-mono);font-size:.68rem;color:var(--dim);text-align:center;letter-spacing:.06em}
+.unitkey{font-family:var(--font-mono);font-size:.72rem;color:var(--dim)}
+
+/* equator */
+.eq-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:center}
+@media(min-width:620px){.eq-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+
+/* fall */
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-family:var(--font-mono);font-size:.78rem;color:var(--void);background:var(--fast);border:0;border-radius:999px;padding:8px 14px;cursor:pointer}
+
+/* recap */
+.kid{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.kid li{display:flex;gap:12px;align-items:baseline;font-size:1.05rem;max-width:62ch}
+.kid .dot{transform:translateY(1px)}
+
+footer{display:flex;flex-direction:column;gap:8px;font-size:.84rem;color:var(--dim);border-top:1px solid var(--line);padding-top:20px}
+footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+
+@media (prefers-reduced-motion: reduce){
+  .track .bar,.netmark,.chip{transition:none}
+}
+</style>
+
+<main class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Gravitational time dilation</p>
+    <h1>The Time Well</h1>
+    <p class="lede">Mass slows down time near it. The closer you sit to Earth's center, the slower your clock ticks. Moving fast slows it down too. These effects are real, and atomic clocks have measured them. They're just very, very small.</p>
+    <div class="well">
+      <canvas id="well" role="img" aria-label="Earth sitting at the bottom of a funnel-shaped gravity well. A clock near the rim ticks fastest, a clock deep in the well ticks slowest."></canvas>
+    </div>
+    <div class="formula">
+      <span>Rate change per meter of height: <b>gh/c² ≈ 1.1 × 10⁻¹⁶</b></span>
+      <span>Clock speeds in the picture exaggerated enormously</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="rules-h">
+    <p class="eyebrow">The rules</p>
+    <h2 id="rules-h">Two things slow a clock</h2>
+    <div class="rules">
+      <div class="rule">
+        <svg viewBox="0 0 56 56" aria-hidden="true">
+          <path d="M4 14 C 18 14, 22 40, 28 40 C 34 40, 38 14, 52 14" fill="none" stroke="var(--dim)" stroke-width="1.5"/>
+          <circle cx="28" cy="46" r="7" fill="var(--earth)"/>
+          <circle cx="28" cy="27" r="7" fill="var(--void)" stroke="var(--slow)" stroke-width="1.5"/>
+          <line x1="28" y1="27" x2="28" y2="22.5" stroke="var(--slow)" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h3>Gravity</h3>
+          <p>Closer to a big mass, time runs slower. Climb higher and it runs faster.</p>
+        </div>
+      </div>
+      <div class="rule">
+        <svg viewBox="0 0 56 56" aria-hidden="true">
+          <line x1="4" y1="22" x2="18" y2="22" stroke="var(--dim)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="8" y1="30" x2="20" y2="30" stroke="var(--dim)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="4" y1="38" x2="18" y2="38" stroke="var(--dim)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="36" cy="30" r="13" fill="var(--void)" stroke="var(--slow)" stroke-width="1.5"/>
+          <line x1="36" y1="30" x2="36" y2="21" stroke="var(--slow)" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="36" y1="30" x2="42" y2="33" stroke="var(--slow)" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h3>Speed</h3>
+          <p>The faster you move, the slower your clock ticks. This is the astronaut effect.</p>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="dot f"></i>Gold: ticks faster than a clock at sea level</span>
+      <span><i class="dot s"></i>Blue: ticks slower</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="pen-h">
+    <p class="eyebrow">Scale: 0 to 2 meters</p>
+    <h2 id="pen-h">The watch on the table</h2>
+    <p>A watch on the table and a watch on the floor. The floor watch sits a tiny bit deeper in Earth's gravity well, so it ticks slower. Lift the clock below and watch it speed up.</p>
+    <div class="instrument">
+      <div class="scene">
+        <svg viewBox="0 0 320 232" role="img" aria-label="Side view: a ruler from 0 to 2 meters, a table at 0.75 meters with a watch on the floor beneath it, and a movable clock you can raise with the slider.">
+          <line x1="36" y1="36" x2="36" y2="206" stroke="var(--line)" stroke-width="2"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
+            <line x1="32" y1="206" x2="40" y2="206" stroke="var(--dim)"/><text x="28" y="209">0</text>
+            <line x1="32" y1="163.5" x2="40" y2="163.5" stroke="var(--dim)"/><text x="28" y="166.5">0.5</text>
+            <line x1="32" y1="121" x2="40" y2="121" stroke="var(--dim)"/><text x="28" y="124">1 m</text>
+            <line x1="32" y1="78.5" x2="40" y2="78.5" stroke="var(--dim)"/><text x="28" y="81.5">1.5</text>
+            <line x1="32" y1="36" x2="40" y2="36" stroke="var(--dim)"/><text x="28" y="39">2 m</text>
+          </g>
+          <line x1="14" y1="206" x2="312" y2="206" stroke="var(--dim)" stroke-width="1.5"/>
+          <g fill="var(--line)">
+            <rect x="160" y="142.25" width="140" height="6" rx="2" fill="var(--dim)" opacity=".55"/>
+            <rect x="168" y="148" width="5" height="58"/>
+            <rect x="287" y="148" width="5" height="58"/>
+          </g>
+          <text x="230" y="136" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">table, 0.75 m</text>
+          <g transform="translate(230 194)">
+            <circle r="11" fill="var(--void)" stroke="var(--slow)" stroke-width="1.6"/>
+            <line id="floorHand" x1="0" y1="0" x2="0" y2="-8" stroke="var(--slow)" stroke-width="2" stroke-linecap="round"/>
+            <circle r="1.6" fill="var(--slow)"/>
+          </g>
+          <text x="230" y="222" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--slow)" text-anchor="middle">floor watch</text>
+          <line id="penGuide" x1="40" y1="142" x2="80" y2="142" stroke="var(--fast)" stroke-dasharray="3 3" opacity=".7"/>
+          <g id="penClock" transform="translate(98 142)">
+            <circle r="15" fill="var(--fast-soft)"/>
+            <circle r="12" fill="var(--void)" stroke="var(--fast)" stroke-width="1.8"/>
+            <line id="penHand" x1="0" y1="0" x2="0" y2="-9" stroke="var(--fast)" stroke-width="2.2" stroke-linecap="round"/>
+            <circle r="1.8" fill="var(--fast)"/>
+            <text x="0" y="-21" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--fast)">your clock</text>
+          </g>
+        </svg>
+      </div>
+      <div class="field">
+        <div class="field-row"><label for="penH">Height above the floor</label><output id="penHeight" for="penH">75 cm</output></div>
+        <input type="range" id="penH" min="0" max="200" step="1" value="75">
+      </div>
+      <div class="stats" aria-live="polite">
+        <div class="stat"><span class="k">Gains per day</span><span class="v fast" id="penDay">+7.1 ps</span></div>
+        <div class="stat"><span class="k">Gains over 80 years</span><span class="v fast" id="penLife">+0.21 μs</span></div>
+      </div>
+      <p class="verdict" id="penVerdict">Up here it ticks faster than the floor watch, so it ages faster.</p>
+      <p class="unitkey">ps = trillionth of a second · μs = millionth · Hand speeds exaggerated about 10¹⁵ times</p>
+    </div>
+    <div class="callout">
+      <h3>Your head is older than your feet</h3>
+      <p>Stand up and your head sits about 1.7 m above your feet. Over an 80-year life, your head ends up about half a millionth of a second older.</p>
+    </div>
+    <div class="exps">
+      <div class="exp">
+        <span class="yr">2010 · NIST</span>
+        <p>Physicists raised one aluminum-ion clock about a third of a meter above another. The higher one ran faster, by roughly 90 billionths of a second over a 79-year life.</p>
+      </div>
+      <div class="exp">
+        <span class="yr">2022 · JILA</span>
+        <p>A single cloud of atoms used as a clock. Its top ticked faster than its bottom, across a height of about one millimeter.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="lab-h">
+    <p class="eyebrow">Scale: 0 to 380,000 km</p>
+    <h2 id="lab-h">From your kitchen to the Moon</h2>
+    <p>Two effects fight over every clock in space. Height makes it run faster. Orbital speed makes it run slower. Pick a spot and see who wins.</p>
+    <div class="instrument">
+      <div class="chips" id="chips" role="group" aria-label="Places"></div>
+      <div class="field">
+        <div class="field-row"><label for="alt">Altitude</label><span class="seg" role="group" aria-label="Motion">
+          <button type="button" id="mStill" aria-pressed="false">Holding still</button>
+          <button type="button" id="mOrbit" aria-pressed="true">Orbiting</button>
+        </span></div>
+        <input type="range" id="alt" min="0" max="1000" step="1" value="626">
+      </div>
+      <div class="lab-grid">
+        <div class="orbit">
+          <svg viewBox="0 0 280 280" role="img" aria-label="Earth with the chosen orbit drawn around it">
+            <defs>
+              <radialGradient id="earthG" cx="38%" cy="34%" r="70%">
+                <stop offset="0" style="stop-color:var(--earth-hi)"/>
+                <stop offset="1" style="stop-color:var(--earth)"/>
+              </radialGradient>
+            </defs>
+            <circle cx="140" cy="140" r="54" fill="var(--earth)" opacity=".1"/>
+            <circle cx="140" cy="140" r="30" fill="url(#earthG)"/>
+            <text x="140" y="144" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--void)">Earth</text>
+            <circle id="ring" cx="140" cy="140" r="81" fill="none" stroke="var(--dim)" stroke-width="1" opacity=".55"/>
+            <g id="sat">
+              <circle r="11" fill="var(--slow)" opacity=".18" id="satHalo"/>
+              <circle r="6" fill="var(--slow)" id="satDot"/>
+            </g>
+          </svg>
+          <span class="unitkey">Distances squashed to fit</span>
+        </div>
+        <div class="readout" aria-live="polite">
+          <div class="alt"><span class="big" id="altOut">410 km</span><span class="pill slow" id="pill">Ages slower</span></div>
+          <div class="tug">
+            <div class="tug-labels">
+              <span class="slow"><small>SPEED</small><b id="spdOut">−28.2 μs</b></span>
+              <span class="fast"><small>GRAVITY</small><b id="grvOut">+3.64 μs</b></span>
+            </div>
+            <div class="track"><div class="bar s" id="barS"></div><div class="bar f" id="barF"></div><div class="mid"></div><div class="netmark" id="netMark"></div></div>
+            <div class="netlabel">▲ net result, per day, vs a clock at sea level</div>
+          </div>
+          <div class="stats">
+            <div class="stat"><span class="k">Net per day</span><span class="v" id="netDay"></span></div>
+            <div class="stat"><span class="k">Net per year</span><span class="v" id="netYear"></span></div>
+          </div>
+          <p class="verdict" id="labNote"></p>
+        </div>
+      </div>
+      <p class="unitkey">ms = thousandth of a second · μs = millionth · ns = billionth · ps = trillionth</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="eq-h">
+    <p class="eyebrow">Scale: sea level</p>
+    <h2 id="eq-h">The equator trap</h2>
+    <div class="eq-grid">
+      <div class="scene">
+        <svg viewBox="0 0 300 250" role="img" aria-label="Earth drawn with an exaggerated bulge. A clock at the pole and a clock at the equator. The equator is farther from the center and spins faster.">
+          <defs>
+            <radialGradient id="eqG" cx="38%" cy="32%" r="75%">
+              <stop offset="0" style="stop-color:var(--earth-hi)"/>
+              <stop offset="1" style="stop-color:var(--earth)"/>
+            </radialGradient>
+          </defs>
+          <line x1="150" y1="14" x2="150" y2="240" stroke="var(--dim)" stroke-dasharray="4 4" opacity=".6"/>
+          <ellipse cx="150" cy="128" rx="108" ry="88" fill="url(#eqG)"/>
+          <ellipse cx="150" cy="128" rx="108" ry="16" fill="none" stroke="var(--ink)" opacity=".3"/>
+          <line x1="150" y1="128" x2="150" y2="50" stroke="var(--ink)" stroke-width="1.2"/>
+          <line x1="150" y1="128" x2="246" y2="128" stroke="var(--ink)" stroke-width="1.2"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--ink)">
+            <text x="156" y="92">6,357 km</text>
+            <text x="198" y="122" text-anchor="middle">6,378 km</text>
+          </g>
+          <path d="M32 134 A122 22 0 0 0 243.5 142.1" fill="none" stroke="var(--slow)" stroke-width="2"/>
+          <polygon points="252.3,140.2 243.4,146.7 241.6,137.9" fill="var(--slow)"/>
+          <text x="40" y="160" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--slow)">spin</text>
+          <g transform="translate(150 40)">
+            <circle r="10" fill="var(--void)" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="0" y2="-7" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/>
+          </g>
+          <text x="134" y="36" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--ink)">pole</text>
+          <g transform="translate(258 128)">
+            <circle r="10" fill="var(--void)" stroke="var(--ink)" stroke-width="1.5"/>
+            <line x1="0" y1="0" x2="0" y2="-7" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/>
+          </g>
+          <text x="258" y="108" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--ink)">equator</text>
+          <text x="150" y="248" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--dim)">bulge exaggerated about 50 times</text>
+        </svg>
+      </div>
+      <div class="readout">
+        <p>The equator bulges, so a clock there sits about 21 km farther from Earth's center than a clock at a pole. That alone would make it run faster.</p>
+        <p>But the equator also spins at about 1,040 mph, and that speed slows it by the same amount.</p>
+        <div class="tug">
+          <div class="tug-labels">
+            <span class="slow"><small>SPIN SPEED</small><b id="eqSpd">−104 ns</b></span>
+            <span class="fast"><small>BULGE HEIGHT</small><b id="eqGrv">+104 ns</b></span>
+          </div>
+          <div class="track"><div class="bar s" style="width:50%"></div><div class="bar f" style="width:50%"></div><div class="mid"></div><div class="netmark" style="left:50%"></div></div>
+          <div class="netlabel">▲ net per day: zero, a tie</div>
+        </div>
+      </div>
+    </div>
+    <p>It cancels exactly because Earth's spin is what pushed the bulge out in the first place. The oceans settled where gravity's pull and the spin's push balance, and that same balance makes every sea-level clock on Earth agree.</p>
+  </section>
+
+  <section aria-labelledby="fall-h">
+    <p class="eyebrow">Scale: 2 seconds of a thrown ball</p>
+    <h2 id="fall-h">Why things fall</h2>
+    <p>Throw a ball so it lands back in your hand 2 seconds later. Now imagine forcing it along other arcs that also take 2 seconds. Higher arcs spend time up where clocks run faster, but they need more speed, and speed slows the ball's clock.</p>
+    <div class="instrument">
+      <div class="scene">
+        <svg viewBox="0 0 320 214" role="img" aria-label="A ball's arc from throw to catch. A dashed gold arc shows the path a real ball takes. A solid arc shows the path you chose.">
+          <line x1="36" y1="28" x2="36" y2="196" stroke="var(--line)" stroke-width="2"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
+            <line x1="32" y1="196" x2="40" y2="196" stroke="var(--dim)"/><text x="28" y="199">0</text>
+            <line x1="32" y1="140" x2="40" y2="140" stroke="var(--dim)"/><text x="28" y="143">4</text>
+            <line x1="32" y1="84" x2="40" y2="84" stroke="var(--dim)"/><text x="28" y="87">8</text>
+            <line x1="32" y1="28" x2="40" y2="28" stroke="var(--dim)"/><text x="28" y="31">12 m</text>
+          </g>
+          <line x1="40" y1="196" x2="312" y2="196" stroke="var(--dim)" stroke-width="1.5"/>
+          <path id="ghostArc" fill="none" stroke="var(--fast)" stroke-width="1.6" stroke-dasharray="5 5" opacity=".8"/>
+          <path id="myArc" fill="none" stroke="var(--ink)" stroke-width="2"/>
+          <circle cx="56" cy="196" r="4" fill="none" stroke="var(--dim)"/>
+          <circle cx="296" cy="196" r="4" fill="none" stroke="var(--dim)"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">
+            <text x="56" y="211">throw</text><text x="296" y="211">catch</text>
+          </g>
+          <circle id="ball" cx="56" cy="190" r="6" fill="var(--ink)"/>
+        </svg>
+      </div>
+      <div class="field">
+        <div class="field-row"><label for="arcH">Peak height of the arc</label><output id="arcOut" for="arcH">2.5 m</output></div>
+        <input type="range" id="arcH" min="0" max="12" step="0.1" value="2.5">
+      </div>
+      <div class="scene">
+        <svg viewBox="0 0 320 182" role="img" aria-label="Graph of extra time on the ball's clock against the arc's peak height. It rises to a maximum at 4.9 meters, then falls and goes negative past about 9.8 meters.">
+          <text x="44" y="14" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)">extra time on the ball's clock (as)</text>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
+            <text x="38" y="33">+400</text><text x="38" y="95">0</text><text x="38" y="157">−400</text>
+          </g>
+          <line x1="44" y1="30" x2="44" y2="154" stroke="var(--line)"/>
+          <line x1="44" y1="92" x2="308" y2="92" stroke="var(--dim)" opacity=".6"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">
+            <text x="44" y="172">0 m</text><text x="132" y="172">4</text><text x="220" y="172">8</text><text x="300" y="172">12 m</text>
+          </g>
+          <path id="curveF" fill="none" stroke="var(--fast)" stroke-width="2"/>
+          <path id="curveS" fill="none" stroke="var(--slow)" stroke-width="2"/>
+          <line id="peakLine" stroke="var(--fast)" stroke-dasharray="3 3" opacity=".7"/>
+          <text id="peakLabel" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--fast)" text-anchor="middle">real arc, 4.9 m</text>
+          <circle id="plotDot" r="6" fill="var(--ink)" stroke="var(--panel)" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="stats" aria-live="polite">
+        <div class="stat"><span class="k">Ball's clock vs one held still</span><span class="v" id="arcGain"></span></div>
+      </div>
+      <p class="verdict" id="arcVerdict"></p>
+      <div class="btnrow"><button type="button" class="btn" id="snap">Show me the real arc</button></div>
+      <p class="unitkey">as = attosecond, a billionth of a billionth of a second</p>
+    </div>
+    <p>The winning arc is exactly the one a real ball follows. Physicists call this the principle of maximal aging: a falling object takes the path that gives its own clock the most time. For slow, everyday things, most of what we feel as gravity is this stretching of time.</p>
+  </section>
+
+  <section aria-labelledby="kid-h">
+    <p class="eyebrow">The short version</p>
+    <h2 id="kid-h">Say it to a kid</h2>
+    <ul class="kid">
+      <li><i class="dot s"></i><span>Heavy things slow down time near them. Earth slows our clocks down a tiny bit.</span></li>
+      <li><i class="dot f"></i><span>Go higher and time speeds up. Your head is a tiny bit older than your feet.</span></li>
+      <li><i class="dot s"></i><span>Moving fast slows your clock too. Astronauts come home a tiny bit younger than us.</span></li>
+      <li><i class="dot f"></i><span>GPS satellites fly so high that gravity wins. Their clocks run fast, and engineers set them to correct for it.</span></li>
+      <li><i class="dot n"></i><span>Things fall because time runs at different speeds at different heights.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Numbers computed from Earth's mass and a 6,371 km radius, with circular orbits. Compared against a clock at sea level.</span>
+    <ul>
+      <li><a href="https://www.nist.gov/news-events/news/2010/09/nist-pair-aluminum-atomic-clocks-reveal-einsteins-relativity-personal" target="_blank" rel="noopener">NIST: aluminum clocks at different heights (2010)</a></li>
+      <li><a href="https://jila.colorado.edu/bibcite/reference/12594" target="_blank" rel="noopener">JILA: gravitational redshift across a millimeter-scale atomic sample (2022)</a></li>
+      <li><a href="https://link.springer.com/article/10.12942/lrr-2003-1" target="_blank" rel="noopener">Ashby: Relativity in the Global Positioning System</a></li>
+      <li>Taylor and Wheeler, <i>Exploring Black Holes</i>, on the principle of maximal aging</li>
+    </ul>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  document.querySelectorAll('svg *').forEach(el => { for (const a of ['fill', 'stroke']) { const v = el.getAttribute(a); if (v && v.indexOf('var(') > -1) el.style[a] = v; } });
+  const GM = 3.986004418e14, C = 299792458, C2 = C * C, R = 6.371e6, K = GM / C2;
+  const DAY = 86400, YEAR = DAY * 365.25;
+  const MINUS = '−';
+  const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  const css = getComputedStyle(document.documentElement);
+  const tok = (n, d) => (css.getPropertyValue(n) || '').trim() || d;
+  const COL = {
+    fast: tok('--fast', '#f2b54a'), slow: tok('--slow', '#5ec4e6'), dim: tok('--dim', '#97a3bf'),
+    ink: tok('--ink', '#e8ecf6'), earth: tok('--earth', '#3a6bd0'), earthHi: tok('--earth-hi', '#86a8ec'), void: tok('--void', '#060913')
+  };
+  const rgb = h => { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+  const mix = (a, b, t) => { const A = rgb(a), B = rgb(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+  const rgba = (h, a) => 'rgba(' + rgb(h).join(',') + ',' + a + ')';
+
+  function fmt(sec, signed) {
+    const a = Math.abs(sec);
+    if (a === 0) return '0';
+    const units = [[1, 's'], [1e-3, 'ms'], [1e-6, 'μs'], [1e-9, 'ns'], [1e-12, 'ps'], [1e-15, 'fs'], [1e-18, 'as']];
+    let v = a, u = 's';
+    for (const [f, n] of units) { if (a >= f || n === 'as') { v = a / f; u = n; break; } }
+    const d = v >= 100 ? 0 : v >= 10 ? 1 : 2;
+    let s = v.toFixed(d) + ' ' + u;
+    if (signed) s = (sec > 0 ? '+' : MINUS) + s;
+    return s;
+  }
+
+  /* ---------- hero well ---------- */
+  const well = $('#well');
+  const wctx = well.getContext('2d');
+  let W = 0, H = 0, wellVisible = true;
+  function sizeWell() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = well.getBoundingClientRect();
+    W = r.width; H = r.height;
+    well.width = Math.round(W * dpr); well.height = Math.round(H * dpr);
+    wctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function drawClock(ctx, x, y, ang, col) {
+    ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2);
+    ctx.fillStyle = COL.void; ctx.fill();
+    ctx.lineWidth = 1.6; ctx.strokeStyle = col; ctx.stroke();
+    for (let k = 0; k < 4; k++) {
+      const a = k * Math.PI / 2;
+      ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 8, y + Math.sin(a) * 8); ctx.lineTo(x + Math.cos(a) * 10, y + Math.sin(a) * 10);
+      ctx.lineWidth = 1; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(ang - Math.PI / 2) * 8, y + Math.sin(ang - Math.PI / 2) * 8);
+    ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke();
+  }
+  function drawWell(t) {
+    if (!W) return;
+    const ctx = wctx;
+    ctx.clearRect(0, 0, W, H);
+    const cx = W / 2, rMax = Math.min(W * 0.47, 300), rMin = rMax * 0.17, e = 0.3;
+    const y0 = rMax * e + 12;
+    const D = Math.max(80, H - y0 - 70);
+    const q = rMin / rMax;
+    const depth = r => D * ((rMin / r) - q) / (1 - q);
+    const P = (r, th) => [cx + r * Math.cos(th), y0 + depth(r) + r * e * Math.sin(th)];
+    const N = 11, rings = [];
+    for (let i = 0; i <= N; i++) rings.push(rMax - (rMax - rMin) * Math.pow(i / N, 0.75));
+    for (const r of rings) {
+      const df = depth(r) / D;
+      ctx.beginPath(); ctx.ellipse(cx, y0 + depth(r), r, r * e, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = mix(COL.fast, COL.slow, Math.min(1, df * 1.4)); ctx.globalAlpha = 0.2 + 0.4 * df; ctx.lineWidth = 1; ctx.stroke();
+    }
+    ctx.strokeStyle = COL.dim; ctx.globalAlpha = 0.18;
+    for (let k = 0; k < 20; k++) {
+      const th = k / 20 * Math.PI * 2;
+      ctx.beginPath();
+      for (let s = 0; s <= 24; s++) { const r = rMax - (rMax - rMin) * (s / 24); const [x, y] = P(r, th); s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    const ey = y0 + D + rMin * 0.25, er = rMin * 0.95;
+    const glow = ctx.createRadialGradient(cx, ey, er * 0.6, cx, ey, er * 2.6);
+    glow.addColorStop(0, rgba(COL.earth, 0.4)); glow.addColorStop(1, rgba(COL.earth, 0));
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, ey, er * 2.6, 0, Math.PI * 2); ctx.fill();
+    const grd = ctx.createRadialGradient(cx - er * 0.35, ey - er * 0.4, er * 0.1, cx, ey, er);
+    grd.addColorStop(0, COL.earthHi); grd.addColorStop(1, COL.earth);
+    ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(cx, ey, er, 0, Math.PI * 2); ctx.fill();
+    // front lip of the throat over Earth
+    for (const r of rings.slice(-2)) {
+      ctx.beginPath(); ctx.ellipse(cx, y0 + depth(r), r, r * e, 0, 0, Math.PI);
+      ctx.strokeStyle = COL.slow; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.font = '600 10px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = COL.dim; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    if (ey + er + 16 < H) ctx.fillText('EARTH', cx, ey + er + 6);
+    const sec = t / 1000;
+    const clocks = [
+      { r: rMax * 0.93, th: 2.5, rate: 1.0, col: COL.fast, label: 'FASTER', side: -1 },
+      { r: rMax * 0.52, th: 0.7, rate: 0.6, col: mix(COL.fast, COL.slow, 0.5), label: '', side: 1 },
+      { r: rMin * 1.6, th: 2.0, rate: 0.25, col: COL.slow, label: 'SLOWER', side: -1 }
+    ];
+    ctx.textBaseline = 'middle';
+    for (const c of clocks) {
+      const [x, y] = P(c.r, c.th);
+      const ang = reduce ? c.rate * 2.2 : sec * (Math.PI * 2 / 3) * c.rate;
+      drawClock(ctx, x, y, ang, c.col);
+      if (c.label) {
+        ctx.fillStyle = c.col; ctx.textAlign = c.side < 0 ? 'right' : 'left';
+        ctx.fillText(c.label, x + c.side * 18, y);
+      }
+    }
+  }
+
+  /* ---------- pen / table ---------- */
+  const penH = $('#penH');
+  const yOfM = m => 206 - m * 85;
+  let penM = 0.75;
+  function updatePen() {
+    const cm = +penH.value; penM = cm / 100;
+    const y = yOfM(penM);
+    $('#penClock').setAttribute('transform', 'translate(98 ' + y + ')');
+    const g = $('#penGuide'); g.setAttribute('y1', y); g.setAttribute('y2', y);
+    $('#penHeight').textContent = cm >= 100 ? penM.toFixed(2) + ' m' : cm + ' cm';
+    const perDay = K * penM / (R * (R + penM)) * DAY;
+    const life = perDay * 365.25 * 80;
+    $('#penDay').textContent = cm === 0 ? 'Same rate' : '+' + fmt(perDay);
+    $('#penLife').textContent = cm === 0 ? 'Same rate' : '+' + fmt(life);
+    $('#penVerdict').textContent = cm === 0
+      ? 'Down on the floor, it ticks at the same rate as the floor watch.'
+      : (cm === 75 ? 'Level with the tabletop. ' : '') + 'Up here it ticks faster than the floor watch, so it ages faster. Lower it and it slows down.';
+  }
+  penH.addEventListener('input', updatePen);
+
+  /* ---------- altitude lab ---------- */
+  const PRESETS = [
+    { id: 'burj', label: 'Skyscraper top', h: 828, mode: 'still', note: 'Top of the Burj Khalifa, 828 m up. It rides along with Earth’s spin just like you do, so only gravity counts. A 40-year career on the top floor adds about a tenth of a millisecond of aging.' },
+    { id: 'everest', label: 'Everest summit', h: 8849, mode: 'still', note: 'Still riding Earth’s spin, so it’s all gravity. About ten times higher than the skyscraper, so about ten times the gain.' },
+    { id: 'iss', label: 'Space station', h: 410e3, mode: 'orbit', note: 'The station moves about 7.7 km every second. At this height gravity barely helps, so speed wins easily and astronauts age slower than us.' },
+    { id: 'even', label: 'Break-even orbit', h: 3185.5e3, mode: 'orbit', note: 'About 3,200 km up, an orbiting clock ties with one at sea level. Every orbit below this runs slow. Every orbit above it runs fast.' },
+    { id: 'gps', label: 'GPS satellite', h: 20200e3, mode: 'orbit', note: 'High enough that gravity wins. Left uncorrected, this drift would throw your phone’s position off by about 11 km (7 miles) a day, so the satellite clocks are set to tick slightly slow before launch.' },
+    { id: 'moon', label: 'Moon’s distance', h: 378029e3, mode: 'orbit', note: 'Earth’s pull is weak out here and the orbit is slow, so clocks gain nearly the full amount. Standing on the Moon, its own gravity takes back about 2.7 μs a day, leaving lunar clocks roughly 56 μs a day ahead of ours.' },
+    { id: 'far', label: 'Far from Earth', h: Infinity, mode: 'still', note: 'Out of Earth’s gravity well and holding still. That’s about as fast as a clock runs around here. The Sun has its own well, about 14 times deeper than Earth’s where we orbit, so getting far from the Sun too would gain even more.' }
+  ];
+  const lab = { h: 410e3, mode: 'orbit', preset: 'iss' };
+  const alt = $('#alt');
+  const toS = h => !isFinite(h) ? 1000 : Math.min(999, Math.log10(h + 1) * 1000 / 9);
+  const toH = s => s >= 1000 ? Infinity : Math.pow(10, s * 9 / 1000) - 1;
+  const chipsEl = $('#chips');
+  PRESETS.forEach(p => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.textContent = p.label; b.dataset.id = p.id;
+    b.addEventListener('click', () => { lab.h = p.h; lab.mode = p.mode; lab.preset = p.id; alt.value = toS(p.h); updateLab(); });
+    chipsEl.appendChild(b);
+  });
+  alt.addEventListener('input', () => { lab.h = toH(+alt.value); lab.preset = null; updateLab(); });
+  $('#mStill').addEventListener('click', () => { lab.mode = 'still'; lab.preset = null; updateLab(); });
+  $('#mOrbit').addEventListener('click', () => { lab.mode = 'orbit'; lab.preset = null; updateLab(); });
+
+  function effects(h, mode) {
+    const grav = isFinite(h) ? K * h / (R * (R + h)) : K / R;
+    const speed = (mode === 'orbit' && isFinite(h)) ? K / (2 * (R + h)) : 0;
+    return { grav, speed, net: grav - speed };
+  }
+  function fmtAlt(h) {
+    if (!isFinite(h)) return 'Far away';
+    if (h < 1e5) return Math.round(h).toLocaleString('en-US') + ' m';
+    return Math.round(h / 1000).toLocaleString('en-US') + ' km';
+  }
+  const ringR = h => !isFinite(h) ? 128 : 30 + 96 * Math.min(1, Math.log10(1 + h / 1000) / 6);
+  let satAng = -Math.PI / 2;
+  function placeSat() {
+    const r = ringR(lab.h);
+    $('#sat').setAttribute('transform', 'translate(' + (140 + r * Math.cos(satAng)).toFixed(2) + ' ' + (140 + r * Math.sin(satAng)).toFixed(2) + ')');
+  }
+  function updateLab() {
+    const { grav, speed, net } = effects(lab.h, lab.mode);
+    chipsEl.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.id === lab.preset)));
+    $('#mStill').setAttribute('aria-pressed', String(lab.mode === 'still'));
+    $('#mOrbit').setAttribute('aria-pressed', String(lab.mode === 'orbit'));
+    $('#altOut').textContent = fmtAlt(lab.h);
+    const max = Math.max(grav, speed);
+    const tie = max > 0 && Math.abs(net) < max * 1e-3;
+    $('#barF').style.width = (max ? grav / max * 50 : 0) + '%';
+    $('#barS').style.width = (max ? speed / max * 50 : 0) + '%';
+    $('#netMark').style.left = (max ? 50 + (tie ? 0 : net / max * 50) : 50) + '%';
+    $('#grvOut').textContent = grav ? '+' + fmt(grav * DAY) : '0';
+    $('#spdOut').textContent = speed ? MINUS + fmt(speed * DAY) : (lab.mode === 'still' ? '0, not moving' : '0');
+    const nd = $('#netDay'), ny = $('#netYear'), pill = $('#pill');
+    if (max === 0) {
+      nd.textContent = '0'; ny.textContent = '0'; nd.className = ny.className = 'v';
+      pill.className = 'pill tie'; pill.textContent = 'Reference clock';
+    } else if (tie) {
+      nd.textContent = '≈ 0'; ny.textContent = '≈ 0'; nd.className = ny.className = 'v';
+      pill.className = 'pill tie'; pill.textContent = 'A tie';
+    } else {
+      nd.textContent = fmt(net * DAY, true); ny.textContent = fmt(net * YEAR, true);
+      const cls = net > 0 ? 'fast' : 'slow';
+      nd.className = ny.className = 'v ' + cls;
+      pill.className = 'pill ' + cls; pill.textContent = net > 0 ? 'Ages faster' : 'Ages slower';
+    }
+    let note;
+    const p = PRESETS.find(x => x.id === lab.preset);
+    if (p) note = p.note;
+    else if (max === 0) note = 'Sea level. This is the reference clock everything else is compared to.';
+    else if (lab.mode === 'still') note = 'Holding still at this height, only gravity acts. Higher always means faster.';
+    else if (isFinite(lab.h) && lab.h < 150e3) note = 'No real orbit is possible this low, since air drag would pull you down fast. The math still shows the trend: speed wins.';
+    else if (tie) note = 'Right at the break-even point. Speed and height cancel out.';
+    else if (net < 0) note = 'In orbit here, speed wins. The clock runs slower than one at sea level.';
+    else note = 'In orbit here, height wins. The clock runs faster than one at sea level.';
+    $('#labNote').textContent = note;
+    const ring = $('#ring');
+    ring.setAttribute('r', ringR(lab.h).toFixed(2));
+    ring.setAttribute('stroke-dasharray', lab.mode === 'still' ? '3 4' : 'none');
+    const col = (max === 0 || tie) ? 'var(--ink)' : (net > 0 ? 'var(--fast)' : 'var(--slow)');
+    $('#satDot').style.fill = col; $('#satHalo').style.fill = col;
+    if (lab.mode === 'still' || reduce) satAng = -Math.PI / 2;
+    placeSat();
+  }
+
+  /* ---------- equator ---------- */
+  (function () {
+    const v = 2 * Math.PI * 6378137 / 86164.1;
+    const d = v * v / (2 * C2) * DAY;
+    $('#eqSpd').textContent = MINUS + fmt(d);
+    $('#eqGrv').textContent = '+' + fmt(d);
+  })();
+
+  /* ---------- falling ball ---------- */
+  const T = 2, G = 9.81, ASTAR = G * T * T / 8;
+  const arcH = $('#arcH');
+  const Sx = t => 56 + 240 * t / T;
+  const Sy = h => 196 - 14 * h;
+  const hOf = (A, t) => 4 * A * t * (T - t) / (T * T);
+  const extra = A => (2 * G * A * T / 3 - 8 * A * A / (3 * T)) / C2;
+  const px = A => 44 + A / 12 * 264;
+  const py = as => 92 - as / 400 * 62;
+  function arcPath(A) {
+    let d = '';
+    for (let i = 0; i <= 40; i++) { const t = T * i / 40; d += (i ? 'L' : 'M') + Sx(t).toFixed(1) + ' ' + Sy(hOf(A, t)).toFixed(1); }
+    return d;
+  }
+  $('#ghostArc').setAttribute('d', arcPath(ASTAR));
+  (function () {
+    const zero = 2 * ASTAR;
+    let dF = '', dS = '';
+    for (let i = 0; i <= 80; i++) {
+      const A = zero * i / 80;
+      dF += (i ? 'L' : 'M') + px(A).toFixed(1) + ' ' + py(extra(A) * 1e18).toFixed(1);
+    }
+    for (let i = 0; i <= 30; i++) {
+      const A = zero + (12 - zero) * i / 30;
+      dS += (i ? 'L' : 'M') + px(A).toFixed(1) + ' ' + py(extra(A) * 1e18).toFixed(1);
+    }
+    $('#curveF').setAttribute('d', dF);
+    $('#curveS').setAttribute('d', dS);
+    const pk = py(extra(ASTAR) * 1e18);
+    const pl = $('#peakLine');
+    pl.setAttribute('x1', px(ASTAR)); pl.setAttribute('x2', px(ASTAR)); pl.setAttribute('y1', pk); pl.setAttribute('y2', 92);
+    const lb = $('#peakLabel'); lb.setAttribute('x', px(ASTAR)); lb.setAttribute('y', pk - 9);
+  })();
+  let arcA = 2.5;
+  function updateArc() {
+    arcA = +arcH.value;
+    $('#arcOut').textContent = arcA.toFixed(1) + ' m';
+    $('#myArc').setAttribute('d', arcPath(arcA));
+    const x = extra(arcA);
+    const g = $('#arcGain');
+    g.textContent = arcA === 0 ? '0, same as holding it' : fmt(x, true);
+    g.className = 'v ' + (x > 0 ? 'fast' : x < 0 ? 'slow' : '');
+    const dot = $('#plotDot');
+    dot.setAttribute('cx', px(arcA).toFixed(1)); dot.setAttribute('cy', py(x * 1e18).toFixed(1));
+    let v;
+    if (Math.abs(arcA - ASTAR) < 0.1) v = 'This is the real arc. No other 2-second path gives the ball’s clock more time.';
+    else if (arcA === 0) v = 'The ball never leaves your hand. Raise the arc to give it some time up where clocks run faster.';
+    else if (arcA < ASTAR) v = 'Too low. Going higher would earn more fast-running time up top than the extra speed costs.';
+    else if (x > 0) v = 'Too high. The extra speed this arc needs slows the ball’s clock more than the height helps.';
+    else v = 'Way too high. The speed cost now beats everything the height gains, so the ball ends up younger than one you just held.';
+    $('#arcVerdict').textContent = v;
+    if (reduce) placeBall(T / 2);
+  }
+  function placeBall(t) {
+    const b = $('#ball');
+    b.setAttribute('cx', Sx(t).toFixed(1)); b.setAttribute('cy', Sy(hOf(arcA, t)).toFixed(1));
+  }
+  arcH.addEventListener('input', updateArc);
+  $('#snap').addEventListener('click', () => { arcH.value = ASTAR.toFixed(1); updateArc(); });
+
+  /* ---------- loop ---------- */
+  sizeWell();
+  alt.value = toS(lab.h);
+  updatePen(); updateLab(); updateArc();
+  drawWell(0);
+  window.addEventListener('resize', () => { sizeWell(); drawWell(performance.now()); });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => { wellVisible = es[0].isIntersecting; }).observe(well);
+  }
+  if (!reduce) {
+    let prev = performance.now();
+    const floorHand = $('#floorHand'), penHand = $('#penHand');
+    const frame = now => {
+      const dt = Math.min(now - prev, 100); prev = now;
+      if (wellVisible) drawWell(now);
+      const base = (now / 1000) * 90;
+      floorHand.setAttribute('transform', 'rotate(' + (base % 360).toFixed(1) + ')');
+      penHand.setAttribute('transform', 'rotate(' + ((base * (1 + 0.35 * penM)) % 360).toFixed(1) + ')');
+      if (lab.mode === 'orbit') {
+        const r = ringR(lab.h);
+        satAng += dt / 1000 * 1.1 * Math.pow(34 / r, 1.5);
+        placeSat();
+      }
+      const cyc = (now / 1000) % (T + 0.7);
+      placeBall(Math.min(cyc, T));
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  } else {
+    placeBall(T / 2);
+  }
+})();
+</script>
+
+</body></html>

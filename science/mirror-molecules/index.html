@@ -1,0 +1,516 @@
+<!doctype html><html><head><meta charset=utf8>
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BONES">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script src="../../assets/bones.js" data-root="../../" defer></script>
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Handedness Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Lexend:wght@400;600&display=swap">
+<style>
+/* Layout: a picture book. One idea per page, big picture first, two or three short sentences under it. */
+:root{
+  --paper:#eef3fa;
+  --page:#ffffff;
+  --ink:#16233b;
+  --soft:#55627a;
+  --line:#d3dcea;
+  --left:#2563d9;      /* left hand, everywhere */
+  --left-tint:#dbe6fb;
+  --right:#d0336e;     /* right hand, everywhere */
+  --right-tint:#f9dce7;
+  --good:#1f9d5c;
+  --bad:#d23b2f;
+  --metal:#c4ccd8;
+  --metal-dark:#8b95a6;
+  --skin:#f6cfa6;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0e1522;--page:#172133;--ink:#e9eef7;--soft:#a3afc4;--line:#2b3850;
+    --left:#6f9cff;--left-tint:#1d2f55;--right:#ff6f9f;--right-tint:#4a1d31;
+    --good:#45c97f;--bad:#ff6b5f;--metal:#7d8798;--metal-dark:#4c5567;--skin:#e3b588;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0e1522;--page:#172133;--ink:#e9eef7;--soft:#a3afc4;--line:#2b3850;
+  --left:#6f9cff;--left-tint:#1d2f55;--right:#ff6f9f;--right-tint:#4a1d31;
+  --good:#45c97f;--bad:#ff6b5f;--metal:#7d8798;--metal-dark:#4c5567;--skin:#e3b588;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:16px;padding-block:24px 48px}
+.book{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,8vw,3.4rem);font-weight:800}
+h2{font-size:clamp(1.6rem,6vw,2.1rem);font-weight:800}
+p{margin:0;max-width:62ch}
+.cover{display:flex;flex-direction:column;gap:12px;padding-block:8px}
+.cover p{color:var(--soft);font-size:1.05rem}
+.L{color:var(--left);font-weight:600}
+.R{color:var(--right);font-weight:600}
+.page{background:var(--page);border:2px solid var(--line);border-radius:22px;padding:22px 20px;display:flex;flex-direction:column;gap:14px}
+.pnum{font-family:var(--display);font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.stage{background:var(--paper);border-radius:16px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+button{font-family:var(--display);font-weight:600;font-size:1.05rem;border:2px solid var(--ink);background:var(--page);color:var(--ink);border-radius:999px;padding:6px 18px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--ink);color:var(--page)}
+button:focus-visible{outline:3px solid var(--left);outline-offset:3px}
+.say{font-family:var(--display);font-size:1.25rem;font-weight:600;min-height:2.2em}
+.say.ok{color:var(--good)} .say.no{color:var(--bad)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{background:var(--paper);border-radius:14px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center}
+.tile svg{width:100%;max-width:150px;height:auto}
+.tile b{font-family:var(--display);font-size:1.05rem}
+.tile span{font-size:.85rem;color:var(--soft)}
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rule{border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.rule.l{background:var(--left-tint)} .rule.r{background:var(--right-tint)}
+.rule b{font-family:var(--display);font-size:1.2rem}
+.rule svg{width:100%;height:auto}
+.bar{display:flex;height:34px;border-radius:10px;overflow:hidden;font-family:var(--display);font-weight:600;color:#fff;font-size:.95rem}
+.bar div{display:flex;align-items:center;justify-content:center}
+.barrow{display:grid;grid-template-columns:7.5em 1fr;gap:10px;align-items:center;font-size:.9rem}
+.bars{display:flex;flex-direction:column;gap:8px}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/10;max-width:100%}
+.counts{display:flex;gap:18px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-size:.95rem;color:var(--soft)}
+.counts strong{color:var(--ink);font-family:var(--display);font-size:1.3rem}
+.big{font-family:var(--display);font-size:clamp(1.3rem,5vw,1.6rem);font-weight:600;line-height:1.35;border-left:6px solid var(--right);padding-left:14px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0}
+dt{font-family:var(--display);font-weight:800;font-size:1.1rem}
+dd{margin:0}
+@media (max-width:460px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.rules{grid-template-columns:1fr}dl{grid-template-columns:1fr}dd{margin-bottom:6px}}
+.mv{transition:transform .9s cubic-bezier(.5,0,.2,1)}
+.spin{transform-box:fill-box;transform-origin:center;transition:transform .6s ease}
+@media (prefers-reduced-motion:reduce){.mv,.spin,#key,#shackle{transition:none!important}}
+#key{transition:transform 1s ease}
+#shackle{transition:transform .5s ease}
+.shake{animation:shake .45s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- A cartoon LEFT hand, palm facing you, so the thumb is on the right -->
+    <g id="hand">
+      <rect x="30" y="72" width="76" height="86" rx="26" fill="var(--skin)"/>
+      <rect x="33" y="40" width="15" height="52" rx="7.5" fill="var(--skin)"/>
+      <rect x="50" y="20" width="16" height="70" rx="8" fill="var(--skin)"/>
+      <rect x="68" y="12" width="16" height="78" rx="8" fill="var(--skin)"/>
+      <rect x="86" y="22" width="16" height="68" rx="8" fill="var(--skin)"/>
+      <rect x="97" y="58" width="18" height="58" rx="9" fill="var(--skin)" transform="rotate(30 106 112)"/>
+      <path d="M48 112 q22 14 46 0" fill="none" stroke="var(--metal-dark)" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+      <path d="M52 128 q16 8 32 2" fill="none" stroke="var(--metal-dark)" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+    </g>
+  </defs>
+</svg>
+
+<main class="book">
+
+  <header class="cover">
+    <h1>The Handedness Book</h1>
+    <p>Why <span class="L">left</span> and <span class="R">right</span> molecules matter, told with hands, keys, and germs. Blue always means left. Pink always means right.</p>
+  </header>
+
+  <!-- PAGE 1 -->
+  <section class="page" aria-labelledby="p1">
+    <span class="pnum">Page 1</span>
+    <h2 id="p1">Your two hands are twins that don't match</h2>
+    <div class="stage">
+      <svg viewBox="0 0 360 200" role="img" aria-label="A left hand and a right hand. Try stacking them.">
+        <text x="107" y="194" text-anchor="middle" font-family="var(--display)" font-size="15" font-weight="600" fill="var(--left)">LEFT</text>
+        <text x="253" y="194" text-anchor="middle" font-family="var(--display)" font-size="15" font-weight="600" fill="var(--right)">RIGHT</text>
+        <g transform="translate(20,8)">
+          <use href="#hand"/>
+          <rect x="28" y="8" width="118" height="154" rx="20" fill="none" stroke="var(--left)" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>
+        </g>
+        <g id="rmove" class="mv">
+          <g transform="translate(190,8)">
+            <g id="rspin" class="spin">
+              <g transform="translate(150,0) scale(-1,1)" id="rhand">
+                <use href="#hand"/>
+                <rect x="28" y="8" width="118" height="154" rx="20" fill="none" stroke="var(--right)" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="btns">
+      <button id="stack" aria-pressed="false">Stack them</button>
+      <button id="turn">Turn the right hand</button>
+    </div>
+    <p class="say" id="say1" aria-live="polite">Same fingers. Same thumb. Mirror images.</p>
+    <p>Stack them and turn them any way you like. The thumbs never line up. Flipping a hand over doesn't help either, because then you'd see the back of the hand, not the palm.</p>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page" aria-labelledby="p2">
+    <span class="pnum">Page 2</span>
+    <h2 id="p2">The mirror test</h2>
+    <p>Hold a thing up to a mirror. If the mirror picture is exactly the same thing, it has <b>no hand</b>. If the mirror picture is a different version, it is <b>handed</b>.</p>
+    <div class="tiles">
+      <div class="tile">
+        <svg viewBox="0 0 120 90" aria-hidden="true">
+          <circle cx="32" cy="45" r="22" fill="var(--metal)"/><line x1="60" y1="8" x2="60" y2="82" stroke="var(--soft)" stroke-width="2" stroke-dasharray="4 4"/><circle cx="88" cy="45" r="22" fill="var(--metal)"/>
+        </svg>
+        <b>Ball</b><span>Mirror is the same. No hand.</span>
+      </div>
+      <div class="tile">
+        <svg viewBox="0 0 120 90" aria-hidden="true">
+          <rect x="14" y="26" width="30" height="40" rx="5" fill="var(--metal)"/><path d="M44 36 h6 a8 8 0 0 1 0 18 h-6" fill="none" stroke="var(--metal)" stroke-width="5"/>
+          <line x1="60" y1="8" x2="60" y2="82" stroke="var(--soft)" stroke-width="2" stroke-dasharray="4 4"/>
+          <rect x="76" y="26" width="30" height="40" rx="5" fill="var(--metal)"/><path d="M76 36 h-6 a8 8 0 0 0 0 18 h6" fill="none" stroke="var(--metal)" stroke-width="5"/>
+        </svg>
+        <b>Mug</b><span>Just turn it around. No hand.</span>
+      </div>
+      <div class="tile">
+        <svg viewBox="0 0 120 90" aria-hidden="true">
+          <g transform="translate(-2,4) scale(.5)"><use href="#hand"/></g>
+          <line x1="60" y1="8" x2="60" y2="82" stroke="var(--soft)" stroke-width="2" stroke-dasharray="4 4"/>
+          <g transform="translate(122,4) scale(-.5,.5)"><use href="#hand"/></g>
+        </svg>
+        <b>Hand</b><span>Mirror is a different hand. Handed!</span>
+      </div>
+    </div>
+    <p>Scientists have a big word for "handed": <b>chiral</b> (say it "KY-rull"). It comes from the Greek word for hand. Chirality just means handedness. That's all it is.</p>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page" aria-labelledby="p3">
+    <span class="pnum">Page 3</span>
+    <h2 id="p3">Tiny molecules have hands too</h2>
+    <p>Many of the building blocks of living things come in a <span class="L">left</span> version and a <span class="R">right</span> version. Same atoms, mirror shapes, just like your hands. And life follows two strict rules:</p>
+    <div class="rules">
+      <div class="rule l">
+        <svg viewBox="0 0 200 50" aria-hidden="true">
+          <path d="M14 25 Q40 5 66 25 T118 25 T170 25" fill="none" stroke="var(--left)" stroke-width="3"/>
+          <g font-family="var(--display)" font-weight="800" font-size="14" text-anchor="middle" fill="#fff">
+            <circle cx="14" cy="25" r="11" fill="var(--left)"/><text x="14" y="30">L</text>
+            <circle cx="49" cy="15" r="11" fill="var(--left)"/><text x="49" y="20">L</text>
+            <circle cx="84" cy="30" r="11" fill="var(--left)"/><text x="84" y="35">L</text>
+            <circle cx="118" cy="25" r="11" fill="var(--left)"/><text x="118" y="30">L</text>
+            <circle cx="152" cy="17" r="11" fill="var(--left)"/><text x="152" y="22">L</text>
+            <circle cx="184" cy="30" r="11" fill="var(--left)"/><text x="184" y="35">L</text>
+          </g>
+        </svg>
+        <b class="L">Proteins use LEFT</b>
+        <p>Proteins are chains of amino acids. Every one is a left-handed piece.</p>
+      </div>
+      <div class="rule r">
+        <svg viewBox="0 0 200 50" aria-hidden="true">
+          <path d="M10 10 C60 10 60 40 110 40 S160 10 190 10" fill="none" stroke="var(--right)" stroke-width="3"/>
+          <path d="M10 40 C60 40 60 10 110 10 S160 40 190 40" fill="none" stroke="var(--right)" stroke-width="3" opacity=".5"/>
+          <g font-family="var(--display)" font-weight="800" font-size="14" text-anchor="middle" fill="#fff">
+            <circle cx="30" cy="12" r="11" fill="var(--right)"/><text x="30" y="17">R</text>
+            <circle cx="100" cy="38" r="11" fill="var(--right)"/><text x="100" y="43">R</text>
+            <circle cx="170" cy="12" r="11" fill="var(--right)"/><text x="170" y="17">R</text>
+          </g>
+        </svg>
+        <b class="R">DNA sugars use RIGHT</b>
+        <p>The sugar in the backbone of DNA and RNA is the right-handed version.</p>
+      </div>
+    </div>
+    <div class="bars" aria-label="Space makes a 50 50 mix. Life uses one hand.">
+      <div class="barrow"><span>Bennu asteroid</span><div class="bar"><div style="width:50%;background:var(--left)">L half</div><div style="width:50%;background:var(--right)">R half</div></div></div>
+      <div class="barrow"><span>Your proteins</span><div class="bar"><div style="width:100%;background:var(--left)">All L</div></div></div>
+    </div>
+    <p>Space makes both hands about equally. Life picked one hand for each job and never switched. Every living thing has the same picks, which is a big clue we all come from one shared ancestor. Why left? Nobody knows yet.</p>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page" aria-labelledby="p4">
+    <span class="pnum">Page 4</span>
+    <h2 id="p4">Shape is everything: the lock and key</h2>
+    <p>Your body is full of tiny machines that grab molecules. Each one works like a <b>lock</b>. The molecule is the <b>key</b>. Pick a key and try it.</p>
+    <div class="stage">
+      <svg viewBox="0 -34 360 190" role="img" aria-label="A padlock and a key. The normal key fits; the mirror key does not.">
+        <!-- shackle -->
+        <path id="shackle" d="M222 42 V10 a43 43 0 0 1 86 0 V42" fill="none" stroke="var(--metal-dark)" stroke-width="12" stroke-linecap="round"/>
+        <!-- lock body -->
+        <rect x="190" y="36" width="150" height="112" rx="16" fill="var(--metal)"/>
+        <rect x="190" y="58" width="150" height="46" fill="var(--paper)" opacity=".85"/>
+        <!-- key -->
+        <g id="key">
+          <circle cx="26" cy="92" r="20" fill="none" stroke="var(--left)" stroke-width="10" id="keyhead"/>
+          <rect x="44" y="86" width="132" height="14" rx="3" fill="var(--left)" id="keyblade"/>
+          <g id="teeth" fill="var(--left)"></g>
+        </g>
+        <!-- pins drawn over the key so you can see them meet -->
+        <g id="pins" fill="var(--metal-dark)"></g>
+        <rect x="190" y="104" width="150" height="44" rx="0" fill="var(--metal)"/>
+        <rect x="190" y="104" width="150" height="44" rx="16" fill="var(--metal)"/>
+        <circle id="light" cx="318" cy="128" r="7" fill="var(--soft)"/>
+        <text x="265" y="133" text-anchor="middle" font-family="var(--display)" font-size="14" font-weight="600" fill="var(--ink)">LOCK</text>
+      </svg>
+    </div>
+    <div class="btns" role="group" aria-label="Pick a key">
+      <button id="kNormal" aria-pressed="true">Normal key</button>
+      <button id="kMirror" aria-pressed="false">Mirror key</button>
+      <button id="kTry">Try it</button>
+    </div>
+    <p class="say" id="say4" aria-live="polite">The pins in the lock are shaped for the normal key.</p>
+    <p>The mirror key is made of the same metal with the same bumps, just flipped. It still won't work. Your body's locks were all built for life's hands, so a mirror molecule can't be grabbed, read, or cut up.</p>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page" aria-labelledby="p5">
+    <span class="pnum">Page 5</span>
+    <h2 id="p5">Why a mirror germ would be scary</h2>
+    <p>Your immune system is a team of <b>guards</b>. They catch germs by grabbing their shapes. Watch what happens with a normal germ, then a mirror germ.</p>
+    <div class="stage"><canvas id="germs" width="640" height="400" aria-label="Animation of immune guards catching germs"></canvas></div>
+    <div class="btns" role="group" aria-label="Pick a germ">
+      <button id="gNormal" aria-pressed="true">Normal germs</button>
+      <button id="gMirror" aria-pressed="false">Mirror germs</button>
+      <button id="gPlay">Pause</button>
+    </div>
+    <div class="counts" aria-live="polite">
+      <span>Caught <strong id="cCaught">0</strong></span>
+      <span>Still loose <strong id="cLoose">0</strong></span>
+    </div>
+    <p class="say" id="say5">Normal germs get grabbed and cleaned up.</p>
+    <p>A mirror germ slips past every guard, because none of their grabbers fit it. Nothing breaks it down, so it keeps making copies. That is why scientists warned in 2024 that nobody should build a mirror cell at all.</p>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="page" aria-labelledby="p6">
+    <span class="pnum">Page 6</span>
+    <h2 id="p6">The whole book in one sentence</h2>
+    <p class="big">A mirror germ is dangerous because it won't fit the body's locks, so the guards can't see it or break it down, and it keeps copying itself.</p>
+    <dl>
+      <dt>Chirality</dt><dd>Handedness. A thing that doesn't match its mirror picture.</dd>
+      <dt>Amino acid</dt><dd>A building block of proteins. Life uses the left one.</dd>
+      <dt>Enzyme</dt><dd>A tiny body machine that grabs or cuts molecules. Works like a lock.</dd>
+      <dt>Immune system</dt><dd>Your body's guards. They find germs by their shape.</dd>
+      <dt>Mirror life</dt><dd>A made-up cell built entirely from flipped pieces. Nobody has built one.</dd>
+    </dl>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Page 1: hands ---------- */
+  const rmove = document.getElementById('rmove');
+  const rspin = document.getElementById('rspin');
+  const stackBtn = document.getElementById('stack');
+  const say1 = document.getElementById('say1');
+  let stacked = false, angle = 0;
+  const lines = [
+    "Thumbs point opposite ways. No match.",
+    "Turned a quarter. Still no match.",
+    "Upside down. Thumb is on the wrong side.",
+    "Another quarter turn. Nope, never matches."
+  ];
+  stackBtn.addEventListener('click', () => {
+    stacked = !stacked;
+    stackBtn.setAttribute('aria-pressed', stacked);
+    stackBtn.textContent = stacked ? 'Pull apart' : 'Stack them';
+    rmove.style.transform = stacked ? 'translateX(-146px)' : 'none';
+    rmove.style.opacity = stacked ? '.72' : '1';
+    say1.textContent = stacked ? lines[(angle/90)%4] : 'Same fingers. Same thumb. Mirror images.';
+  });
+  document.getElementById('turn').addEventListener('click', () => {
+    angle += 90;
+    rspin.style.transform = 'rotate(' + angle + 'deg)';
+    if (!stacked) { stackBtn.click(); }
+    else say1.textContent = lines[(angle/90)%4];
+  });
+
+  /* ---------- Page 4: lock and key ---------- */
+  const NS = 'http://www.w3.org/2000/svg';
+  const normal = [20, 8, 24, 13];
+  const mirror = normal.slice().reverse();
+  const toothX = [72, 97, 122, 147];   // key-local x of each tooth
+  const INSERT = 140;                    // how far the key slides in
+  const pins = document.getElementById('pins');
+  const teeth = document.getElementById('teeth');
+  normal.forEach((h, i) => {
+    const x = toothX[i] + INSERT;
+    const r = document.createElementNS(NS, 'rect');
+    r.setAttribute('x', x - 6); r.setAttribute('y', 58);
+    r.setAttribute('width', 12); r.setAttribute('height', (86 - h) - 58);
+    r.setAttribute('rx', 3);
+    pins.appendChild(r);
+  });
+  function drawTeeth(hs, color){
+    teeth.innerHTML = '';
+    hs.forEach((h, i) => {
+      const p = document.createElementNS(NS, 'path');
+      const x = toothX[i];
+      p.setAttribute('d', `M${x-9} 87 L${x-6} ${86-h} H${x+6} L${x+9} 87 Z`);
+      teeth.appendChild(p);
+    });
+    teeth.setAttribute('fill', color);
+    document.getElementById('keyblade').setAttribute('fill', color);
+    document.getElementById('keyhead').setAttribute('stroke', color);
+  }
+  const key = document.getElementById('key');
+  const shackle = document.getElementById('shackle');
+  const light = document.getElementById('light');
+  const say4 = document.getElementById('say4');
+  const kN = document.getElementById('kNormal'), kM = document.getElementById('kMirror');
+  let isMirror = false, busy = false;
+  function reset(){
+    key.style.transform = 'none';
+    shackle.style.transform = 'none';
+    light.setAttribute('fill', 'var(--soft)');
+    say4.className = 'say';
+  }
+  function pick(m){
+    isMirror = m;
+    kN.setAttribute('aria-pressed', !m); kM.setAttribute('aria-pressed', m);
+    drawTeeth(m ? mirror : normal, m ? 'var(--right)' : 'var(--left)');
+    reset();
+    say4.textContent = m ? 'Same bumps, flipped order. Will it fit?' : 'The pins in the lock are shaped for the normal key.';
+  }
+  kN.addEventListener('click', () => pick(false));
+  kM.addEventListener('click', () => pick(true));
+  document.getElementById('kTry').addEventListener('click', () => {
+    if (busy) return; busy = true;
+    reset();
+    void key.getBoundingClientRect();
+    const wait = reduce ? 50 : 1050;
+    if (!isMirror) {
+      key.style.transform = `translateX(${INSERT}px)`;
+      setTimeout(() => {
+        shackle.style.transform = 'translateY(-16px)';
+        light.setAttribute('fill', 'var(--good)');
+        say4.className = 'say ok';
+        say4.textContent = 'Click! Every bump meets its pin. Unlocked.';
+        busy = false;
+      }, wait);
+    } else {
+      key.style.transform = `translateX(${INSERT - 62}px)`;
+      setTimeout(() => {
+        light.setAttribute('fill', 'var(--bad)');
+        say4.className = 'say no';
+        say4.textContent = 'Stuck! The tall bump hits a pin. It won\'t go in.';
+        if (!reduce) {
+          const st = key.closest('.stage');
+          st.classList.remove('shake'); void st.offsetWidth; st.classList.add('shake');
+        }
+        busy = false;
+      }, wait);
+    }
+  });
+  pick(false);
+
+  /* ---------- Page 5: germs ---------- */
+  const cv = document.getElementById('germs');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let C = {};
+  function readColors(){ C = {left:css('--left'), right:css('--right'), ink:css('--ink'), soft:css('--soft'), page:css('--page'), good:css('--good'), tint:css('--left-tint')}; }
+  readColors();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', readColors);
+  new MutationObserver(readColors).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+  const guards = [{x:200,y:110},{x:420,y:220},{x:250,y:320},{x:520,y:95}];
+  const R = 44;
+  let germs = [], caught = 0, mode = 'normal', running = !reduce, t = 0, lastSpawn = 0, lastSplit = 0;
+  const say5 = document.getElementById('say5');
+  const cC = document.getElementById('cCaught'), cL = document.getElementById('cLoose');
+  const playBtn = document.getElementById('gPlay');
+
+  function spawn(x, y){
+    const a = (Math.random() - .5) * 1.2;
+    germs.push({x: x ?? -10, y: y ?? 40 + Math.random() * (H - 80), vx: Math.cos(a) * 1.3, vy: Math.sin(a) * 1.3, rot: Math.random()*6, state:'free', fade:1, g:null});
+  }
+  function start(m){
+    mode = m; germs = []; caught = 0; t = 0; lastSpawn = 0; lastSplit = 0;
+    for (let i = 0; i < 4; i++) spawn(-10 - i * 40);
+    say5.textContent = m === 'normal' ? 'Normal germs get grabbed and cleaned up.' : 'Mirror germs slip past the guards and keep copying.';
+    document.getElementById('gNormal').setAttribute('aria-pressed', m === 'normal');
+    document.getElementById('gMirror').setAttribute('aria-pressed', m === 'mirror');
+    if (!running) { for (let i = 0; i < 260; i++) step(); }
+    draw();
+  }
+
+  function step(){
+    t++;
+    if (t - lastSpawn > 70 && germs.filter(g => g.state === 'free').length < 70) { spawn(); lastSpawn = t; }
+    if (mode === 'mirror' && t - lastSplit > 150) {
+      lastSplit = t;
+      const free = germs.filter(g => g.state === 'free');
+      free.slice(0, Math.max(0, 70 - free.length)).forEach(g => spawn(g.x + 6, g.y + 6));
+    }
+    for (const g of germs) {
+      if (g.state === 'free') {
+        g.x += g.vx; g.y += g.vy; g.rot += .03;
+        if (g.y < 14 || g.y > H - 14) g.vy *= -1;
+        if (g.x > W + 12) { g.x = -10; }
+        if (mode === 'normal') {
+          for (const gd of guards) {
+            if (Math.hypot(g.x - gd.x, g.y - gd.y) < R + 14) { g.state = 'caught'; g.g = gd; caught++; break; }
+          }
+        }
+      } else if (g.state === 'caught') {
+        g.x += (g.g.x - g.x) * .08; g.y += (g.g.y - g.y) * .08; g.fade -= .02;
+        if (g.fade <= 0) g.state = 'gone';
+      }
+    }
+    germs = germs.filter(g => g.state !== 'gone');
+  }
+
+  function drawGuard(gd){
+    ctx.fillStyle = C.tint; ctx.beginPath(); ctx.arc(gd.x, gd.y, R, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = C.left; ctx.lineWidth = 3; ctx.stroke();
+    // Y-shaped grabbers, built for left-handed shapes
+    for (let k = 0; k < 6; k++) {
+      const a = k * Math.PI / 3 + t * .004;
+      const bx = gd.x + Math.cos(a) * R, by = gd.y + Math.sin(a) * R;
+      const ex = gd.x + Math.cos(a) * (R + 12), ey = gd.y + Math.sin(a) * (R + 12);
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(ex, ey);
+      ctx.moveTo(ex, ey); ctx.lineTo(ex + Math.cos(a - .6) * 8, ey + Math.sin(a - .6) * 8);
+      ctx.moveTo(ex, ey); ctx.lineTo(ex + Math.cos(a + .6) * 8, ey + Math.sin(a + .6) * 8);
+      ctx.stroke();
+    }
+    ctx.fillStyle = C.left; ctx.font = '600 15px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('guard', gd.x, gd.y);
+  }
+  function drawGerm(g){
+    ctx.save(); ctx.globalAlpha = Math.max(0, g.fade);
+    ctx.translate(g.x, g.y); ctx.rotate(g.rot);
+    const col = mode === 'normal' ? C.left : C.right;
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-13, -7, 26, 14, 7) : ctx.rect(-13,-7,26,14); ctx.fill();
+    ctx.rotate(-g.rot);
+    ctx.fillStyle = '#fff'; ctx.font = '800 11px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(mode === 'normal' ? 'L' : 'R', 0, 1);
+    ctx.restore();
+  }
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    guards.forEach(drawGuard);
+    germs.forEach(drawGerm);
+    cC.textContent = caught;
+    cL.textContent = germs.filter(g => g.state === 'free').length;
+  }
+  function loop(){
+    if (running) { step(); draw(); }
+    requestAnimationFrame(loop);
+  }
+  playBtn.textContent = running ? 'Pause' : 'Play';
+  playBtn.addEventListener('click', () => { running = !running; playBtn.textContent = running ? 'Pause' : 'Play'; });
+  document.getElementById('gNormal').addEventListener('click', () => start('normal'));
+  document.getElementById('gMirror').addEventListener('click', () => start('mirror'));
+  start('normal');
+  loop();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,1375 @@
+<!doctype html><html><head><meta charset=utf8>
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BONES">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script src="../../assets/bones.js" data-root="../../" defer></script>
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Bennu Sample Files</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a mission console. Stacked instrument panels, each one a live readout of one finding. Single dark look by choice. */
+:root{
+  color-scheme: dark;
+  --void:#04070d;
+  --panel:#091120;
+  --panel-2:#0d1729;
+  --line:#1b2a43;
+  --ink:#dce7f4;
+  --dim:#8696b0;
+  --cyan:#62dcff;
+  --amber:#ffb24a;
+  --water:#5b8fff;
+  --salt:#e9eef7;
+  --display:"Michroma","Eurostile","Arial Narrow",sans-serif;
+  --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--void)}
+body{
+  background:var(--void);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:48px 48px;
+  background-position:-1px -1px;
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:17px;
+  line-height:1.6;
+  padding-inline:16px;
+  padding-block:0 64px;
+}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%, transparent 0%, var(--void) 70%);opacity:.85;pointer-events:none;z-index:0}
+.wrap{max-width:1120px;margin:0 auto;position:relative;z-index:1;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;letter-spacing:.02em}
+h1{font-size:clamp(28px,5.2vw,52px);line-height:1.15}
+h2{font-size:clamp(20px,3vw,28px);line-height:1.25}
+h3{font-size:15px;line-height:1.35;letter-spacing:.04em}
+p{margin:0;max-width:65ch}
+a{color:var(--cyan)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.tag.amber{color:var(--amber)}
+.lede{color:var(--dim);font-size:18px}
+
+/* top bar */
+.bar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:18px 10px;border-bottom:1px solid var(--line)}
+.bar .mono b{color:var(--cyan);font-weight:500}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px;align-items:center}
+.hero-copy{display:flex;flex-direction:column;gap:18px;min-width:0}
+.scope{position:relative;border:1px solid var(--line);background:radial-gradient(circle at 50% 50%, var(--panel-2), var(--void) 72%);aspect-ratio:1/0.92;max-width:100%;overflow:hidden}
+.scope canvas{width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
+.scope canvas:active{cursor:grabbing}
+.hud{position:absolute;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);pointer-events:none;line-height:1.5}
+.hud b{color:var(--cyan);font-weight:500}
+.hud.tl{top:12px;left:14px}.hud.tr{top:12px;right:14px;text-align:right}
+.hud.bl{bottom:12px;left:14px}.hud.br{bottom:12px;right:14px;text-align:right}
+.corner{position:absolute;width:14px;height:14px;border-color:var(--cyan);border-style:solid;opacity:.7}
+.c1{top:-1px;left:-1px;border-width:2px 0 0 2px}.c2{top:-1px;right:-1px;border-width:2px 2px 0 0}
+.c3{bottom:-1px;left:-1px;border-width:0 0 2px 2px}.c4{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.stat{background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .v{font-family:var(--display);font-size:clamp(18px,2.4vw,24px);color:var(--ink);font-variant-numeric:tabular-nums}
+.stat .v small{font-family:var(--mono);font-size:12px;color:var(--cyan);margin-left:3px}
+.stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+
+.hud button{pointer-events:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;background:var(--void);color:var(--cyan);border:1px solid var(--line);padding:5px 9px;cursor:pointer;margin-top:4px}
+.hud button[aria-pressed="false"]{color:var(--dim)}
+.pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pin{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink);white-space:nowrap;transition:opacity .35s;will-change:transform}
+.pin i{flex:none;width:9px;height:9px;border:1.5px solid var(--cyan);border-radius:50%;background:color-mix(in srgb,var(--cyan) 30%,transparent);box-shadow:0 0 8px var(--cyan)}
+.pin span{background:color-mix(in srgb,var(--void) 82%,transparent);border:1px solid var(--line);padding:2px 6px}
+.pin.flip{flex-direction:row-reverse}
+.pin.away{opacity:0}
+.pins.off .pin{opacity:0}
+
+/* field guide */
+.guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.guide > div{background:var(--panel-2);padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.guide .v{font-family:var(--display);font-size:15px;line-height:1.35}
+.guide p{font-size:15px;color:var(--dim);line-height:1.5}
+.guide p b{color:var(--ink);font-weight:500}
+.note{font-size:13.5px;color:var(--dim);border-top:1px dashed var(--line);padding-top:12px}
+.callout{border:1px solid var(--line);border-left:2px solid var(--cyan);background:var(--panel-2);padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.callout.water{border-left-color:var(--water)}
+.pairs{display:flex;flex-wrap:wrap;gap:8px}
+.pairs span{font-family:var(--mono);font-size:13px;border:1px solid var(--line);padding:4px 10px;color:var(--ink)}
+.pairs span em{font-style:normal;color:var(--cyan)}
+.hyp{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.hyp li{display:flex;flex-direction:column;gap:2px;font-size:15px;color:var(--dim);border-left:1px solid var(--line);padding-left:12px}
+.hyp li b{color:var(--ink);font-weight:500}
+
+.tagview{aspect-ratio:16/8}
+.tagctl{display:flex;gap:12px;align-items:center}
+.tagctl .tbtn{flex:none;min-width:84px}
+.tagrange{flex:1;min-width:0;accent-color:var(--cyan)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:11px;letter-spacing:.06em;background:transparent;color:var(--dim);border:1px solid var(--line);padding:5px 9px;cursor:pointer}
+.chip:hover{color:var(--ink)}
+.chip[aria-current="step"]{color:var(--cyan);border-color:var(--cyan)}
+.stagecard.tagcard .when{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.08em}
+
+/* panels */
+.panel{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);padding:26px clamp(18px,3vw,34px);display:flex;flex-direction:column;gap:20px;position:relative}
+.panel-head{display:flex;flex-direction:column;gap:8px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px;align-items:start}
+.split > *{min-width:0}
+.stack{display:flex;flex-direction:column;gap:14px}
+
+/* timeline */
+.timeline{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;position:relative}
+.timeline::before{content:"";position:absolute;left:0;right:0;top:9px;height:1px;background:linear-gradient(90deg,var(--line),var(--cyan),var(--line))}
+.timeline li{position:relative;padding:28px 12px 0 0;display:flex;flex-direction:column;gap:6px}
+.timeline li::before{content:"";position:absolute;top:4px;left:0;width:11px;height:11px;border:1px solid var(--cyan);background:var(--void);transform:rotate(45deg)}
+.timeline li.key::before{background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.timeline time{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.timeline h3{font-size:13px}
+.timeline p{font-size:14.5px;color:var(--dim);line-height:1.5}
+
+/* inventory */
+.toggles{display:flex;flex-wrap:wrap;gap:8px}
+.tbtn{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:transparent;color:var(--dim);border:1px solid var(--line);padding:8px 14px;cursor:pointer;transition:all .2s}
+.tbtn:hover{color:var(--ink);border-color:var(--dim)}
+.tbtn[aria-pressed="true"]{color:var(--void);background:var(--cyan);border-color:var(--cyan)}
+.tbtn.amb[aria-pressed="true"]{background:var(--amber);border-color:var(--amber)}
+.bases{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.base{border:1px solid var(--line);background:var(--panel-2);padding:14px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:opacity .3s,border-color .3s,transform .3s;min-width:0}
+.base .glyph{font-family:var(--display);font-size:clamp(26px,4vw,40px);color:var(--cyan);line-height:1.1}
+.base .nm{font-size:13.5px;color:var(--ink);text-align:center;overflow-wrap:anywhere}
+.base .in{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+.base.off{opacity:.18;transform:scale(.97)}
+.base.on{border-color:var(--cyan)}
+.aa{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;max-width:420px}
+.aa span{aspect-ratio:1;border:1px solid var(--line);background:transparent}
+.aa span.hit{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 8px color-mix(in srgb,var(--cyan) 60%,transparent)}
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.ro{background:var(--panel-2);padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.ro .v{font-family:var(--display);font-size:17px}
+.ro p{font-size:14px;color:var(--dim);line-height:1.45}
+.ro .when{font-family:var(--mono);font-size:10px;color:var(--cyan);letter-spacing:.1em}
+
+/* 3D viewers */
+.viewer{position:relative;border:1px solid var(--line);background:radial-gradient(circle at 50% 45%, var(--panel-2), var(--void) 75%);aspect-ratio:16/10;max-width:100%;overflow:hidden}
+.viewer canvas{width:100%;height:100%;display:block;touch-action:pan-y}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.status{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--ink);border-left:2px solid var(--cyan);padding:6px 0 6px 12px;min-height:3.2em}
+.status.amber{border-color:var(--amber)}
+
+.ratio{display:flex;flex-direction:column;gap:10px}
+.rrow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center}
+.rrow .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.rbar{display:flex;height:22px;border:1px solid var(--line);overflow:hidden}
+.rbar .l{background:var(--cyan);color:var(--void)}.rbar .d{background:var(--amber);color:var(--void)}
+.rbar div{font-family:var(--mono);font-size:10.5px;display:flex;align-items:center;padding-inline:8px;white-space:nowrap;overflow:hidden;font-weight:500}
+.tank{border:1px solid var(--line);background:var(--void);aspect-ratio:16/9;max-width:100%}
+.tank canvas{width:100%;height:100%;display:block}
+
+/* water */
+.range{width:100%;accent-color:var(--water)}
+.stagecard{display:flex;flex-direction:column;gap:6px}
+.stagecard .when{font-family:var(--mono);font-size:12px;color:var(--water);letter-spacing:.08em}
+.ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.06em;gap:4px}
+.ticks span{flex:1;text-align:center}
+.ticks span:first-child{text-align:left}.ticks span:last-child{text-align:right}
+
+/* star stuff */
+.stars{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:26px;align-items:center}
+.bigq{font-family:var(--display);font-size:clamp(22px,3.4vw,34px);line-height:1.3;color:var(--ink)}
+.bigq em{font-style:normal;color:var(--cyan)}
+
+/* mirror */
+.panel.warn{border-color:color-mix(in srgb,var(--amber) 45%,var(--line))}
+.lock svg{width:100%;height:auto;display:block;border:1px solid var(--line);background:var(--void)}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.checks li{display:grid;grid-template-columns:74px minmax(0,1fr);gap:12px;font-size:15px;align-items:baseline}
+.pill{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border:1px solid currentColor;text-align:center}
+.pill.done{color:var(--cyan)}.pill.no{color:var(--amber)}.pill.note{color:var(--dim)}
+
+/* proves */
+.proves{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.proves > div{background:var(--panel-2);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.proves ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15.5px}
+.sources{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.sources a{color:var(--dim);text-decoration-color:var(--line)}
+.sources a:hover{color:var(--cyan)}
+footer{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.08em;text-align:center}
+
+@media (max-width:860px){
+  .hero,.split,.stars,.proves{grid-template-columns:minmax(0,1fr)}
+  .timeline{grid-template-columns:minmax(0,1fr);gap:18px}
+  .timeline::before{left:5px;right:auto;top:0;bottom:0;width:1px;height:auto;background:linear-gradient(180deg,var(--line),var(--cyan),var(--line))}
+  .timeline li{padding:0 0 0 30px}
+  .timeline li::before{top:6px}
+  .readouts{grid-template-columns:minmax(0,1fr)}
+  .guide{grid-template-columns:minmax(0,1fr)}
+}
+@media (min-width:861px) and (max-width:1060px){ .guide{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:520px){
+  body{font-size:16px}
+  .bases{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .stat:last-child{grid-column:span 2}
+  .rrow{grid-template-columns:minmax(0,1fr)}
+  .viewer{aspect-ratio:1/1}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important}
+}
+</style>
+
+<div class="wrap">
+
+  <div class="bar">
+    <span class="mono">Sample file <b>101955 Bennu</b></span>
+    <span class="mono">Mission <b>OSIRIS-REx</b> / NASA</span>
+  </div>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="tag">Carbonaceous near-Earth asteroid</span>
+      <h1>The starter kit for life, sealed inside a space rock</h1>
+      <p class="lede">In 2023 a capsule parachuted into the Utah desert carrying dust and pebbles scooped from asteroid Bennu. Inside: all five letters of the genetic code, most of the amino acids life uses, sugars, salts, and dust older than the Sun.</p>
+      <div class="stats">
+        <div class="stat"><span class="v">121.6<small>g</small></span><span class="k">Sample returned</span></div>
+        <div class="stat"><span class="v">565<small>m</small></span><span class="k">Widest point</span></div>
+        <div class="stat"><span class="v">~4<small>%</small></span><span class="k">Sunlight reflected</span></div>
+      </div>
+    </div>
+    <div class="scope" id="scope">
+      <canvas id="bennu" aria-label="Rotating 3D model of asteroid Bennu built from published measurements, with labels for the sample site, the tallest boulder and the equatorial ridge. Drag sideways to spin it."></canvas>
+      <div class="pins" id="pins"></div>
+      <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+      <div class="hud tl">Target<br><b>101955 Bennu</b></div>
+      <div class="hud tr">Size<br><b>565 × 535 × 508 m</b></div>
+      <div class="hud bl">Day length 4.3 h<br><b id="spinread">Shown ~770× faster</b></div>
+      <div class="hud br">Drag to rotate<br><button id="pinbtn" aria-pressed="true">Labels on</button></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-guide">
+    <div class="panel-head">
+      <span class="tag">Field guide</span>
+      <h2 id="t-guide">What you're looking at</h2>
+      <p class="lede">The model above is built from OSIRIS-REx's measurements: Bennu's real dimensions, its spinning-top profile, its near-black surface, and a boulder field that follows the size pattern seen from orbit.</p>
+    </div>
+    <div class="guide">
+      <div><span class="tag">Shape</span><span class="v">A spinning top</span><p>Two rough cones joined at a ridge around the equator. Bennu likely spun faster in the past, and loose rubble slid toward the equator and piled up there.</p></div>
+      <div><span class="tag">Color</span><span class="v">Darker than charcoal</span><p>It reflects only about <b>4%</b> of the sunlight that hits it, one of the darkest objects in the solar system. The darkness comes from carbon, and carbon-rich rock is exactly where organic molecules survive. That's why NASA picked it.</p></div>
+      <div><span class="tag">Surface</span><span class="v">Boulders everywhere</span><p>Telescopes suggested smooth, sandy ground. Instead the team found boulders across the whole surface. Some bright ones have veins of carbonate, an early clue to water. The tallest, <b>Benben Saxum</b>, stands about 22 m (72 ft), roughly a seven-story building.</p></div>
+      <div><span class="tag">Structure</span><span class="v">A ball pit, not solid ground</span><p>During the sample grab, the arm met almost no resistance, like pushing a French press plunger. It left an 8 m crater, and the spacecraft would have kept sinking if it hadn't fired its thrusters to back away. Bennu is loose rubble held together by very weak gravity.</p></div>
+      <div><span class="tag">Sample site</span><span class="v">Nightingale</span><p>A crater about 20 m wide, high in the northern hemisphere. It was picked because it held fine-grained material small enough for the collector to swallow, in a field of boulders that mostly wasn't.</p></div>
+      <div><span class="tag">Why NASA watches it</span><span class="v">1 in 2,700</span><p>Bennu has roughly a 1 in 2,700 chance of hitting Earth on September 24, 2182. Learning how a rubble pile behaves helps plan how you'd deflect one.</p></div>
+    </div>
+    <p class="note">Model notes: dimensions, shape, brightness and boulder sizes follow published measurements. Individual boulder positions are illustrative, and the labeled features are placed at their approximate latitudes. The spin is sped up so you can see it turn.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="t-mission">
+    <div class="panel-head">
+      <span class="tag">Mission log</span>
+      <h2 id="t-mission">Seven years out and back</h2>
+    </div>
+    <ol class="timeline">
+      <li><time datetime="2016-09-08">Sep 2016</time><h3>Launch</h3><p>OSIRIS-REx lifts off from Cape Canaveral.</p></li>
+      <li><time datetime="2018-12-03">Dec 2018</time><h3>Arrival</h3><p>Spacecraft reaches Bennu and maps it for nearly two years.</p></li>
+      <li class="key"><time datetime="2020-10-20">Oct 2020</time><h3>Touch and go</h3><p>About six seconds of contact. A nitrogen puff kicks surface material into the collector.</p></li>
+      <li class="key"><time datetime="2023-09-24">Sep 2023</time><h3>Capsule lands</h3><p>Sample capsule parachutes into the Utah desert, sealed from Earth's air and life.</p></li>
+      <li class="key"><time datetime="2025-01-29">Jan 2025</time><h3>First big papers</h3><p>Nucleobases, amino acids, ammonia, and brine salts reported in Nature and Nature Astronomy.</p></li>
+      <li class="key"><time datetime="2025-12-02">Dec 2025</time><h3>Sugars and stardust</h3><p>Ribose, glucose, a "space gum" polymer, and an unusual load of supernova dust.</p></li>
+    </ol>
+    <div class="split">
+      <p>The capsule was opened in a clean room at NASA's Johnson Space Center, inside glove boxes filled with nitrogen so Earth's air and moisture never touched the material. About a quarter of the sample went to the mission's science team, and small shares went to Canada's and Japan's space agencies. Most of the rest is stored for future researchers with better instruments, the same approach NASA took with the Apollo moon rocks.</p>
+      <p style="color:var(--dim)">The spacecraft didn't retire. It dropped the capsule and kept flying, and is now called OSIRIS-APEX, on its way to the asteroid Apophis, which passes unusually close to Earth in April 2029.</p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-tag">
+    <div class="panel-head">
+      <span class="tag">Mission replay / October 20, 2020</span>
+      <h2 id="t-tag">The six-second grab</h2>
+      <p class="lede">How OSIRIS-REx took its sample. Press play, or drag the slider to scrub through the 4.5-hour sequence. The spacecraft, arm and crater are to scale. Heights are compressed so the whole descent fits on screen.</p>
+    </div>
+    <div class="viewer tagview">
+      <canvas id="tagc" aria-label="3D replay of the OSIRIS-REx spacecraft descending to Bennu, touching the surface with its sampler arm, firing nitrogen and backing away"></canvas>
+      <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+      <div class="hud tl">Phase<br><b id="tag-phase">Touch</b></div>
+      <div class="hud tr">Altitude<br><b id="tag-alt">0 m</b></div>
+      <div class="hud bl">Speed<br><b id="tag-spd">10 cm/s</b></div>
+      <div class="hud br">Contact clock<br><b id="tag-clk">T-00:00</b></div>
+    </div>
+    <div class="tagctl">
+      <button class="tbtn" id="tag-play" aria-pressed="false">Play</button>
+      <input type="range" class="range tagrange" id="tag-t" min="0" max="1000" step="1" value="480" aria-label="Scrub through the sample collection">
+    </div>
+    <div class="chips" id="tag-chips" role="group" aria-label="Jump to a step"></div>
+    <div class="split">
+      <div class="stagecard tagcard" id="tag-card" aria-live="polite"></div>
+      <div class="callout">
+        <h3>Why it had to fly itself</h3>
+        <p>On the day of the grab, Bennu was about 334 million km from Earth. A radio signal took roughly 18.5 minutes each way, far too slow to steer by hand. The spacecraft compared what its cameras saw with a stored map of the site and made its own decisions, including a built-in option to abort if it was heading toward a boulder.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-inv">
+    <div class="panel-head">
+      <span class="tag">Inventory 01 / Genetic alphabet</span>
+      <h2 id="t-inv">All five nucleobases</h2>
+      <p class="lede">These are the letters DNA and RNA use to store and copy genetic instructions. Bennu has every one of them. Tap a strand type to see which letters it uses.</p>
+    </div>
+    <div class="toggles" role="group" aria-label="Filter nucleobases">
+      <button class="tbtn" data-f="all" aria-pressed="true">All five</button>
+      <button class="tbtn" data-f="dna" aria-pressed="false">DNA uses</button>
+      <button class="tbtn" data-f="rna" aria-pressed="false">RNA uses</button>
+    </div>
+    <div class="bases" id="bases">
+      <div class="base" data-s="dna rna"><span class="glyph">A</span><span class="nm">Adenine</span><span class="in">DNA + RNA</span></div>
+      <div class="base" data-s="dna rna"><span class="glyph">G</span><span class="nm">Guanine</span><span class="in">DNA + RNA</span></div>
+      <div class="base" data-s="dna rna"><span class="glyph">C</span><span class="nm">Cytosine</span><span class="in">DNA + RNA</span></div>
+      <div class="base" data-s="dna"><span class="glyph">T</span><span class="nm">Thymine</span><span class="in">DNA only</span></div>
+      <div class="base" data-s="rna"><span class="glyph">U</span><span class="nm">Uracil</span><span class="in">RNA only</span></div>
+    </div>
+    <div class="callout">
+      <h3>How the letters work</h3>
+      <p>Nucleobases are the rungs of the DNA ladder. Each one pairs with a specific partner, and the order of letters along a strand spells out instructions, the same way letters spell words. RNA uses U where DNA uses T.</p>
+      <div class="pairs"><span>A <em>pairs with</em> T</span><span>G <em>pairs with</em> C</span><span>A <em>pairs with</em> U <em>(RNA)</em></span></div>
+    </div>
+
+    <div class="split">
+      <div class="stack">
+        <span class="tag">Inventory 02 / Protein parts</span>
+        <h3>14 of the 20 amino acids life builds proteins from</h3>
+        <div class="aa" aria-label="14 of 20 cells lit">
+          <span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span>
+          <span class="hit"></span><span class="hit"></span><span class="hit"></span><span class="hit"></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <p style="color:var(--dim);font-size:15px">Plus 19 more amino acids that Earth life doesn't use, for 33 in total.</p>
+        <p style="font-size:15.5px">Amino acids are beads. A protein is a chain of hundreds of them folded into a shape, and proteins do nearly all the work in a cell. The 19 extras matter: living things make only their 20, while plain chemistry makes a messy variety. A big mix like Bennu's is a sign these formed without life involved.</p>
+      </div>
+      <div class="stack">
+        <span class="tag">Why this sample matters</span>
+        <p>Meteorites that fall to Earth get contaminated by our air, soil, and microbes the moment they land, so you can never be fully sure what came from space. Bennu's sample was sealed in space and opened in a clean lab. What's in it came from the asteroid.</p>
+      </div>
+    </div>
+
+    <div class="stack">
+      <span class="tag">Inventory 03 / Everything else</span>
+      <div class="readouts">
+        <div class="ro"><span class="when">Dec 2025</span><span class="v">Ribose</span><p>The sugar in RNA's backbone. Spotted in meteorites before, now confirmed in an uncontaminated sample.</p></div>
+        <div class="ro"><span class="when">Dec 2025</span><span class="v">Glucose</span><p>The sugar most Earth life burns for energy. The first time it has been found in any material from space.</p></div>
+        <div class="ro"><span class="when">Jan 2025</span><span class="v">Phosphate</span><p>Links the sugars together to form the backbone of DNA and RNA. Also the core of ATP, the cell's energy currency.</p></div>
+        <div class="ro"><span class="when">Jan 2025</span><span class="v">Ammonia</span><p>Found in large amounts. It's a key raw ingredient for building both amino acids and nucleobases.</p></div>
+        <div class="ro"><span class="when">Jan 2025</span><span class="v">~10,000</span><p>Distinct nitrogen-bearing compounds. Nitrogen chemistry was busy on this asteroid.</p></div>
+        <div class="ro"><span class="when">Dec 2025</span><span class="v">"Space gum"</span><p>A flexible, plastic-like polymer rich in nitrogen and oxygen. It formed when carbamate, made from ammonia and carbon dioxide, linked into long chains.</p></div>
+      </div>
+    </div>
+    <div class="callout">
+      <h3>Every part of RNA, in one rock</h3>
+      <p>RNA needs three things: nucleobases (including U), the sugar ribose, and phosphate. Bennu has all of them. That supports the "RNA world" idea: before DNA and proteins, early life may have run on RNA alone, because RNA can both store information and do chemical work. One telling detail: deoxyribose, the sugar DNA needs, was not found. That fits the idea that RNA came first.</p>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-chi">
+    <div class="panel-head">
+      <span class="tag">Analysis 01 / Chirality</span>
+      <h2 id="t-chi">Left hand, right hand</h2>
+      <p class="lede">Amino acids come in two mirror-image versions, like a pair of gloves. Same atoms, same bonds, flipped. Below is alanine, one of the amino acids found on Bennu, and its mirror twin.</p>
+    </div>
+    <div class="split">
+      <div class="stack">
+        <div class="viewer"><canvas id="mol" aria-label="3D model of left-handed and right-handed alanine. Drag to rotate."></canvas></div>
+        <div class="legend">
+          <span><i style="background:#5f6b7c"></i>Carbon (center)</span>
+          <span><i style="background:#5aa0ff"></i>Amino group</span>
+          <span><i style="background:#ff5c6c"></i>Acid group</span>
+          <span><i style="background:#9fd2ad"></i>Methyl</span>
+          <span><i style="background:#e8eef6"></i>Hydrogen</span>
+        </div>
+        <div class="toggles" role="group" aria-label="Molecule view">
+          <button class="tbtn" id="m-side" aria-pressed="true">Side by side</button>
+          <button class="tbtn amb" id="m-over" aria-pressed="false">Try to overlap them</button>
+        </div>
+        <div class="status" id="m-status">Left: the version life uses. Right: its mirror image. Drag to spin them.</div>
+        <p style="font-size:15.5px">Why it happens: the center carbon holds four different groups. Any time a carbon has four different neighbors, there are two ways to arrange them that are mirror images, and no amount of turning converts one into the other. Chemists call them L (from the Latin for left) and D (for right).</p>
+      </div>
+      <div class="stack">
+        <h3>Space makes both. Life picked one.</h3>
+        <div class="ratio">
+          <div class="rrow"><span class="lbl">Bennu sample</span><div class="rbar"><div class="l" style="width:50%">L ~50%</div><div class="d" style="width:50%">D ~50%</div></div></div>
+          <div class="rrow"><span class="lbl">Earth proteins</span><div class="rbar"><div class="l" style="width:100%">L ~100%</div></div></div>
+        </div>
+        <div class="tank"><canvas id="tank" aria-label="Animated mix of left-handed and right-handed molecules"></canvas></div>
+        <div class="toggles" role="group" aria-label="Molecule mix">
+          <button class="tbtn" id="k-ben" aria-pressed="true">Mix on Bennu</button>
+          <button class="tbtn" id="k-life" aria-pressed="false">What life uses</button>
+        </div>
+        <p>Every living thing builds proteins from left-handed amino acids only. That shared choice is strong evidence that all life descends from one common ancestor. Why left won is still unsolved. Bennu narrows it down: the delivery was an even mix, so the choice happened here. Sugars go the other way: life's sugars are all the right-handed (D) form.</p>
+        <div class="callout">
+          <h3>Leading ideas for why left won</h3>
+          <ul class="hyp">
+            <li><b>Polarized starlight</b>Some light in star-forming regions is twisted in one direction, and it can destroy one hand slightly faster than the other. A small tilt to start with.</li>
+            <li><b>Chance, then amplification</b>A tiny random excess got locked in, and certain reactions make the more common hand even more common.</li>
+            <li><b>Mineral surfaces</b>Some crystal faces grip one hand better, sorting molecules as they formed.</li>
+          </ul>
+          <p class="note">None of these is proven. They may have worked together.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-water">
+    <div class="panel-head">
+      <span class="tag" style="color:var(--water)">Analysis 02 / Water</span>
+      <h2 id="t-water">A wet past, written in salt</h2>
+      <p class="lede">Bennu is a fragment of a much bigger parent body. The salts and clays in the sample show that parent body once held pockets of liquid brine. Slide through its history.</p>
+    </div>
+    <div class="split">
+      <div class="stack">
+        <div class="viewer"><canvas id="water" aria-label="Illustration of the history of Bennu's parent body"></canvas></div>
+        <label class="mono" for="stage">Stage</label>
+        <input type="range" class="range" id="stage" min="0" max="4" step="1" value="1">
+        <div class="ticks"><span>Form</span><span>Thaw</span><span>Dry</span><span>Break</span><span>Today</span></div>
+      </div>
+      <div class="stack">
+        <div class="stagecard" id="stagecard" aria-live="polite"></div>
+        <div class="callout water">
+          <h3>How we know there was water</h3>
+          <ul class="hyp">
+            <li><b>Evaporite salts</b>Including sodium carbonate, the same white crust that forms on dry lake beds like Searles Lake in California's Mojave Desert. It had never been seen in a meteorite or any space sample before.</li>
+            <li><b>Clays and carbonates</b>Minerals that only form when water soaks into rock and changes it.</li>
+            <li><b>Bright veins on boulders</b>Seen from orbit before the sample came home: carbonate filling old cracks where fluid once flowed.</li>
+          </ul>
+          <p class="note">These salts dissolve in humid air. A meteorite falling through Earth's atmosphere would lose them, which is why they only showed up in a sealed sample.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-star">
+    <div class="stars">
+      <div class="stack">
+        <span class="tag">Analysis 03 / Origins</span>
+        <h2 id="t-star">Older than the Sun</h2>
+        <p>The December 2025 papers found grains of dust that formed before our solar system existed, some blasted out of exploding stars. Scientists spot these "presolar grains" by their isotopes: the ratios of heavier and lighter versions of the same elements don't match anything made in our solar system, so they carry the chemical signature of the star that made them.</p>
+        <p>Bennu's parent body had about six times more supernova dust than any space material studied before. That suggests it formed in a patch of the early solar system unusually rich in debris from dead stars.</p>
+        <p style="color:var(--dim)">Put it together and the ingredients for life were cooked from star debris and spread through the early solar system. They weren't rare, and they weren't made only on Earth.</p>
+      </div>
+      <p class="bigq">"We are made of <em>star stuff.</em>"<br><span class="mono" style="font-size:11px">Carl Sagan</span></p>
+    </div>
+  </section>
+
+  <section class="panel warn" aria-labelledby="t-mirror">
+    <div class="panel-head">
+      <span class="tag amber">Frontier / Mirror life</span>
+      <h2 id="t-mirror">What if someone built a right-handed cell?</h2>
+      <p class="lede">Your immune system recognizes invaders by shape, the way a key fits a lock. A bacterium built from mirror-image parts would present flipped shapes. Run the test.</p>
+    </div>
+    <div class="split">
+      <div class="stack lock">
+        <svg id="lock" viewBox="0 0 340 200" role="img" aria-label="An immune receptor and a bacterium surface shape docking or failing to dock">
+          <defs>
+            <pattern id="dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#1b2a43"/></pattern>
+          </defs>
+          <rect x="0" y="0" width="340" height="200" fill="url(#dots)"/>
+          <g id="receptor">
+            <polygon id="recpoly" points="190,30 330,30 330,170 190,170 190,118 206,118 206,100 220,100 220,76 190,76" fill="#0d1729" stroke="#8696b0" stroke-width="1.5"/>
+            <text x="262" y="150" fill="#8696b0" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1" text-anchor="middle">IMMUNE RECEPTOR</text>
+          </g>
+          <g id="bug">
+            <g id="key">
+              <polygon points="100,89 130,89 130,76 160,76 160,100 146,100 146,118 130,118 130,105 100,105" fill="#62dcff"/>
+            </g>
+            <circle cx="60" cy="97" r="44" fill="#091120" stroke="#62dcff" stroke-width="1.5" id="bugbody"/>
+            <text x="60" y="94" fill="#dce7f4" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1" text-anchor="middle">BACTERIUM</text>
+            <text x="60" y="108" fill="#8696b0" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="1" text-anchor="middle" id="bugkind">NORMAL</text>
+          </g>
+        </svg>
+        <div class="toggles" role="group" aria-label="Choose a bacterium">
+          <button class="tbtn" id="b-norm" aria-pressed="true">Normal bacterium</button>
+          <button class="tbtn amb" id="b-mirr" aria-pressed="false">Mirror bacterium</button>
+        </div>
+        <div class="status" id="b-status">Shape fits. Alarm raised. The immune system attacks.</div>
+      </div>
+      <div class="stack">
+        <p>The same mismatch would apply to animals, plants, and fungi, because all of them run on the same left-handed chemistry. Digestive enzymes are gloves too, so microbes and viruses that normally keep bacteria in check might not be able to break one down. With no predators and no immune response, a mirror microbe could spread unchecked. That's why the worry is about whole ecosystems, not just people.</p>
+        <p style="color:var(--dim)">Mirror molecules on their own aren't the problem. Drug researchers already use mirror-image proteins because the body's enzymes can't break them down, so they last longer. The line scientists drew is at a mirror cell that can copy itself.</p>
+        <ul class="checks">
+          <li><span class="pill done">Built</span><span>Mirror-image proteins, made by chemical synthesis.</span></li>
+          <li><span class="pill done">Built</span><span>A working mirror-image enzyme that copies DNA.</span></li>
+          <li><span class="pill no">Not built</span><span>A living, self-copying mirror cell. Estimated at least a decade away.</span></li>
+          <li><span class="pill no">Dec 2024</span><span>38 scientists, some of whom had worked toward mirror life, warned in Science that it should not be created.</span></li>
+          <li><span class="pill note">Counter</span><span>Some argue the risk is overstated, since a mirror microbe would struggle to find food it could digest.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-proves">
+    <div class="panel-head">
+      <span class="tag">Read this before you overclaim</span>
+      <h2 id="t-proves">What Bennu does and doesn't tell us</h2>
+    </div>
+    <div class="proves">
+      <div>
+        <span class="tag">Shows</span>
+        <ul>
+          <li>Life's raw ingredients form naturally in space.</li>
+          <li>They were common in the early solar system.</li>
+          <li>Water, organics, and minerals once mixed inside asteroids.</li>
+          <li>Space delivers both molecular hands in roughly equal amounts.</li>
+        </ul>
+      </div>
+      <div>
+        <span class="tag amber">Doesn't show</span>
+        <ul>
+          <li>That life exists anywhere else.</li>
+          <li>That life on Earth started from asteroid deliveries.</li>
+          <li>That life ever began on Bennu or its parent body.</li>
+          <li>Why life chose left-handed amino acids.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sources">
+      <span class="mono">Sources</span>
+      <a href="https://www.nasa.gov/news-release/nasas-asteroid-bennu-sample-reveals-mix-of-lifes-ingredients/" target="_blank" rel="noopener">NASA: Asteroid Bennu sample reveals mix of life's ingredients (Jan 2025)</a>
+      <a href="https://www.nasa.gov/missions/osiris-rex/sugars-gum-stardust-found-in-nasas-asteroid-bennu-samples/" target="_blank" rel="noopener">NASA: Sugars, gum, stardust found in Bennu samples (Dec 2025)</a>
+      <a href="https://www.nasa.gov/feature/goddard/2022/surprise-again-asteroid-bennu-reveals-its-surface-is-like-a-plastic-ball-pit" target="_blank" rel="noopener">NASA: Bennu's surface is like a plastic ball pit (2022)</a>
+      <a href="https://www.theweathernetwork.com/en/news/science/space/asteroid-bennu-surprisingly-salty-with-building-blocks-for-life" target="_blank" rel="noopener">The Weather Network: Surprisingly salty asteroid Bennu (Jan 2025)</a>
+      <a href="https://www.science.org/doi/10.1126/science.ads9158" target="_blank" rel="noopener">Science: Confronting risks of mirror life (Dec 2024)</a>
+    </div>
+  </section>
+
+  <footer>Built from a morning conversation about An Immense World and asteroid Bennu</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const scenes = [];
+const visible = new Set();
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
+},{rootMargin:'100px'}) : null;
+function register(el, step){ scenes.push({el,step}); if(io) io.observe(el); else visible.add(el); }
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05,(now-last)/1000); last = now;
+  scenes.forEach(s=>{ if(visible.has(s.el)) s.step(dt, now/1000); });
+  requestAnimationFrame(loop);
+}
+
+/* seeded random */
+function rng(seed){ return function(){ seed = (seed*16807)%2147483647; return (seed-1)/2147483646; }; }
+
+/* ---------- value noise ---------- */
+function hash(x,y,z){ const h = Math.sin(x*127.1+y*311.7+z*74.7)*43758.5453; return h-Math.floor(h); }
+function sm(t){ return t*t*(3-2*t); }
+function noise(x,y,z){
+  const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(z);
+  const xf=sm(x-xi),yf=sm(y-yi),zf=sm(z-zi);
+  let r=0;
+  for(let a=0;a<2;a++)for(let b=0;b<2;b++)for(let c=0;c<2;c++){
+    const w=(a?xf:1-xf)*(b?yf:1-yf)*(c?zf:1-zf);
+    r+=w*hash(xi+a,yi+b,zi+c);
+  }
+  return r;
+}
+function fbm(x,y,z){ let v=0,a=.5,f=1; for(let i=0;i<4;i++){ v+=a*noise(x*f,y*f,z*f); f*=2.03; a*=.5; } return v; }
+
+/* drag helper */
+function dragRotate(canvas, onDelta){
+  let down=false, px=0, py=0;
+  canvas.addEventListener('pointerdown',e=>{ down=true; px=e.clientX; py=e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointermove',e=>{ if(!down) return; onDelta((e.clientX-px)/canvas.clientWidth, (e.clientY-py)/canvas.clientHeight); px=e.clientX; py=e.clientY; });
+  ['pointerup','pointercancel'].forEach(t=>canvas.addEventListener(t,()=>{down=false;}));
+}
+
+function makeRenderer(canvas, fov, z){
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(DPR);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 200);
+  camera.position.set(0,0,z);
+  function fit(){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if(!w||!h) return;
+    renderer.setSize(w,h,false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.render(scene,camera);
+  }
+  if('ResizeObserver' in window) new ResizeObserver(fit).observe(canvas); else window.addEventListener('resize',fit);
+  fit();
+  return {renderer, scene, camera, fit};
+}
+
+/* ---------- HERO: Bennu ---------- */
+function initBennu(){
+  const canvas = document.getElementById('bennu');
+  const {renderer, scene, camera} = makeRenderer(canvas, 33, 4.9);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  camera.position.set(0, 0.55, 4.9); camera.lookAt(0,0,0);
+
+  const R = rng(1999);
+  const deg = Math.PI/180;
+  function dirLL(lat, lon){ return new THREE.Vector3(Math.cos(lat*deg)*Math.cos(lon*deg), Math.sin(lat*deg), Math.cos(lat*deg)*Math.sin(lon*deg)); }
+
+  // Craters: Bennu has several broad, shallow ones plus the small Nightingale crater at ~56 N.
+  const NIGHT = dirLL(56, 40);
+  const craters = [{d:NIGHT, rad:0.075, depth:0.014}];
+  for(let i=0;i<9;i++){
+    const lat = (R()*2-1)*70, lon = R()*360;
+    craters.push({d:dirLL(lat,lon), rad:0.12+R()*0.2, depth:0.012+R()*0.022});
+  }
+
+  // Radius along a unit direction. Equatorial radius = 1 (282 m), polar = 0.9.
+  function radius(x,y,z){
+    const rho = Math.sqrt(x*x+z*z), ay = Math.abs(y), c = 0.9;
+    const diamond = 1/(rho + ay/c);
+    const ellip = 1/Math.sqrt(rho*rho + (y*y)/(c*c));
+    let r = 0.42*diamond + 0.58*ellip;
+    // broad lumpiness and fine regolith roughness
+    r *= 1 + (fbm(x*1.5+3.1, y*1.5+1.7, z*1.5+5.3)-0.5)*0.10;
+    r *= 1 + (fbm(x*9+9.2, y*9+0.4, z*9+4.4)-0.5)*0.022;
+    for(const cr of craters){
+      const a = Math.acos(Math.max(-1,Math.min(1, x*cr.d.x+y*cr.d.y+z*cr.d.z)));
+      if(a < cr.rad*1.3){
+        const t = a/cr.rad;
+        if(t < 1) r -= cr.depth*(1-t*t);
+        else r += cr.depth*0.15*Math.sin((t-1)/0.3*Math.PI);
+      }
+    }
+    return r;
+  }
+  const ZS = 535/565; // triaxial: 565 x 535 x 508 m
+  function surf(d){
+    const r = radius(d.x,d.y,d.z);
+    return new THREE.Vector3(d.x*r, d.y*r, d.z*r*ZS);
+  }
+
+  // Main body
+  const geo = new THREE.IcosahedronGeometry(1, 56);
+  const pos = geo.attributes.position, v = new THREE.Vector3(), cols = [];
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos,i).normalize();
+    const p = surf(v);
+    pos.setXYZ(i,p.x,p.y,p.z);
+    const n = fbm(v.x*4+2, v.y*4+7, v.z*4+1);
+    let s = 0.052 + (n-0.5)*0.03;
+    // fine material inside Nightingale is slightly darker and smoother
+    if(v.angleTo(NIGHT) < 0.075) s *= 0.85;
+    cols.push(s, s*1.01, s*1.04);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(cols,3));
+  geo.computeVertexNormals();
+  const rock = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({vertexColors:true, flatShading:true, roughness:1, metalness:0}));
+  rock.castShadow = true; rock.receiveShadow = true;
+
+  // Boulders: rounded, lumpy blocks with a steep size distribution (many small, few large).
+  const bgeo = new THREE.IcosahedronGeometry(1, 2);
+  const bp = bgeo.attributes.position;
+  for(let i=0;i<bp.count;i++){
+    v.fromBufferAttribute(bp,i);
+    const k = 1 + (noise(v.x*1.8+4, v.y*1.8+2, v.z*1.8+7)-0.5)*0.55;
+    v.multiplyScalar(k);
+    bp.setXYZ(i, v.x, v.y, v.z);
+  }
+  bgeo.computeVertexNormals();
+  const N = 2600;
+  const bmat = new THREE.MeshStandardMaterial({roughness:1, metalness:0, flatShading:true});
+  const boulders = new THREE.InstancedMesh(bgeo, bmat, N + 1);
+  boulders.castShadow = true; boulders.receiveShadow = true;
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(), col = new THREE.Color();
+  let placed = 0;
+  while(placed < N){
+    const u = R()*2-1, t = R()*Math.PI*2, qq = Math.sqrt(1-u*u);
+    const d = new THREE.Vector3(qq*Math.cos(t), u, qq*Math.sin(t));
+    if(d.angleTo(NIGHT) < 0.09) continue;            // Nightingale was chosen for being boulder-poor
+    const s = Math.min(0.07, 0.011/Math.pow(1-R()*0.985, 0.42));
+    const p = surf(d).addScaledVector(d, -s*0.35);
+    e.set(R()*6.28, R()*6.28, R()*6.28); q.setFromEuler(e);
+    sc.set(s*(0.75+R()*0.5), s*(0.55+R()*0.4), s*(0.75+R()*0.5));
+    m4.compose(p, q, sc);
+    boulders.setMatrixAt(placed, m4);
+    const bright = R() < 0.035;
+    const g = bright ? 0.11 + R()*0.04 : 0.042 + R()*0.03;
+    boulders.setColorAt(placed, col.setRGB(g, g*1.01, g*1.03));
+    placed++;
+  }
+  // Benben Saxum: tallest boulder, ~22 m tall (0.078 of the 282 m radius), at ~46 S.
+  const BEN = dirLL(-46, 205);
+  {
+    const p = surf(BEN).addScaledVector(BEN, 0.02);
+    q.setFromUnitVectors(new THREE.Vector3(0,1,0), BEN);
+    sc.set(0.075, 0.07, 0.06);
+    m4.compose(p, q, sc);
+    boulders.setMatrixAt(N, m4);
+    boulders.setColorAt(N, col.setRGB(0.06,0.061,0.063));
+  }
+  boulders.instanceMatrix.needsUpdate = true;
+  if(boulders.instanceColor) boulders.instanceColor.needsUpdate = true;
+
+  const spinner = new THREE.Group(); spinner.add(rock); spinner.add(boulders);
+  const body = new THREE.Group(); body.add(spinner); body.rotation.z = 0.08; scene.add(body);
+
+  // Light: harsh, single sun, almost no fill, like the real images.
+  scene.add(new THREE.AmbientLight(0x8fa3c0, 0.22));
+  const sun = new THREE.DirectionalLight(0xfff6ea, 6.2);
+  sun.position.set(3.2, 1.6, 2.6);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  const sc2 = sun.shadow.camera; sc2.left=-1.4; sc2.right=1.4; sc2.top=1.4; sc2.bottom=-1.4; sc2.near=0.5; sc2.far=12;
+  sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.015;
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x62dcff, 0.25); fill.position.set(-4,-1,-3); scene.add(fill);
+
+  // Stars
+  const sp = [];
+  for(let i=0;i<1400;i++){
+    const u=R()*2-1, t=R()*Math.PI*2, rr=40+R()*40, qq=Math.sqrt(1-u*u);
+    sp.push(rr*qq*Math.cos(t), rr*u, rr*qq*Math.sin(t));
+  }
+  const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.Float32BufferAttribute(sp,3));
+  const stars = new THREE.Points(sg, new THREE.PointsMaterial({color:0x9fb6d6, size:0.16, sizeAttenuation:true, transparent:true, opacity:.75}));
+  scene.add(stars);
+
+  // Labels
+  const pinsEl = document.getElementById('pins');
+  function mkPin(text){ const el = document.createElement('div'); el.className='pin'; el.innerHTML='<i></i><span></span>'; el.querySelector('span').textContent=text; pinsEl.appendChild(el); return el; }
+  const ridgeAnchors = [];
+  for(let i=0;i<36;i++){ const d = dirLL(0, i*10); ridgeAnchors.push(surf(d)); }
+  const pins = [
+    {el:mkPin('Nightingale: sample site'), local:surf(NIGHT)},
+    {el:mkPin('Benben Saxum: 22 m boulder'), local:surf(BEN).addScaledVector(BEN,0.07)},
+    {el:mkPin('Equatorial ridge'), ridge:true}
+  ];
+  const btn = document.getElementById('pinbtn');
+  btn.addEventListener('click',()=>{
+    const on = btn.getAttribute('aria-pressed') !== 'true';
+    btn.setAttribute('aria-pressed', on); btn.textContent = on ? 'Labels on' : 'Labels off';
+    pinsEl.classList.toggle('off', !on);
+  });
+  const wv = new THREE.Vector3(), nv = new THREE.Vector3(), cv = new THREE.Vector3();
+  function facing(local){
+    wv.copy(local); spinner.localToWorld(wv);
+    nv.copy(wv).normalize();
+    cv.copy(camera.position).sub(wv).normalize();
+    return nv.dot(cv);
+  }
+  function placePins(){
+    scene.updateMatrixWorld();
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    pins.forEach(pn=>{
+      let local = pn.local, f;
+      if(pn.ridge){
+        let best = -1e9;
+        ridgeAnchors.forEach(a=>{
+          const ff = facing(a);
+          if(ff < 0.35) return;
+          wv.copy(a); spinner.localToWorld(wv);
+          const score = -Math.abs(wv.x + 0.62);
+          if(score > best){ best = score; local = a; }
+        });
+        if(!local){ pn.el.classList.add('away'); return; }
+      }
+      f = facing(local);
+      wv.copy(local); spinner.localToWorld(wv); wv.project(camera);
+      const x = (wv.x+1)/2*w, y = (1-wv.y)/2*h;
+      const flip = x > w*0.55;
+      pn.el.classList.toggle('flip', flip);
+      pn.el.classList.toggle('away', f < 0.2);
+      pn.el.style.transform = flip
+        ? 'translate(' + (x - pn.el.offsetWidth + 5).toFixed(1) + 'px,' + (y - 9).toFixed(1) + 'px)'
+        : 'translate(' + (x - 5).toFixed(1) + 'px,' + (y - 9).toFixed(1) + 'px)';
+    });
+  }
+
+  // Real day is 4.3 h; one turn every 20 s here (~770x faster).
+  const SPIN = Math.PI*2/20;
+  let angle = 2.2, tilt = 0.12;
+  if(still) document.getElementById('spinread').textContent = 'Paused (reduced motion)';
+  dragRotate(canvas,(dx,dy)=>{ angle += dx*5; tilt = Math.max(-0.7,Math.min(0.7,tilt+dy*2)); if(still) draw(); });
+
+  function draw(t){
+    spinner.rotation.y = angle;
+    body.rotation.x = tilt;
+    if(t!==undefined) stars.rotation.y = t*0.004;
+    renderer.render(scene,camera);
+    placePins();
+  }
+  draw(0);
+  if('ResizeObserver' in window) new ResizeObserver(()=>draw()).observe(canvas);
+  register(canvas,(dt,t)=>{ if(still) return; angle -= SPIN*dt; draw(t); });
+}
+
+/* ---------- TAG replay ---------- */
+function initTag(){
+  const canvas = document.getElementById('tagc');
+  const {renderer, scene, camera} = makeRenderer(canvas, 40, 12);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  scene.fog = new THREE.Fog(0x04070d, 16, 34);
+  const R = rng(2020);
+  const ss = (a,b,x)=>{ const t=Math.max(0,Math.min(1,(x-a)/(b-a))); return t*t*(3-2*t); };
+  const lerp = (a,b,k)=>a+(b-a)*k;
+
+  /* --- surface patch (1 unit = 1 m) --- */
+  const SIZE = 34, SEG = 150;
+  const pg = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
+  pg.rotateX(-Math.PI/2);
+  const pp = pg.attributes.position;
+  const base = new Float32Array(pp.count), crat = new Float32Array(pp.count);
+  const cols = [];
+  for(let i=0;i<pp.count;i++){
+    const x = pp.getX(i), z = pp.getZ(i), r = Math.sqrt(x*x+z*z);
+    let y = (fbm(x*0.08+3, 0.5, z*0.08+1)-0.5)*2.2 + (fbm(x*0.6, 2.1, z*0.6)-0.5)*0.35;
+    y -= 0.9*Math.exp(-(r*r)/60);                 // Nightingale: a shallow bowl ~20 m wide
+    base[i] = y;
+    // TAG crater: ~8 m wide, centered on the contact point
+    crat[i] = r < 4 ? -0.7*(1-(r/4)*(r/4)) : (r < 5.2 ? 0.12*Math.sin((r-4)/1.2*Math.PI) : 0);
+    pp.setY(i, y);
+    const s = 0.05 + (fbm(x*0.3+7, 1, z*0.3)-0.5)*0.03;
+    cols.push(s, s*1.01, s*1.04);
+  }
+  pg.setAttribute('color', new THREE.Float32BufferAttribute(cols,3));
+  pg.computeVertexNormals();
+  const ground = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({vertexColors:true, roughness:1, metalness:0, flatShading:true}));
+  ground.receiveShadow = true;
+  scene.add(ground);
+  const y0 = base[Math.floor(pp.count/2)];          // surface height at the contact point
+  function groundY(x,z){ const r2=x*x+z*z; return (fbm(x*0.08+3,0.5,z*0.08+1)-0.5)*2.2 + (fbm(x*0.6,2.1,z*0.6)-0.5)*0.35 - 0.9*Math.exp(-r2/60); }
+
+  // boulders around the site (the center was chosen for being clear)
+  const bgeo = new THREE.IcosahedronGeometry(1, 2);
+  const bpa = bgeo.attributes.position, v = new THREE.Vector3();
+  for(let i=0;i<bpa.count;i++){ v.fromBufferAttribute(bpa,i); v.multiplyScalar(1+(noise(v.x*1.8+4,v.y*1.8+2,v.z*1.8+7)-0.5)*0.55); bpa.setXYZ(i,v.x,v.y,v.z); }
+  bgeo.computeVertexNormals();
+  const NB = 520;
+  const bm = new THREE.InstancedMesh(bgeo, new THREE.MeshStandardMaterial({roughness:1, metalness:0, flatShading:true}), NB);
+  bm.castShadow = true; bm.receiveShadow = true;
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(), col = new THREE.Color();
+  for(let i=0;i<NB;i++){
+    let x,z,r;
+    do{ x=(R()-.5)*SIZE*0.9; z=(R()-.5)*SIZE*0.9; r=Math.sqrt(x*x+z*z); }while(r < 3.2 + R()*2.5);
+    const s = Math.min(2.6, 0.12/Math.pow(1-R()*0.97, 0.6));
+    e.set(R()*6.28,R()*6.28,R()*6.28); q.setFromEuler(e);
+    sc.set(s*(0.8+R()*0.4), s*(0.55+R()*0.35), s*(0.8+R()*0.4));
+    m4.compose(new THREE.Vector3(x, groundY(x,z)+s*0.2, z), q, sc);
+    bm.setMatrixAt(i, m4);
+    const g = R()<0.04 ? 0.11 : 0.04+R()*0.03;
+    bm.setColorAt(i, col.setRGB(g,g*1.01,g*1.03));
+  }
+  scene.add(bm);
+
+  /* --- spacecraft (origin = bottom of the sampler head) --- */
+  const craft = new THREE.Group();
+  const mBody = new THREE.MeshStandardMaterial({color:0x707782, roughness:.6, metalness:.3});
+  const mGold = new THREE.MeshStandardMaterial({color:0x8f7434, roughness:.45, metalness:.6});
+  const mPanel = new THREE.MeshStandardMaterial({color:0x182748, roughness:.35, metalness:.5});
+  const mWhite = new THREE.MeshStandardMaterial({color:0x9ea4ae, roughness:.6, metalness:.1, side:THREE.DoubleSide});
+  const mArm = new THREE.MeshStandardMaterial({color:0x9aa1ab, roughness:.5, metalness:.6});
+  function add(mesh){ mesh.castShadow = true; craft.add(mesh); return mesh; }
+  const head = add(new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.16,24), mArm)); head.position.y = 0.08;
+  const arm = add(new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,3.2,10), mArm)); arm.position.y = 0.16+1.6;
+  const bodyM = add(new THREE.Mesh(new THREE.BoxGeometry(2.4,2.0,2.4), mBody)); bodyM.position.y = 3.35+1.0;
+  const band = add(new THREE.Mesh(new THREE.BoxGeometry(2.44,0.35,2.44), mGold)); band.position.y = 3.35+0.25;
+  // capsule on top-side
+  const cap = add(new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.55,0.45,24), mWhite)); cap.position.set(0.6,5.6,-0.4);
+  // high-gain antenna dish
+  const dish = add(new THREE.Mesh(new THREE.SphereGeometry(1.0,32,12,0,Math.PI*2,0,0.55), mWhite)); dish.position.set(-0.4,5.55,0.3); dish.rotation.x = Math.PI;
+  dish.position.y = 6.25;
+  // Y-wing solar panels: raised to keep them out of the dust
+  [-1,1].forEach(sd=>{
+    const g = new THREE.Group();
+    const p = new THREE.Mesh(new THREE.BoxGeometry(2.1,0.05,1.3), mPanel); p.position.x = sd*1.2; p.castShadow = true;
+    const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,6), mArm); strut.rotation.z = Math.PI/2; strut.position.x = sd*0.1;
+    g.add(p); g.add(strut);
+    g.position.set(sd*1.25, 4.9, 0);
+    g.rotation.z = sd*0.75;
+    craft.add(g);
+  });
+  // thruster plumes
+  const mPlume = new THREE.MeshBasicMaterial({color:0x9fdcff, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false});
+  const plumes = [];
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{
+    const c = new THREE.Mesh(new THREE.ConeGeometry(0.22,1.4,16,1,true), mPlume);
+    c.position.set(sx*1.0, 3.35-0.7, sz*1.0); craft.add(c); plumes.push(c);
+  });
+  scene.add(craft);
+
+  /* --- particles: nitrogen burst ejecta, computed from the timeline so scrubbing works --- */
+  const NP = 1600, ppos = new Float32Array(NP*3), pdat = [];
+  for(let i=0;i<NP;i++){
+    const a = R()*Math.PI*2, el = 0.15 + R()*1.2, sp = 0.5 + Math.pow(R(),2)*4.5;
+    pdat.push({sx:Math.cos(a)*R()*0.4, sz:Math.sin(a)*R()*0.4, vx:Math.cos(a)*Math.cos(el)*sp, vy:Math.sin(el)*sp*0.8, vz:Math.sin(a)*Math.cos(el)*sp, d:R()*0.6, leak:i<90});
+  }
+  const pgeo = new THREE.BufferGeometry(); pgeo.setAttribute('position', new THREE.BufferAttribute(ppos,3));
+  const pmat = new THREE.PointsMaterial({color:0xb8bec7, size:0.13, transparent:true, opacity:0.9, depthWrite:false});
+  const parts = new THREE.Points(pgeo, pmat); scene.add(parts);
+
+  /* --- light --- */
+  scene.add(new THREE.AmbientLight(0x8fa3c0, 0.28));
+  const sun = new THREE.DirectionalLight(0xfff6ea, 4.2);
+  sun.position.set(9, 14, 6); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048,2048);
+  const sc2 = sun.shadow.camera; sc2.left=-14; sc2.right=14; sc2.top=14; sc2.bottom=-14; sc2.near=1; sc2.far=60;
+  sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.03;
+  scene.add(sun); scene.add(sun.target);
+
+  /* --- timeline --- */
+  const phases = [
+    {at:0,    name:'Leave orbit', t:'Leaving the safe orbit', p:'About 4.5 hours before contact, the spacecraft fires its thrusters and leaves its orbit roughly 770 m above Bennu. From here it flies the entire sequence on its own.'},
+    {at:0.18, name:'Checkpoint', t:'Checkpoint burn, 125 m', p:'First braking burn. The spacecraft compares the ground below with a stored map of the site and corrects its aim. Its solar panels are swept up into a Y shape to keep them clear of dust.'},
+    {at:0.30, name:'Matchpoint', t:'Matchpoint burn, 54 m', p:'Eleven minutes later, a second burn slows the fall and matches Bennu\'s rotation, so the spacecraft comes straight down at a crawl of about 10 cm per second. The target was the size of a few parking spaces, ringed by boulders as big as buildings.'},
+    {at:0.48, name:'Touch', t:'Touchdown', p:'Only the sampler head at the end of the 3.35 m arm (TAGSAM) touches the surface. The spacecraft body never comes closer than the length of that arm.'},
+    {at:0.53, name:'Nitrogen', t:'Nitrogen burst', p:'About one second after contact, a bottle of pressurized nitrogen fires through the head, blowing loose rock and dust up into the collector.'},
+    {at:0.565,name:'Sinking', t:'The ground gives way', p:'Instead of firm ground, the head meets almost no resistance, like a plastic ball pit. It sinks about 49 cm in a few seconds.'},
+    {at:0.60, name:'Back away', t:'Back-away burn', p:'About six seconds after touching, thrusters fire to pull away. The thruster blast and the gas leave a crater about 8 m wide. Had it not backed off, the spacecraft would have kept sinking.'},
+    {at:0.80, name:'Leaking', t:'Too much of a good thing', p:'The head collected far more than the 60 grams needed. Rocks wedged its flap open and particles drifted out into space, so the team skipped a planned weighing spin and sealed the sample in the return capsule early, on October 28.'}
+  ];
+  const chipsEl = document.getElementById('tag-chips');
+  const chipEls = phases.map((ph,i)=>{
+    const b = document.createElement('button'); b.className='chip'; b.textContent=(i+1)+'. '+ph.name;
+    b.addEventListener('click',()=>{ playing=false; setPlayBtn(); setT(ph.at+0.001); });
+    chipsEl.appendChild(b); return b;
+  });
+  const card = document.getElementById('tag-card');
+  const elPhase = document.getElementById('tag-phase'), elAlt = document.getElementById('tag-alt'), elSpd = document.getElementById('tag-spd'), elClk = document.getElementById('tag-clk');
+  const slider = document.getElementById('tag-t'), playBtn = document.getElementById('tag-play');
+  let T = 0.48, playing = false, played = false, lastPhase = -1, lastCr = -1;
+
+  // visual height of the sampler head above the contact point
+  function headY(t){
+    if(t < 0.18) return lerp(15, 9.5, ss(0,0.18,t));
+    if(t < 0.30) return lerp(9.5, 6, ss(0.18,0.30,t));
+    if(t < 0.48) return lerp(6, 0, 1-Math.pow(1-(t-0.30)/0.18, 2));
+    if(t < 0.60) return -0.49*ss(0.52,0.59,t);
+    return lerp(-0.49, 16, Math.pow((t-0.60)/0.40, 1.6));
+  }
+  function realAlt(t){
+    if(t < 0.18) return lerp(770,125, ss(0,0.18,t));
+    if(t < 0.30) return lerp(125,54, ss(0.18,0.30,t));
+    if(t < 0.48) return lerp(54,0, 1-Math.pow(1-(t-0.30)/0.18,2));
+    if(t < 0.60) return -0.49*ss(0.52,0.59,t);
+    return lerp(0, 600, Math.pow((t-0.60)/0.40,1.6));
+  }
+  function speed(t){
+    if(t < 0.18) return '~20 cm/s down';
+    if(t < 0.30) return '~25 cm/s down';
+    if(t < 0.48) return '~10 cm/s down';
+    if(t < 0.60) return t<0.52 ? '~10 cm/s down' : 'Sinking';
+    return '~40 cm/s up';
+  }
+  function clock(t){
+    // contact at t=0.48 -> 0 s. Before: 4.5 h compressed into 0..0.48. After: seconds then minutes.
+    let s;
+    if(t < 0.48) s = -(1 - t/0.48)*4.5*3600;
+    else if(t < 0.60) s = (t-0.48)/0.12*8;
+    else s = 8 + Math.pow((t-0.60)/0.40,2)*3600;
+    const sign = s < 0 ? 'T-' : 'T+'; s = Math.abs(Math.round(s));
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    return sign + (h ? h+':'+String(m).padStart(2,'0') : String(m).padStart(2,'0')) + ':' + String(sec).padStart(2,'0');
+  }
+
+  function setPhaseUI(t){
+    let idx = 0; phases.forEach((ph,i)=>{ if(t >= ph.at) idx = i; });
+    if(idx !== lastPhase){
+      lastPhase = idx;
+      const ph = phases[idx];
+      card.innerHTML = '<span class="when"></span><h3></h3><p></p>';
+      card.querySelector('.when').textContent = 'STEP ' + (idx+1) + ' OF ' + phases.length;
+      card.querySelector('h3').textContent = ph.t;
+      card.querySelector('p').textContent = ph.p;
+      elPhase.textContent = ph.name;
+      chipEls.forEach((c,i)=>c.setAttribute('aria-current', i===idx ? 'step' : 'false'));
+    }
+    const a = realAlt(t);
+    elAlt.textContent = a < 0 ? Math.round(-a*100) + ' cm below surface' : (a < 10 ? a.toFixed(1) : Math.round(a)) + ' m';
+    elSpd.textContent = speed(t);
+    elClk.textContent = clock(t);
+  }
+
+  function apply(t){
+    // crater forms during the gas burst and back-away burn
+    const cr = ss(0.535, 0.66, t);
+    if(Math.abs(cr - lastCr) > 0.004){
+      lastCr = cr;
+      for(let i=0;i<pp.count;i++) pp.setY(i, base[i] + crat[i]*cr);
+      pp.needsUpdate = true; pg.computeVertexNormals();
+    }
+    const hy = y0 + headY(t);
+    craft.position.set(0, hy, 0);
+    craft.rotation.y = 0.5;
+    // plumes
+    let pl = 0;
+    pl = Math.max(pl, 1-Math.abs(t-0.185)/0.02, 1-Math.abs(t-0.305)/0.02);
+    if(t > 0.595 && t < 0.66) pl = Math.max(pl, 1 - Math.abs(t-0.615)/0.045);
+    mPlume.opacity = Math.max(0, pl)*0.55;
+    plumes.forEach(c=>{ c.scale.set(1, 0.6+Math.max(0,pl), 1); });
+    // ejecta
+    const tb = 0.525;
+    for(let i=0;i<NP;i++){
+      const d = pdat[i];
+      let x=0,y=-999,z=0;
+      if(d.leak){
+        const tl = 0.62 + d.d*0.3;
+        if(t > tl){ const s=(t-tl)*20; x = d.sx*0.3 + d.vx*0.05*s; y = hy - 0.05 - s*0.04 + d.vy*0.03*s; z = d.sz*0.3 + d.vz*0.05*s; }
+      } else if(t > tb + d.d*0.02){
+        const s = (t - tb - d.d*0.02)*55;
+        x = d.sx + d.vx*s*0.55; y = y0 - 0.2 + d.vy*s*0.55 - 0.004*s*s; z = d.sz + d.vz*s*0.55;
+        if(s > 26 || y < y0-1) y = -999;
+      }
+      ppos[i*3]=x; ppos[i*3+1]=y; ppos[i*3+2]=z;
+    }
+    pgeo.attributes.position.needsUpdate = true;
+    pmat.opacity = 0.9;
+    // camera follows the craft down
+    const hv = headY(t);
+    const k = ss(0, 7, hv);
+    const lookY = y0 + lerp(2.4, hv+3.0, k);
+    camera.position.set(7.5, lookY + 2.4 + k*1.5, 13 + k*2.5);
+    camera.lookAt(0, lookY, 0);
+    renderer.render(scene, camera);
+    setPhaseUI(t);
+  }
+  function setT(t){ T = Math.max(0, Math.min(1, t)); slider.value = Math.round(T*1000); apply(T); }
+  function setPlayBtn(){ playBtn.setAttribute('aria-pressed', playing); playBtn.textContent = playing ? 'Pause' : (T >= 1 ? 'Replay' : 'Play'); }
+  playBtn.addEventListener('click',()=>{
+    if(!playing && T >= 1) T = 0;
+    playing = !playing; played = true; setPlayBtn();
+  });
+  slider.addEventListener('input',()=>{ playing=false; played=true; setPlayBtn(); setT(slider.value/1000); });
+  let ang = 0;
+  dragRotate(canvas,(dx)=>{ ang += dx*3; });
+  setT(T); setPlayBtn();
+
+  // play once automatically the first time it scrolls into view
+  if(!still && 'IntersectionObserver' in window){
+    const io2 = new IntersectionObserver(es=>{ es.forEach(en=>{ if(en.isIntersecting && en.intersectionRatio > 0.6 && !played){ played = true; T = 0; playing = true; setPlayBtn(); io2.disconnect(); } }); },{threshold:[0.6]});
+    io2.observe(canvas);
+  }
+  // pacing: slow near the action, fast through the long descent
+  function rate(t){ if(t < 0.45) return 1/14; if(t < 0.66) return 1/16; return 1/10; }
+  register(canvas,(dt)=>{
+    if(playing){ T += dt*rate(T); if(T >= 1){ T = 1; playing = false; setPlayBtn(); } slider.value = Math.round(T*1000); }
+    scene.rotation.y = ang;
+    apply(T);
+  });
+}
+
+/* ---------- Chirality molecule ---------- */
+function initMol(){
+  const canvas = document.getElementById('mol');
+  const {renderer, scene, camera} = makeRenderer(canvas, 34, 9);
+  scene.add(new THREE.AmbientLight(0x6a7a96, 0.9));
+  const key = new THREE.DirectionalLight(0xffffff, 1.8); key.position.set(3,4,5); scene.add(key);
+  const rimL = new THREE.DirectionalLight(0x62dcff, 0.5); rimL.position.set(-5,-2,-3); scene.add(rimL);
+
+  const dirs = [[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]].map(d=>new THREE.Vector3(...d).normalize());
+  const subs = [
+    {c:0x5aa0ff, r:.42}, // NH2
+    {c:0xff5c6c, r:.48}, // COOH
+    {c:0x9fd2ad, r:.42}, // CH3
+    {c:0xe8eef6, r:.26}  // H
+  ];
+  const up = new THREE.Vector3(0,1,0);
+  function build(mirror, tint){
+    const g = new THREE.Group(), mats=[];
+    const cm = new THREE.MeshStandardMaterial({color:0x5f6b7c, roughness:.5, metalness:.1, transparent:true});
+    mats.push(cm);
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(.36,32,32), cm));
+    subs.forEach((s,i)=>{
+      const d = dirs[i].clone(); if(mirror) d.x *= -1;
+      const p = d.clone().multiplyScalar(1.3);
+      const m = new THREE.MeshStandardMaterial({color:s.c, roughness:.45, metalness:.05, transparent:true});
+      mats.push(m);
+      const a = new THREE.Mesh(new THREE.SphereGeometry(s.r,32,32), m); a.position.copy(p); g.add(a);
+      const bm = new THREE.MeshStandardMaterial({color:tint, roughness:.6, transparent:true});
+      mats.push(bm);
+      const bond = new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,1.3,12), bm);
+      bond.position.copy(d.clone().multiplyScalar(.65));
+      bond.quaternion.setFromUnitVectors(up, d);
+      g.add(bond);
+    });
+    g.userData.mats = mats;
+    return g;
+  }
+  const L = build(false, 0x62dcff), D = build(true, 0xffb24a);
+  scene.add(L); scene.add(D);
+
+  // ground halo rings marking each molecule
+  let mode = 'side', rot = 0.6, tiltX = 0.25;
+  const target = {lx:-1.9, dx:1.9, dop:1};
+  const cur = {lx:-1.9, dx:1.9, dop:1};
+  const status = document.getElementById('m-status');
+  const bSide = document.getElementById('m-side'), bOver = document.getElementById('m-over');
+  function setMode(m){
+    mode = m;
+    bSide.setAttribute('aria-pressed', m==='side'); bOver.setAttribute('aria-pressed', m==='over');
+    if(m==='side'){ target.lx=-1.9; target.dx=1.9; target.dop=1;
+      status.textContent = 'Left: the version life uses. Right: its mirror image. Drag to spin them.'; status.classList.remove('amber'); }
+    else { target.lx=0; target.dx=0; target.dop=.5;
+      status.textContent = 'Overlapped. Two groups line up, two never will, no matter how you spin it. That is what makes a molecule chiral.'; status.classList.add('amber'); }
+    if(still) snap();
+  }
+  bSide.addEventListener('click',()=>setMode('side'));
+  bOver.addEventListener('click',()=>setMode('over'));
+  dragRotate(canvas,(dx,dy)=>{ rot += dx*5; tiltX = Math.max(-1,Math.min(1,tiltX+dy*2)); if(still) draw(); });
+
+  function apply(){
+    L.position.x = cur.lx; D.position.x = cur.dx;
+    L.rotation.set(tiltX, rot, 0);
+    // side by side: true mirror pose. overlap: same rotation so the mismatch shows.
+    const k = 1 - Math.min(1, Math.abs(cur.dx)/1.9);
+    D.rotation.set(tiltX, -rot*(1-k) + rot*k, 0);
+    D.userData.mats.forEach(m=>{ m.opacity = cur.dop; m.depthWrite = cur.dop>0.9; });
+  }
+  function draw(){ apply(); renderer.render(scene,camera); }
+  function snap(){ Object.assign(cur,target); draw(); }
+  draw();
+  register(canvas,(dt)=>{
+    const e = 1-Math.pow(0.002,dt);
+    cur.lx += (target.lx-cur.lx)*e; cur.dx += (target.dx-cur.dx)*e; cur.dop += (target.dop-cur.dop)*e;
+    if(!still) rot += dt*0.5;
+    draw();
+  });
+}
+
+/* ---------- Tank of L and D molecules ---------- */
+function initTank(){
+  const c = document.getElementById('tank'), ctx = c.getContext('2d');
+  const R = rng(42), N = 70, ps = [];
+  for(let i=0;i<N;i++) ps.push({x:R(),y:R(),vx:(R()-.5)*.05,vy:(R()-.5)*.05,a:R()*6.28,va:(R()-.5)*1.5,d:i%2===1,o:1});
+  let mode='bennu', w=0, h=0;
+  const cyan='#62dcff', amber='#ffb24a';
+  function size(){ const r=c.getBoundingClientRect(); w=r.width; h=r.height; c.width=w*DPR; c.height=h*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); draw(); }
+  function glyph(p){
+    const s = Math.max(6, Math.min(w,h)*0.035);
+    ctx.save(); ctx.translate(p.x*w,p.y*h); ctx.rotate(p.a); if(p.d) ctx.scale(-1,1);
+    ctx.globalAlpha = p.o;
+    ctx.fillStyle = p.d ? amber : cyan;
+    // asymmetric "hand": palm plus a thumb on one side
+    ctx.beginPath(); ctx.arc(0,0,s*.55,0,Math.PI*2); ctx.fill();
+    ctx.fillRect(-s*.15,-s*1.25,s*.3,s*.8);
+    ctx.fillRect(-s*1.1,-s*.15,s*.6,s*.3);
+    ctx.restore();
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    ps.forEach(glyph);
+    ctx.globalAlpha=1;
+    ctx.font = '500 11px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#8696b0';
+    const live = ps.filter(p=>p.o>.5);
+    const l = live.filter(p=>!p.d).length, d = live.filter(p=>p.d).length;
+    ctx.fillText(mode==='bennu' ? 'BENNU MIX  L '+l+' / D '+d : 'IN A CELL  L ONLY', 12, h-12);
+  }
+  const bB=document.getElementById('k-ben'), bL=document.getElementById('k-life');
+  function set(m){ mode=m; bB.setAttribute('aria-pressed',m==='bennu'); bL.setAttribute('aria-pressed',m==='life'); if(still){ ps.forEach(p=>p.o = (m==='life'&&p.d)?0.08:1); draw(); } }
+  bB.addEventListener('click',()=>set('bennu')); bL.addEventListener('click',()=>set('life'));
+  if('ResizeObserver' in window) new ResizeObserver(size).observe(c); else window.addEventListener('resize',size);
+  size();
+  register(c,(dt)=>{
+    ps.forEach(p=>{
+      if(!still){
+        p.x+=p.vx*dt; p.y+=p.vy*dt; p.a+=p.va*dt;
+        if(p.x<.03||p.x>.97) p.vx*=-1; if(p.y<.04||p.y>.9) p.vy*=-1;
+      }
+      const t = (mode==='life' && p.d) ? 0.08 : 1;
+      p.o += (t-p.o)*Math.min(1,dt*3);
+    });
+    draw();
+  });
+}
+
+/* ---------- Water history ---------- */
+function initWater(){
+  const c = document.getElementById('water'), ctx = c.getContext('2d');
+  const card = document.getElementById('stagecard'), slider = document.getElementById('stage');
+  const stages = [
+    {when:'~4.6 billion years ago', t:'A parent body forms', p:'In the far colder outer solar system, dust, ice, and organic molecules clump together into a body perhaps 100 km (60 miles) across, far bigger than Bennu is today. Some of that ice may have included frozen ammonia, which fits the large amount of ammonia in the sample.'},
+    {when:'First few million years', t:'The inside thaws', p:'Short-lived radioactive elements, mainly aluminum-26, decay and heat the interior. The ice melts. Liquid water seeps through the rock, reacting with minerals and organic molecules. Water, organics, and minerals all mix in one place: a small natural chemistry lab, warm and wet for a while.'},
+    {when:'As the heat fades', t:'The water dries out', p:'The brine evaporates or freezes, leaving salts behind, like the white crust on a dried-up salty puddle. The sample holds carbonates, clays, phosphates, and sodium carbonate. The order salts formed in tells scientists how the brine changed as it dried.'},
+    {when:'Roughly 1 to 2 billion years ago', t:'A collision shatters it', p:'Another asteroid slams into the parent body and breaks it apart. Some of the debris drifts back together under its own weak gravity into a loose rubble pile: Bennu. Later, sunlight and gravity nudge it into an orbit that crosses near Earth.'},
+    {when:'2020 to 2023', t:'OSIRIS-REx takes a sample', p:'The spacecraft taps Bennu for about six seconds and brings back 121.6 grams. The salts inside are a fingerprint of that ancient water, preserved for billions of years because space is dry and cold.'}
+  ];
+  const R = rng(11);
+  const ice = [], veins = [], salts = [], frags = [];
+  for(let i=0;i<70;i++){ const a=R()*6.28, r=Math.sqrt(R())*0.92; ice.push({x:Math.cos(a)*r,y:Math.sin(a)*r,s:.6+R()*1.2}); }
+  for(let i=0;i<9;i++){ const pts=[]; let a=R()*6.28, r=.15+R()*.2; for(let j=0;j<7;j++){ pts.push({x:Math.cos(a)*r,y:Math.sin(a)*r}); a+= (R()-.5)*.9; r += .1+R()*.05; if(r>.9) break; } veins.push(pts); }
+  for(let i=0;i<55;i++){ const a=R()*6.28, r=.1+Math.sqrt(R())*.8; salts.push({x:Math.cos(a)*r,y:Math.sin(a)*r,s:1.5+R()*2.5,rot:R()*1.5}); }
+  for(let i=0;i<12;i++){ const a=i/12*6.28+R()*.3; const verts=[]; const k=5+Math.floor(R()*3); for(let j=0;j<k;j++){ const aa=j/k*6.28; const rr=.08+R()*.07; verts.push({x:Math.cos(aa)*rr,y:Math.sin(aa)*rr}); } frags.push({a, d:.3+R()*.25, verts, spin:(R()-.5)*1.5, bennu:i===4}); }
+  const pile = []; for(let i=0;i<26;i++){ const a=R()*6.28, r=Math.sqrt(R())*.16; pile.push({x:Math.cos(a)*r,y:Math.sin(a)*r*.85,s:.02+R()*.03}); }
+
+  const layers = ['body','ice','heat','veins','salts','frags','pile','probe'];
+  const targets = [
+    {body:1,ice:1,heat:0,veins:0,salts:0,frags:0,pile:0,probe:0},
+    {body:1,ice:.15,heat:1,veins:1,salts:0,frags:0,pile:0,probe:0},
+    {body:1,ice:0,heat:.15,veins:.2,salts:1,frags:0,pile:0,probe:0},
+    {body:0,ice:0,heat:0,veins:0,salts:0,frags:1,pile:0,probe:0},
+    {body:0,ice:0,heat:0,veins:0,salts:0,frags:.15,pile:1,probe:1}
+  ];
+  const cur = Object.assign({}, targets[1]);
+  let stage = 1, w=0, h=0, time=0, spread = 0;
+
+  function setStage(s){
+    stage = s; slider.value = s;
+    const st = stages[s];
+    card.innerHTML = '<span class="when"></span><h3></h3><p></p>';
+    card.querySelector('.when').textContent = st.when.toUpperCase();
+    card.querySelector('h3').textContent = st.t;
+    card.querySelector('p').textContent = st.p;
+    if(still){ Object.assign(cur,targets[s]); spread = s>=3?1:0; draw(); }
+  }
+  slider.addEventListener('input',()=>setStage(+slider.value));
+
+  function size(){ const r=c.getBoundingClientRect(); w=r.width; h=r.height; c.width=w*DPR; c.height=h*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); draw(); }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    const cx=w/2, cy=h/2, R0=Math.min(w,h)*0.36;
+    // body
+    if(cur.body>0.01){
+      ctx.globalAlpha=cur.body;
+      const g=ctx.createRadialGradient(cx-R0*.3,cy-R0*.3,R0*.1,cx,cy,R0);
+      g.addColorStop(0,'#2a3342'); g.addColorStop(1,'#11161f');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,R0,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#1b2a43'; ctx.lineWidth=1; ctx.stroke();
+    }
+    if(cur.heat>0.01){
+      ctx.globalAlpha=cur.heat*cur.body*(0.75+0.25*Math.sin(time*2));
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R0*.6);
+      g.addColorStop(0,'rgba(255,150,70,.75)'); g.addColorStop(1,'rgba(255,150,70,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,R0*.6,0,Math.PI*2); ctx.fill();
+    }
+    if(cur.ice>0.01){
+      ctx.globalAlpha=cur.ice*cur.body; ctx.fillStyle='#e9eef7';
+      ice.forEach(p=>{ ctx.beginPath(); ctx.arc(cx+p.x*R0,cy+p.y*R0,p.s,0,6.28); ctx.fill(); });
+    }
+    if(cur.veins>0.01){
+      ctx.globalAlpha=cur.veins*cur.body; ctx.strokeStyle='#5b8fff'; ctx.lineWidth=2.2; ctx.lineCap='round';
+      ctx.setLineDash([6,5]); ctx.lineDashOffset = -time*14;
+      veins.forEach(v=>{ ctx.beginPath(); v.forEach((p,i)=>{ const X=cx+p.x*R0, Y=cy+p.y*R0; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }); ctx.stroke(); });
+      ctx.setLineDash([]);
+    }
+    if(cur.salts>0.01){
+      ctx.globalAlpha=cur.salts*cur.body; ctx.fillStyle='#e9eef7';
+      salts.forEach(p=>{ ctx.save(); ctx.translate(cx+p.x*R0,cy+p.y*R0); ctx.rotate(p.rot); ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s); ctx.restore(); });
+    }
+    if(cur.frags>0.01){
+      frags.forEach(f=>{
+        const d = R0*(0.25 + f.d*1.4*spread);
+        const X=cx+Math.cos(f.a)*d, Y=cy+Math.sin(f.a)*d;
+        ctx.save(); ctx.translate(X,Y); ctx.rotate(f.spin*spread*2+time*f.spin*.1);
+        ctx.globalAlpha=cur.frags;
+        ctx.fillStyle = f.bennu ? '#2e3a4c' : '#1a212d';
+        ctx.strokeStyle = f.bennu ? '#62dcff' : '#1b2a43';
+        ctx.beginPath(); f.verts.forEach((p,i)=>{ const x=p.x*R0*1.6, y=p.y*R0*1.6; i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+        if(f.bennu && cur.frags>.5){
+          ctx.globalAlpha=cur.frags; ctx.fillStyle='#62dcff'; ctx.font='500 10px "JetBrains Mono", monospace';
+          ctx.fillText('BENNU-TO-BE', X+R0*.18, Y+3);
+        }
+      });
+    }
+    if(cur.pile>0.01){
+      ctx.globalAlpha=cur.pile;
+      pile.forEach(p=>{ ctx.fillStyle='#2a3342'; ctx.strokeStyle='#3a4659'; ctx.beginPath(); ctx.arc(cx+p.x*R0*2,cy+p.y*R0*2,p.s*R0*2,0,6.28); ctx.fill(); ctx.stroke(); });
+      ctx.fillStyle='#e9eef7';
+      for(let i=0;i<14;i++){ const a=i*2.4, r=(i%5)/5*R0*.3; ctx.fillRect(cx+Math.cos(a)*r, cy+Math.sin(a)*r*.8, 2, 2); }
+    }
+    if(cur.probe>0.01){
+      ctx.globalAlpha=cur.probe;
+      const px=cx+R0*.95, py=cy-R0*.75;
+      ctx.strokeStyle='#62dcff'; ctx.lineWidth=1.2;
+      const bob = Math.sin(time*1.5)*4;
+      ctx.beginPath(); ctx.moveTo(px,py+bob); ctx.lineTo(cx+R0*.28, cy-R0*.22); ctx.stroke();
+      ctx.fillStyle='#dce7f4'; ctx.fillRect(px-6,py-4+bob,12,8);
+      ctx.fillStyle='#62dcff'; ctx.fillRect(px-20,py-1+bob,12,2); ctx.fillRect(px+8,py-1+bob,12,2);
+      ctx.font='500 10px "JetBrains Mono", monospace'; ctx.fillText('OSIRIS-REx', px-28, py-12+bob);
+    }
+    ctx.globalAlpha=1;
+  }
+  if('ResizeObserver' in window) new ResizeObserver(size).observe(c); else window.addEventListener('resize',size);
+  setStage(1); size();
+  register(c,(dt)=>{
+    if(!still) time += dt;
+    const t = targets[stage], e = Math.min(1, dt*3);
+    layers.forEach(k=>{ cur[k] += (t[k]-cur[k])*e; });
+    spread += ((stage>=3?1:0)-spread)*Math.min(1,dt*1.6);
+    draw();
+  });
+}
+
+/* ---------- Nucleobase filter ---------- */
+function initBases(){
+  const btns = document.querySelectorAll('.tbtn[data-f]'), cards = document.querySelectorAll('#bases .base');
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    const f=b.dataset.f;
+    btns.forEach(x=>x.setAttribute('aria-pressed', x===b));
+    cards.forEach(cd=>{
+      const has = f==='all' || cd.dataset.s.split(' ').includes(f);
+      cd.classList.toggle('off', !has); cd.classList.toggle('on', has && f!=='all');
+    });
+  }));
+}
+
+/* ---------- Immune lock ---------- */
+function initLock(){
+  const bug = document.getElementById('bug'), keyG = document.getElementById('key'), rec = document.getElementById('recpoly');
+  const kind = document.getElementById('bugkind'), status = document.getElementById('b-status');
+  const bN = document.getElementById('b-norm'), bM = document.getElementById('b-mirr');
+  let mirror=false, x=0, phase='in', hold=0, animating=false;
+  function setKind(m){
+    mirror=m; bN.setAttribute('aria-pressed',!m); bM.setAttribute('aria-pressed',m);
+    keyG.setAttribute('transform', m ? 'translate(0,194) scale(1,-1)' : '');
+    keyG.querySelector('polygon').setAttribute('fill', m ? '#ffb24a' : '#62dcff');
+    document.getElementById('bugbody').setAttribute('stroke', m ? '#ffb24a' : '#62dcff');
+    kind.textContent = m ? 'MIRROR' : 'NORMAL';
+    status.classList.toggle('amber', m);
+    status.textContent = m ? 'Shape is flipped. It cannot dock. No alarm. The invader goes unseen.' : 'Shape fits. Alarm raised. The immune system attacks.';
+    x=0; phase='in'; hold=0;
+    if(still){ x = m?46:60; paint(); }
+  }
+  function paint(){
+    bug.setAttribute('transform','translate('+x.toFixed(1)+',0)');
+    const docked = !mirror && x>59.5;
+    rec.setAttribute('fill', docked ? '#0f3346' : '#0d1729');
+    rec.setAttribute('stroke', docked ? '#62dcff' : (mirror && x>45.5 ? '#ffb24a' : '#8696b0'));
+  }
+  bN.addEventListener('click',()=>setKind(false)); bM.addEventListener('click',()=>setKind(true));
+  const svg = document.getElementById('lock');
+  setKind(false);
+  if(still){ x=60; paint(); }
+  register(svg,(dt)=>{
+    if(still) return;
+    const stop = mirror ? 46 : 60;
+    if(phase==='in'){ x = Math.min(stop, x + dt*40); if(x>=stop){ phase='hold'; hold=0; } }
+    else if(phase==='hold'){ hold+=dt; if(hold>2.2) phase='out'; }
+    else { x = Math.max(0, x - dt*60); if(x<=0) phase='in'; }
+    paint();
+  });
+}
+
+initBases();
+initLock();
+initTank();
+initWater();
+if(window.THREE){ try{ initBennu(); initTag(); initMol(); }catch(e){ console.error(e); } }
+requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,3774 @@
+<!doctype html><html><head><meta charset=utf8>
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BONES">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script src="../../assets/bones.js" data-root="../../" defer></script>
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Event Horizon Observatory</title>
+<meta name="description" content="A real-time GPU ray tracer of a Schwarzschild black hole with thin accretion disk, plus interactive general relativity labs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* Layout: a full-bleed observatory viewport (live ray tracer) with a docked instrument rail,
+   then a physics bench of tabbed experiments: figure + chart on the left, controls and readouts on the right. */
+:root {
+  color-scheme: dark;
+  --void: #04060a;
+  --surface: #0d1016;
+  --surface-2: #141922;
+  --surface-3: #1c2230;
+  --ink: #ece6dc;
+  --ink-2: #b7b3ab;
+  --muted: #868c99;
+  --hair: rgba(236, 230, 220, 0.09);
+  --hair-2: rgba(236, 230, 220, 0.17);
+  --glass: rgba(8, 10, 15, 0.70);
+  --ember: #f2a24e;
+  --ember-ink: #ffc48a;
+  --ember-wash: rgba(242, 162, 78, 0.13);
+  --blueshift: #7cc4ff;
+  --redshift: #ff7a59;
+  --series-1: #cc7826;
+  --series-2: #3a8ae0;
+  --series-3: #d55181;
+  --grid: #1a1f29;
+  --axis: #323947;
+  --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --t-xs: 0.6875rem;
+  --t-sm: 0.8125rem;
+  --t-md: 0.9375rem;
+  --t-lg: 1.125rem;
+  --t-xl: 2rem;
+  --t-2xl: clamp(2.2rem, 4.2vw, 3.2rem);
+  --t-hero: clamp(3.1rem, 7vw, 6.6rem);
+  --rail-w: 304px;
+  --gutter: clamp(16px, 2.2vw, 28px);
+}
+html, body { background: var(--void); color: var(--ink); }
+body {
+  font-family: var(--font-body);
+  font-size: var(--t-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+* { box-sizing: border-box; }
+::selection { background: rgba(242, 162, 78, 0.35); color: var(--ink); }
+a { color: var(--ember-ink); text-underline-offset: 3px; }
+a:hover { color: var(--ink); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+
+.skip {
+  position: absolute; left: 12px; top: -60px; z-index: 50;
+  background: var(--surface-3); color: var(--ink); padding: 8px 14px; border-radius: 8px;
+}
+.skip:focus { top: calc(12px + env(safe-area-inset-top, 0px)); }
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.kicker {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0;
+}
+
+/* ---------------- Observatory ---------------- */
+.obs {
+  position: relative;
+  height: clamp(580px, 94svh, 1120px);
+  overflow: hidden;
+  background: var(--void);
+  isolation: isolate;
+}
+.obs-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: pan-y;
+  background: var(--void);
+}
+.obs-canvas.dragging { cursor: grabbing; }
+.obs-canvas:focus-visible { outline-offset: -4px; }
+.obs-shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(4, 6, 10, 0.72) 0%, rgba(4, 6, 10, 0.25) 26%, rgba(4, 6, 10, 0) 42%),
+    linear-gradient(0deg, rgba(4, 6, 10, 0.70) 0%, rgba(4, 6, 10, 0) 22%);
+}
+.left-col {
+  position: absolute;
+  top: var(--gutter); bottom: var(--gutter); left: var(--gutter);
+  width: min(440px, calc(100% - var(--rail-w) - 3 * var(--gutter)));
+  display: flex; flex-direction: column; gap: 18px;
+  pointer-events: none;
+}
+.mast { flex: none; }
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--t-hero);
+  line-height: 0.92;
+  letter-spacing: -0.012em;
+  margin: 0.12em 0 0.22em;
+  color: var(--ink);
+  text-wrap: balance;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+}
+.lede {
+  margin: 0;
+  max-width: 40ch;
+  color: var(--ink-2);
+  font-size: var(--t-md);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.8);
+}
+
+.panel-glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+}
+
+.probe {
+  margin-top: auto;
+  flex: none;
+  width: 268px;
+  padding: 12px 12px 10px;
+  pointer-events: none;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  transition: opacity 0.25s ease;
+}
+.probe.idle { opacity: 0.72; }
+.probe.empty .probe-inset, .probe.empty .probe-data { display: none; }
+.probe-head { display: grid; gap: 2px; margin-bottom: 8px; }
+.probe-fate { font-size: var(--t-sm); color: var(--ink); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.probe-inset {
+  display: block; width: min(100%, 23vh); height: auto; aspect-ratio: 1; margin: 0 auto;
+  border-radius: 8px; background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--hair);
+}
+.probe-data { margin: 8px 0 0; display: grid; gap: 3px; }
+.probe-data div { display: flex; justify-content: space-between; gap: 10px; }
+.probe-data dt { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--muted); letter-spacing: 0.04em; white-space: nowrap; }
+.probe-data dd { margin: 0; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.telemetry {
+  flex: none;
+  display: grid; gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+}
+.telemetry div { display: grid; grid-template-columns: 92px auto; gap: 10px; align-items: baseline; }
+.telemetry .tm-render span:last-child { color: var(--muted); }
+
+.modes {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: var(--gutter);
+  display: flex; gap: 2px; padding: 3px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  max-width: calc(100% - 2 * var(--gutter));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.modes::-webkit-scrollbar { display: none; }
+.modes button {
+  border: 0; background: transparent; cursor: pointer;
+  padding: 7px 14px; border-radius: 999px;
+  font-size: var(--t-sm); color: var(--ink-2); white-space: nowrap;
+}
+.modes button:hover { color: var(--ink); }
+.modes button[aria-checked="true"] { background: var(--ember-wash); color: var(--ember-ink); box-shadow: inset 0 0 0 1px rgba(242, 162, 78, 0.35); }
+.legend {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--gutter) + 50px);
+  padding: 8px 12px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+  font-size: 12px; color: var(--ink-2);
+  pointer-events: none;
+  max-width: calc(100% - 2 * var(--gutter));
+}
+.legend .ramp { display: grid; grid-template-columns: auto 160px auto; gap: 8px; align-items: center; font-family: var(--font-mono); font-size: var(--t-xs); }
+.legend .ramp i { display: block; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #ff4d29, #6b6b6b 50%, #3d8cff); }
+.legend .orders { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.legend .orders span { display: inline-flex; align-items: center; gap: 6px; }
+.legend .orders i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend p { margin: 4px 0 0; max-width: 46ch; }
+
+.hint {
+  position: absolute;
+  top: var(--gutter);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: 0.08em;
+  color: var(--muted);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  white-space: nowrap;
+}
+.hint.gone { opacity: 0; }
+.toast {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  padding: 9px 14px; border-radius: 10px;
+  background: rgba(8, 10, 15, 0.86); border: 1px solid var(--hair-2);
+  font-size: var(--t-sm); color: var(--ink); pointer-events: none;
+}
+
+.dive-hud {
+  position: absolute;
+  bottom: calc(var(--gutter) + 54px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(600px, calc(100% - 2 * var(--gutter) - var(--rail-w) - 120px));
+  min-width: min(340px, calc(100% - 2 * var(--gutter)));
+  padding: 12px 16px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--hair-2);
+  border-radius: 12px;
+}
+.dive-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.dive-title { font-family: var(--font-display); font-style: italic; font-size: 1.45rem; line-height: 1.1; }
+.dive-title.crossed { color: var(--ember-ink); }
+.dive-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 16px; }
+.dive-grid div { display: grid; gap: 2px; }
+.dive-grid b { font-family: var(--font-mono); font-weight: 500; font-size: 14px; font-variant-numeric: tabular-nums; }
+.dive-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+
+.rail-open { display: none; }
+.rail {
+  position: absolute;
+  top: var(--gutter); right: var(--gutter); bottom: var(--gutter);
+  width: var(--rail-w);
+  display: flex; flex-direction: column;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  overflow: hidden;
+  z-index: 3;
+}
+.rail-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 10px; border-bottom: 1px solid var(--hair); }
+.rail-head .icon-btn { display: none; }
+.rail-body { overflow-y: auto; padding: 4px 14px 14px; scrollbar-width: thin; scrollbar-color: var(--surface-3) transparent; }
+.group { border: 0; margin: 0; padding: 12px 0 14px; border-bottom: 1px solid var(--hair); display: grid; gap: 12px; min-width: 0; }
+.group:last-child { border-bottom: 0; }
+.group legend { padding: 0; margin-bottom: 4px; float: left; width: 100%; }
+.group-note { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+.ctl { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: baseline; min-width: 0; }
+.ctl label { font-size: var(--t-sm); color: var(--ink-2); }
+.ctl output { font-family: var(--font-mono); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 6px; }
+.ctl input[type="range"] { grid-column: 1 / -1; }
+.swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px currentColor; }
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 22px; background: transparent; margin: 0; cursor: pointer;
+  --fill: 50%;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--ember) var(--fill), var(--surface-3) var(--fill));
+}
+input[type="range"]::-moz-range-track { height: 3px; border-radius: 2px; background: var(--surface-3); }
+input[type="range"]::-moz-range-progress { height: 3px; border-radius: 2px; background: var(--ember); }
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 15px; height: 15px; border-radius: 50%; margin-top: -6px;
+  background: var(--ink); border: 3px solid var(--void);
+  box-shadow: 0 0 0 1px var(--ember), 0 0 12px rgba(242, 162, 78, 0.45);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--ink); border: 3px solid var(--void);
+  box-shadow: 0 0 0 1px var(--ember), 0 0 12px rgba(242, 162, 78, 0.45);
+}
+input[type="range"]:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.sw-row, .sel-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.sw-row label, .sel-row label { font-size: var(--t-sm); color: var(--ink-2); }
+.switch {
+  -webkit-appearance: none; appearance: none;
+  width: 34px; height: 20px; border-radius: 999px; flex: none;
+  background: var(--surface-3); border: 1px solid var(--hair-2);
+  position: relative; cursor: pointer; transition: background 0.2s ease;
+  margin: 0;
+}
+.switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--ink-2); transition: transform 0.2s ease, background 0.2s ease;
+}
+.switch:checked { background: rgba(242, 162, 78, 0.35); border-color: rgba(242, 162, 78, 0.6); }
+.switch:checked::after { transform: translateX(14px); background: var(--ember-ink); }
+select {
+  background: var(--surface-2); border: 1px solid var(--hair-2); border-radius: 8px;
+  padding: 6px 8px; font-size: var(--t-sm); color: var(--ink); max-width: 62%;
+}
+
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  border: 1px solid var(--hair-2); background: var(--surface-2); color: var(--ink);
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: var(--t-sm);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.btn:hover { border-color: rgba(242, 162, 78, 0.55); }
+.btn[aria-pressed="true"] { background: var(--ember-wash); border-color: rgba(242, 162, 78, 0.55); color: var(--ember-ink); }
+.btn-ember { background: var(--ember); border-color: var(--ember); color: #1a0f04; font-weight: 600; }
+.btn-ember:hover { background: var(--ember-ink); border-color: var(--ember-ink); }
+.btn-quiet { background: transparent; }
+.icon-btn { border: 0; background: transparent; cursor: pointer; color: var(--ink-2); font-size: 16px; width: 32px; height: 32px; border-radius: 8px; }
+.icon-btn:hover { background: var(--surface-3); color: var(--ink); }
+
+.gl-fail {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(420px, calc(100% - 32px)); padding: 22px;
+  background: var(--surface); border: 1px solid var(--hair-2); border-radius: 14px; text-align: center;
+}
+.gl-fail h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.8rem; margin: 0 0 8px; }
+.gl-fail p { margin: 6px 0; color: var(--ink-2); }
+.loading {
+  position: absolute; left: 50%; top: 58%; transform: translateX(-50%);
+  display: grid; gap: 8px; justify-items: center; pointer-events: none; transition: opacity 0.5s ease;
+}
+.loading .bar { width: 180px; height: 2px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.loading .bar i { display: block; height: 100%; width: 0; background: var(--ember); transition: width 0.15s linear; }
+.loading.done { opacity: 0; }
+
+/* ---------------- Bench ---------------- */
+.bench {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-block: clamp(64px, 9vw, 112px) 56px;
+  padding-inline: var(--gutter);
+}
+.bench-head { max-width: 760px; margin-bottom: 28px; }
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--t-2xl);
+  line-height: 1.04;
+  margin: 10px 0 12px;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.bench-lede { color: var(--ink-2); margin: 0; max-width: 64ch; }
+.tabs {
+  display: flex; gap: 4px;
+  border-bottom: 1px solid var(--hair);
+  margin-bottom: 28px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button {
+  border: 0; background: transparent; cursor: pointer;
+  padding: 12px 14px 13px; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--ember-ink); border-bottom-color: var(--ember); }
+
+.lab {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+  align-items: start;
+}
+.lab-fig { min-width: 0; display: grid; gap: 14px; }
+.lab-side { min-width: 0; display: grid; gap: 14px; align-content: start; }
+.lab-side p { margin: 0; color: var(--ink-2); max-width: 62ch; }
+.h3 {
+  font-family: var(--font-display); font-weight: 400; font-style: italic;
+  font-size: var(--t-xl); line-height: 1.1; margin: 0; text-wrap: balance;
+}
+.eq {
+  font-family: var(--font-mono) !important; font-size: 13px; color: var(--ink) !important;
+  padding: 10px 12px; border: 1px solid var(--hair); border-radius: 8px; background: var(--surface);
+  overflow-x: auto; white-space: nowrap;
+}
+.eq mark { background: var(--ember-wash); color: var(--ember-ink); padding: 1px 4px; border-radius: 4px; }
+.eq-note { color: var(--muted); }
+
+.fig-frame {
+  position: relative; width: 100%;
+  background: var(--surface); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden;
+}
+.fig-frame.square { aspect-ratio: 1.22; }
+.fig-frame.wide { aspect-ratio: 1.6; }
+.fig-frame.clocks { aspect-ratio: 2.25; }
+.fig-frame canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fig-key {
+  position: absolute; top: 10px; left: 12px; display: flex; flex-wrap: wrap; gap: 4px 14px;
+  font-family: var(--font-mono); font-size: var(--t-xs); color: var(--ink-2); pointer-events: none;
+}
+.fig-key span { display: inline-flex; align-items: center; gap: 6px; }
+.key-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.key-dot.s1 { background: var(--series-1); }
+.key-dot.s2 { background: var(--series-2); }
+.key-dot.ink { background: var(--ink-2); }
+.key-dot.red { background: var(--redshift); }
+
+.chart-card { background: var(--surface); border: 1px solid var(--hair); border-radius: 12px; padding: 12px 14px 10px; min-width: 0; }
+.chart-title { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 14px; align-items: baseline; margin-bottom: 6px; }
+.chart-title > span:first-child { font-size: var(--t-sm); color: var(--ink); font-weight: 500; }
+.chart-sub { font-size: 12px; color: var(--muted); }
+.chart-frame { position: relative; height: 200px; }
+.chart-frame canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+.table-view { margin-top: 6px; }
+.table-view summary { cursor: pointer; font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; padding: 4px 0; }
+.table-scroll { overflow-x: auto; max-height: 260px; overflow-y: auto; }
+.table-scroll table { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.table-scroll th, .table-scroll td { text-align: right; padding: 4px 10px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+.table-scroll th { color: var(--muted); font-weight: 500; position: sticky; top: 0; background: var(--surface); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--hair-2); background: transparent; color: var(--ink-2);
+  padding: 6px 11px; border-radius: 999px; cursor: pointer; font-size: 12.5px;
+}
+.chip:hover { color: var(--ink); border-color: rgba(242, 162, 78, 0.5); }
+.chip[aria-pressed="true"] { color: var(--ember-ink); border-color: rgba(242, 162, 78, 0.6); background: var(--ember-wash); }
+
+.seg { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--hair-2); border-radius: 10px; background: var(--surface); justify-self: start; max-width: 100%; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; cursor: pointer; padding: 6px 12px; border-radius: 7px; font-size: var(--t-sm); color: var(--ink-2); }
+.seg button[aria-checked="true"] { background: var(--surface-3); color: var(--ink); }
+
+.readout {
+  margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px;
+  padding: 12px 14px; border: 1px solid var(--hair); border-radius: 10px; background: var(--surface);
+}
+.readout div { min-width: 0; }
+.readout dt { font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.readout dd { margin: 2px 0 0; font-family: var(--font-mono); font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.readout dd small { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; font-family: var(--font-body); }
+.readout .wide { grid-column: 1 / -1; }
+.tag { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.04em; border: 1px solid var(--hair-2); color: var(--ink-2); vertical-align: 1px; }
+.tag.warm { color: var(--ember-ink); border-color: rgba(242, 162, 78, 0.5); }
+.tag.cool { color: var(--blueshift); border-color: rgba(124, 196, 255, 0.45); }
+.tag.hot { color: var(--redshift); border-color: rgba(255, 122, 89, 0.5); }
+
+.facts ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.facts li { font-size: var(--t-sm); color: var(--ink-2); padding-left: 14px; position: relative; }
+.facts li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 5px; height: 5px; border-radius: 50%; background: var(--ember); }
+.facts li b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); font-size: 12.5px; }
+
+.num-input { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.num-input label { font-size: var(--t-sm); color: var(--ink-2); }
+.num-input input { min-width: 0; width: 100%; background: var(--surface-2); border: 1px solid var(--hair-2); border-radius: 8px; padding: 6px 8px; font-family: var(--font-mono); font-size: 13px; }
+.num-input select { max-width: none; }
+
+.numbers { display: grid; gap: 18px; }
+.num-group h4 { margin: 0 0 8px; }
+.num-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden; }
+.num-card { background: var(--surface); padding: 12px 14px 13px; min-width: 0; }
+.num-card .k { font-size: 12.5px; color: var(--ink-2); }
+.num-card .v { font-size: 1.3rem; color: var(--ink); margin-top: 2px; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.num-card .s { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.eht { border: 1px solid rgba(242, 162, 78, 0.35); border-radius: 10px; padding: 12px 14px; background: var(--ember-wash); }
+.eht p { margin: 4px 0 0; font-size: var(--t-sm); color: var(--ink-2); }
+.eht b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
+
+/* ---------------- Notes ---------------- */
+.notes { border-top: 1px solid var(--hair); background: linear-gradient(180deg, var(--surface) 0%, var(--void) 100%); }
+.notes-inner { max-width: 1280px; margin: 0 auto; padding-block: 56px 72px; padding-inline: var(--gutter); }
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px 36px; margin-top: 18px; }
+.notes-grid h3 { margin: 0 0 6px; }
+.notes-grid p { margin: 0; color: var(--ink-2); font-size: var(--t-sm); line-height: 1.6; max-width: 62ch; }
+.sources { margin: 32px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.7; max-width: 110ch; }
+.sources .label { margin-right: 8px; }
+
+/* ---------------- Responsive ---------------- */
+@media (max-height: 860px) and (min-width: 821px) {
+  .title { font-size: min(var(--t-hero), 10vh); }
+  .left-col { gap: 12px; }
+  .probe-data { gap: 1px; }
+  .probe-inset { width: min(100%, 19vh); }
+}
+@media (max-height: 740px) and (min-width: 821px) {
+  .lede { display: none; }
+}
+@media (max-height: 600px) and (min-width: 821px) {
+  .probe-inset { display: none; }
+}
+@media (max-width: 1080px) {
+  .probe { width: 220px; }
+  .hint { display: none; }
+}
+@media (max-width: 900px) {
+  .lab { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 820px) {
+  :root { --rail-w: 0px; }
+  .obs { height: clamp(520px, 82svh, 900px); }
+  .obs-shade { background: linear-gradient(180deg, rgba(4, 6, 10, 0.75) 0%, rgba(4, 6, 10, 0) 30%), linear-gradient(0deg, rgba(4, 6, 10, 0.75) 0%, rgba(4, 6, 10, 0) 26%); }
+  .left-col { width: calc(100% - 2 * var(--gutter)); }
+  .left-col .telemetry { position: absolute; left: 0; bottom: 46px; }
+  .left-col .probe { position: absolute; right: 0; bottom: 92px; margin: 0; }
+  .title { font-size: clamp(2.6rem, 12vw, 3.6rem); }
+  .lede { font-size: var(--t-sm); max-width: 46ch; }
+  .rail-open { display: inline-flex; position: absolute; right: var(--gutter); bottom: calc(var(--gutter) + 46px); z-index: 4; }
+  .rail {
+    position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;
+    max-height: 72svh; border-radius: 16px 16px 0 0; z-index: 40;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateY(105%); transition: transform 0.28s ease;
+    background: rgba(9, 11, 16, 0.94);
+  }
+  .rail.open { transform: none; }
+  .rail-head .icon-btn { display: inline-block; }
+  .probe { width: 168px; padding: 8px; }
+  .probe-inset { width: 100%; }
+  .probe .probe-data { display: none; }
+  .probe-head { margin-bottom: 6px; }
+  .probe-head .label { display: none; }
+  .probe-fate { font-size: 12px; text-align: left; }
+  .probe.idle { display: none; }
+  .telemetry { font-size: 11px; }
+  .telemetry div { grid-template-columns: 98px auto; }
+  .modes button { padding: 7px 10px; font-size: 12.5px; }
+  .telemetry .tm-render { display: none; }
+  .modes { left: 50%; bottom: var(--gutter); }
+  .legend { left: 50%; bottom: calc(var(--gutter) + 92px); }
+  .dive-hud { left: 50%; top: auto; bottom: calc(var(--gutter) + 46px); padding: 10px 12px; width: calc(100% - 2 * var(--gutter)); }
+  .dive-grid { grid-template-columns: 1fr 1fr; }
+  .dive-title { font-size: 1.25rem; }
+  .dive-note { display: none; }
+  .loading { left: 50%; }
+}
+@media (max-width: 480px) {
+  .readout { grid-template-columns: minmax(0, 1fr); }
+  .num-grid { grid-template-columns: minmax(0, 1fr); }
+  .dive-grid { grid-template-columns: 1fr; gap: 4px; }
+  .chart-frame { height: 180px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+.probe-mark {
+  position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px;
+  border: 1.5px solid var(--ember-ink); border-radius: 50%; pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 14px rgba(242, 162, 78, 0.5);
+}
+.probe-mark::after { content: ""; position: absolute; left: 50%; top: 50%; width: 2px; height: 2px; margin: -1px; border-radius: 50%; background: var(--ember-ink); }
+
+</style>
+<a class="skip" href="#labs">Skip to the physics labs</a>
+<main class="page">
+  <section class="obs" id="observatory" aria-label="Ray-traced black hole">
+    <canvas id="view" class="obs-canvas" tabindex="0" aria-label="Interactive ray-traced black hole. Drag to orbit, use the controls to zoom."></canvas>
+    <div class="obs-shade" aria-hidden="true"></div>
+
+    <div class="left-col">
+    <header class="mast">
+      <p class="kicker">Schwarzschild black hole · ray traced live</p>
+      <h1 class="title">Event Horizon</h1>
+      <p class="lede">Every pixel follows its own ray of light backward through curved spacetime. The shadow, the thin bright ring and the lopsided glow all come straight out of Einstein's equations.</p>
+    </header>
+
+    <div class="probe idle" id="probe" aria-live="polite">
+      <div class="probe-head">
+        <span class="label">Ray probe</span>
+        <span class="probe-fate" id="probeFate">Tracing an example ray…</span>
+      </div>
+      <canvas id="probeInset" class="probe-inset" width="240" height="240" aria-hidden="true"></canvas>
+      <dl class="probe-data" id="probeData">
+        <div><dt>Hover</dt><dd>any pixel to trace its ray</dd></div>
+      </dl>
+    </div>
+
+    <div class="telemetry" id="telemetry">
+      <div><span class="label">Observer</span><span id="tmR">r = 26.0 M</span></div>
+      <div><span class="label">Your clock</span><span id="tmClock">0.961 × far-away rate</span></div>
+      <div><span class="label">Shadow</span><span id="tmShadow">22.1° across</span></div>
+      <div class="tm-render"><span class="label">Render</span><span id="tmRender">starting…</span></div>
+    </div>
+    </div>
+
+    <div class="modes" role="radiogroup" aria-label="View mode" id="modes">
+      <button type="button" role="radio" aria-checked="true" data-mode="0">True color</button>
+      <button type="button" role="radio" aria-checked="false" data-mode="1">Redshift</button>
+      <button type="button" role="radio" aria-checked="false" data-mode="2">Image order</button>
+      <button type="button" role="radio" aria-checked="false" data-mode="3">Lensing grid</button>
+    </div>
+    <div class="legend" id="legend" hidden></div>
+
+    <p class="hint" id="hint">Drag to orbit · scroll to zoom · hover to trace a ray</p>
+    <div class="toast" id="toast" hidden></div>
+
+    <div class="dive-hud" id="diveHud" hidden>
+      <div class="dive-head">
+        <div class="dive-title" id="diveTitle">Falling from rest</div>
+        <button type="button" class="btn" id="diveStop">Climb back out</button>
+      </div>
+      <div class="dive-grid">
+        <div><span class="label">Radius</span><b id="diveR">—</b></div>
+        <div><span class="label">Proper time left</span><b id="diveTau">—</b></div>
+        <div><span class="label">Speed vs hoverers</span><b id="diveV">—</b></div>
+        <div><span class="label">Light from above</span><b id="diveShift">—</b></div>
+      </div>
+      <p class="dive-note" id="diveNote">Drag to look around.</p>
+    </div>
+
+    <button type="button" class="rail-open btn" id="railOpen" aria-controls="rail" aria-expanded="false">Controls</button>
+    <aside class="rail" id="rail" aria-label="Renderer controls">
+      <div class="rail-head">
+        <span class="label">Instrument</span>
+        <button type="button" class="icon-btn" id="railClose" aria-label="Close controls">✕</button>
+      </div>
+      <div class="rail-body">
+        <fieldset class="group">
+          <legend class="label">Observer</legend>
+          <div class="ctl">
+            <label for="cDist">Distance</label><output id="oDist" for="cDist">26.0 M</output>
+            <input type="range" id="cDist" min="0" max="1000" step="1">
+          </div>
+          <div class="ctl">
+            <label for="cIncl">Height above disk</label><output id="oIncl" for="cIncl">7°</output>
+            <input type="range" id="cIncl" min="-85" max="85" step="0.5">
+          </div>
+          <div class="ctl">
+            <label for="cFov">Field of view</label><output id="oFov" for="cFov">55°</output>
+            <input type="range" id="cFov" min="25" max="110" step="1">
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-ember" id="btnDive">Dive in</button>
+            <button type="button" class="btn" id="btnOrbit" aria-pressed="false">Auto-orbit</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend class="label">Accretion disk</legend>
+          <div class="sw-row"><label for="cDisk">Show disk</label><input type="checkbox" class="switch" id="cDisk" checked></div>
+          <div class="ctl">
+            <label for="cTemp">Peak temperature</label><output id="oTemp" for="cTemp"><i class="swatch" id="tempSwatch"></i>5,200 K</output>
+            <input type="range" id="cTemp" min="0" max="1000" step="1">
+          </div>
+          <div class="ctl">
+            <label for="cOut">Outer edge</label><output id="oOut" for="cOut">22 M</output>
+            <input type="range" id="cOut" min="9" max="40" step="0.5">
+          </div>
+          <div class="ctl">
+            <label for="cTurb">Turbulence</label><output id="oTurb" for="cTurb">0.55</output>
+            <input type="range" id="cTurb" min="0" max="1" step="0.01">
+          </div>
+          <div class="ctl">
+            <label for="cSpeed">Time flow</label><output id="oSpeed" for="cSpeed">1.0×</output>
+            <input type="range" id="cSpeed" min="0" max="4" step="0.05">
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend class="label">Relativity</legend>
+          <div class="sw-row"><label for="cLens">Light bending</label><input type="checkbox" class="switch" id="cLens" checked></div>
+          <div class="sw-row"><label for="cDopp">Doppler beaming</label><input type="checkbox" class="switch" id="cDopp" checked></div>
+          <div class="sw-row"><label for="cGrav">Gravitational redshift</label><input type="checkbox" class="switch" id="cGrav" checked></div>
+          <p class="group-note">Switch one off to see what it contributes. With bending off, light travels in straight lines and the shadow shrinks to the bare horizon.</p>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend class="label">Image</legend>
+          <div class="ctl">
+            <label for="cEv">Exposure</label><output id="oEv" for="cEv">0.0 EV</output>
+            <input type="range" id="cEv" min="-3" max="3" step="0.1">
+          </div>
+          <div class="ctl">
+            <label for="cBloom">Lens glare</label><output id="oBloom" for="cBloom">0.14</output>
+            <input type="range" id="cBloom" min="0" max="1" step="0.01">
+          </div>
+          <div class="ctl">
+            <label for="cStars">Starlight</label><output id="oStars" for="cStars">1.0×</output>
+            <input type="range" id="cStars" min="0" max="3" step="0.05">
+          </div>
+          <div class="sel-row">
+            <label for="cRes">Resolution</label>
+            <select id="cRes">
+              <option value="auto" selected>Auto (adapts to your GPU)</option>
+              <option value="0.5">50%</option>
+              <option value="0.75">75%</option>
+              <option value="1">100%</option>
+              <option value="1.5">150% (supersampled)</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-quiet" id="btnReset">Reset view</button>
+        </fieldset>
+      </div>
+    </aside>
+
+    <div class="gl-fail" id="glFail" hidden>
+      <h2>The renderer could not start</h2>
+      <p id="glFailMsg">This browser does not provide WebGL2.</p>
+      <p>The physics labs below still work.</p>
+    </div>
+    <div class="loading" id="loading"><span class="label">Generating the night sky</span><span class="bar"><i id="loadBar"></i></span></div>
+  </section>
+
+  <section class="bench" id="labs" aria-labelledby="benchTitle">
+    <header class="bench-head">
+      <p class="kicker">Physics bench</p>
+      <h2 class="h2" id="benchTitle">Same equations, five experiments</h2>
+      <p class="bench-lede">Each lab runs the exact Schwarzschild equations used by the renderer. Units follow the convention G = c = 1, so distances are in M (half the event horizon radius).</p>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Physics labs">
+      <button type="button" role="tab" id="tab-orbits" aria-controls="lab-orbits" aria-selected="true">Orbits</button>
+      <button type="button" role="tab" id="tab-light" aria-controls="lab-light" aria-selected="false" tabindex="-1">Light bending</button>
+      <button type="button" role="tab" id="tab-time" aria-controls="lab-time" aria-selected="false" tabindex="-1">Time dilation</button>
+      <button type="button" role="tab" id="tab-tides" aria-controls="lab-tides" aria-selected="false" tabindex="-1">Spaghettification</button>
+      <button type="button" role="tab" id="tab-numbers" aria-controls="lab-numbers" aria-selected="false" tabindex="-1">By the numbers</button>
+    </div>
+
+    <!-- ORBITS -->
+    <div class="lab" id="lab-orbits" role="tabpanel" aria-labelledby="tab-orbits">
+      <div class="lab-fig">
+        <div class="fig-frame square"><canvas id="orbitCanvas" aria-label="Orbit of a test particle around the black hole"></canvas>
+          <div class="fig-key"><span><i class="key-dot s1"></i>Relativity</span><span><i class="key-dot s2"></i>Newton, same start</span></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span>Effective potential for this orbit</span><span class="chart-sub">V(r) per unit mass; the particle moves where its energy line sits above the curve</span></div>
+          <div class="chart-frame"><canvas id="potCanvas" aria-label="Effective potential chart"></canvas></div>
+          <details class="table-view"><summary>Values as a table</summary><div class="table-scroll" id="potTable"></div></details>
+        </div>
+      </div>
+      <div class="lab-side">
+        <h3 class="h3">Orbits that don't close</h3>
+        <p>Under Newton's gravity a planet retraces the same ellipse forever. Relativity adds one term to the force and the ellipse starts to turn. Close in, that term wins: no circular orbit is stable inside 6 M, and a particle that clears the potential barrier simply falls in.</p>
+        <p class="eq">d²r/dτ² = −M/r² + L²/r³ <mark>− 3ML²/r⁴</mark></p>
+        <div class="chips" role="group" aria-label="Orbit presets" id="orbitPresets">
+          <button type="button" class="chip" data-preset="rosette">Rosette</button>
+          <button type="button" class="chip" data-preset="zoom">Zoom-whirl</button>
+          <button type="button" class="chip" data-preset="isco">Innermost stable orbit</button>
+          <button type="button" class="chip" data-preset="unstable">Unstable circle</button>
+          <button type="button" class="chip" data-preset="plunge">Plunge</button>
+          <button type="button" class="chip" data-preset="far">Far away (Newtonian)</button>
+        </div>
+        <div class="ctl">
+          <label for="oR0">Start radius (apoapsis)</label><output id="oR0o" for="oR0">30.0 M</output>
+          <input type="range" id="oR0" min="0" max="1000" step="1">
+        </div>
+        <div class="ctl">
+          <label for="oL">Angular momentum L</label><output id="oLo" for="oL">4.20 M</output>
+          <input type="range" id="oL" min="2.5" max="12" step="0.005">
+        </div>
+        <div class="sw-row"><label for="oNewton">Show Newtonian orbit</label><input type="checkbox" class="switch" id="oNewton" checked></div>
+        <div class="seg" role="radiogroup" aria-label="Clock used for playback" id="oClock">
+          <button type="button" role="radio" aria-checked="true" data-clock="tau">Particle's clock</button>
+          <button type="button" role="radio" aria-checked="false" data-clock="t">Distant clock</button>
+        </div>
+        <div class="ctl">
+          <label for="oSpeed">Playback speed</label><output id="oSpeedo" for="oSpeed">1.0×</output>
+          <input type="range" id="oSpeed" min="0.1" max="5" step="0.05">
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn" id="oPlay" aria-pressed="true">Pause</button>
+          <button type="button" class="btn" id="oNudge">Nudge inward</button>
+          <button type="button" class="btn btn-quiet" id="oReset">Restart</button>
+        </div>
+        <dl class="readout" id="orbitReadout"></dl>
+      </div>
+    </div>
+
+    <!-- LIGHT -->
+    <div class="lab" id="lab-light" role="tabpanel" aria-labelledby="tab-light" hidden>
+      <div class="lab-fig">
+        <div class="fig-frame wide"><canvas id="lightCanvas" aria-label="Light rays bending around the black hole"></canvas>
+          <div class="fig-key"><span><i class="key-dot s1"></i>Probe photon</span><span><i class="key-dot ink"></i>Escapes</span><span><i class="key-dot red"></i>Captured</span></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><span>Deflection angle vs impact parameter</span><span class="chart-sub">Exact relativity against the weak-field formula 4M/b (log scale)</span></div>
+          <div class="chart-frame"><canvas id="deflCanvas" aria-label="Deflection angle chart"></canvas></div>
+          <details class="table-view"><summary>Values as a table</summary><div class="table-scroll" id="deflTable"></div></details>
+        </div>
+      </div>
+      <div class="lab-side">
+        <h3 class="h3">Light that falls</h3>
+        <p>Photons travel through the same curved spacetime. Aim one closer than 3√3 M ≈ 5.196 M and it never comes back. Just outside that line it can loop the hole several times before escaping, which is where the thin bright ring in the image comes from.</p>
+        <p class="eq">d²u/dφ² + u = <mark>3Mu²</mark> &nbsp;<span class="eq-note">(u = 1/r)</span></p>
+        <div class="seg" role="radiogroup" aria-label="Light source" id="lMode">
+          <button type="button" role="radio" aria-checked="true" data-mode="beam">Parallel beam</button>
+          <button type="button" role="radio" aria-checked="false" data-mode="flash">Flash near the hole</button>
+        </div>
+        <div class="ctl" id="lBWrap">
+          <label for="lB">Probe impact parameter b</label><output id="lBo" for="lB">5.40 M</output>
+          <input type="range" id="lB" min="0" max="1000" step="1">
+        </div>
+        <div class="ctl" id="lSrcWrap" hidden>
+          <label for="lSrc">Flash at radius</label><output id="lSrco" for="lSrc">4.0 M</output>
+          <input type="range" id="lSrc" min="2.05" max="12" step="0.01">
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn" id="lCrit">Aim at the photon sphere</button>
+        </div>
+        <dl class="readout" id="lightReadout"></dl>
+      </div>
+    </div>
+
+    <!-- TIME -->
+    <div class="lab" id="lab-time" role="tabpanel" aria-labelledby="tab-time" hidden>
+      <div class="lab-fig">
+        <div class="fig-frame clocks"><canvas id="clockCanvas" aria-label="Three clocks at different places"></canvas></div>
+        <div class="chart-card">
+          <div class="chart-title"><span>Clock rate vs radius</span><span class="chart-sub">Seconds ticked per second of a distant clock</span></div>
+          <div class="chart-frame"><canvas id="rateCanvas" aria-label="Clock rate chart"></canvas></div>
+          <details class="table-view"><summary>Values as a table</summary><div class="table-scroll" id="rateTable"></div></details>
+        </div>
+      </div>
+      <div class="lab-side">
+        <h3 class="h3">Clocks near the hole</h3>
+        <p>Gravity slows time. A clock hovering at radius r ticks at √(1 − 2M/r) of a distant clock. A clock in a circular orbit runs slower still, √(1 − 3M/r), because its orbital speed adds special-relativistic time dilation.</p>
+        <p class="eq">dτ/dt = √(1 − 2M/r) &nbsp;·&nbsp; <mark>√(1 − 3M/r)</mark> <span class="eq-note">(orbiting)</span></p>
+        <div class="ctl">
+          <label for="tR">Radius</label><output id="tRo" for="tR">6.00 M</output>
+          <input type="range" id="tR" min="0" max="1000" step="1">
+        </div>
+        <div class="sel-row">
+          <label for="tMass">Real units for</label>
+          <select id="tMass">
+            <option value="10">A 10 M☉ stellar black hole</option>
+            <option value="4.297e6" selected>Sagittarius A* (4.3 million M☉)</option>
+            <option value="6.5e9">M87* (6.5 billion M☉)</option>
+          </select>
+        </div>
+        <div class="btn-row"><button type="button" class="btn btn-quiet" id="tReset">Reset clocks</button></div>
+        <dl class="readout" id="timeReadout"></dl>
+        <div class="facts">
+          <p class="label">The same formula elsewhere</p>
+          <ul id="timeFacts"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIDES -->
+    <div class="lab" id="lab-tides" role="tabpanel" aria-labelledby="tab-tides" hidden>
+      <div class="lab-fig">
+        <div class="fig-frame wide"><canvas id="tideCanvas" aria-label="An astronaut falling feet first toward the black hole"></canvas></div>
+        <div class="chart-card">
+          <div class="chart-title"><span>Head-to-foot stretch vs distance</span><span class="chart-sub">Tidal acceleration across a 2 m body, in g (log scales)</span></div>
+          <div class="chart-frame"><canvas id="tideChart" aria-label="Tidal acceleration chart"></canvas></div>
+          <details class="table-view"><summary>Values as a table</summary><div class="table-scroll" id="tideTable"></div></details>
+        </div>
+      </div>
+      <div class="lab-side">
+        <h3 class="h3">Spaghettification</h3>
+        <p>What kills you near a black hole is the difference in pull between your head and your feet. It grows as M/r³, and at the horizon it scales as 1/M². A small hole shreds you far outside the horizon; a supermassive one lets you cross in one piece.</p>
+        <p class="eq">Δa = 2GM·ℓ / r³</p>
+        <div class="chips" role="group" aria-label="Black hole presets" id="tidePresets">
+          <button type="button" class="chip" data-m="10">10 M☉</button>
+          <button type="button" class="chip" data-m="21.2">Cygnus X-1</button>
+          <button type="button" class="chip" data-m="62">GW150914 remnant</button>
+          <button type="button" class="chip" data-m="4.297e6">Sagittarius A*</button>
+          <button type="button" class="chip" data-m="6.5e9">M87*</button>
+        </div>
+        <div class="ctl">
+          <label for="tdM">Black hole mass</label><output id="tdMo" for="tdM">10 M☉</output>
+          <input type="range" id="tdM" min="0" max="1000" step="1">
+        </div>
+        <div class="ctl">
+          <label for="tdR">Distance from center</label><output id="tdRo" for="tdR">—</output>
+          <input type="range" id="tdR" min="0" max="1000" step="1">
+        </div>
+        <dl class="readout" id="tideReadout"></dl>
+      </div>
+    </div>
+
+    <!-- NUMBERS -->
+    <div class="lab" id="lab-numbers" role="tabpanel" aria-labelledby="tab-numbers" hidden>
+      <div class="lab-fig">
+        <div class="numbers" id="numbers"></div>
+      </div>
+      <div class="lab-side">
+        <h3 class="h3">By the numbers</h3>
+        <p>A non-spinning black hole is fixed by one number, its mass. Everything below follows from that alone, using measured constants of nature.</p>
+        <div class="chips" role="group" aria-label="Mass presets" id="numPresets">
+          <button type="button" class="chip" data-kg="1e12">Asteroid-mass (10¹² kg)</button>
+          <button type="button" class="chip" data-kg="5.9722e24">Earth mass</button>
+          <button type="button" class="chip" data-m="10">10 M☉</button>
+          <button type="button" class="chip" data-m="21.2">Cygnus X-1</button>
+          <button type="button" class="chip" data-m="62">GW150914 remnant</button>
+          <button type="button" class="chip" data-m="4.297e6">Sagittarius A*</button>
+          <button type="button" class="chip" data-m="6.5e9">M87*</button>
+        </div>
+        <div class="ctl">
+          <label for="nM">Mass</label><output id="nMo" for="nM">—</output>
+          <input type="range" id="nM" min="0" max="1000" step="1">
+        </div>
+        <div class="num-input">
+          <label for="nMval">Exact mass</label>
+          <input type="number" id="nMval" inputmode="decimal" step="any" min="0">
+          <select id="nUnit" aria-label="Mass unit">
+            <option value="msun" selected>M☉</option>
+            <option value="kg">kg</option>
+            <option value="mearth">Earth masses</option>
+          </select>
+        </div>
+        <div class="eht" id="ehtCard" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="notes" aria-labelledby="notesTitle">
+    <div class="notes-inner">
+      <h2 class="h2" id="notesTitle">What the model includes</h2>
+      <div class="notes-grid">
+        <div>
+          <h3 class="label">Spacetime and light</h3>
+          <p>The Schwarzschild metric of a non-rotating, uncharged hole. For every pixel the shader integrates the exact photon orbit equation u″ + u = 3u² with fourth-order Runge–Kutta, backward from the camera, and records where the ray ends: on the disk, in the hole, or on the sky.</p>
+        </div>
+        <div>
+          <h3 class="label">The disk</h3>
+          <p>Geometrically thin and optically thick, from the innermost stable orbit at 6 M outward. Its radial brightness is the Page–Thorne (1974) profile with zero torque at the inner edge, and each patch glows as a blackbody. Observed temperature is g times local temperature, where g combines gravitational redshift, time dilation and the Doppler shift of gas orbiting at up to half the speed of light.</p>
+        </div>
+        <div>
+          <h3 class="label">Simplifications</h3>
+          <p>Peak temperature is scaled into visible light; real disks peak in the ultraviolet (supermassive holes) or X-rays (stellar ones). Not modeled: spin (the Kerr metric), light-travel delays across the disk, disk thickness and polarization. The turbulence pattern is procedural, though it orbits at the correct Keplerian rate for each radius.</p>
+        </div>
+        <div>
+          <h3 class="label">Observers</h3>
+          <p>By default the camera hovers at a fixed radius, which takes a rocket, so incoming starlight is blueshifted. Dive mode switches to an observer falling freely from rest far away; that observer's frame stays valid through the horizon and down to the singularity.</p>
+        </div>
+      </div>
+      <p class="sources"><span class="label">Measured values</span>
+        Sagittarius A*: 4.297 ± 0.012 million M☉ at 8,277 pc, GRAVITY Collaboration via <a href="https://en.wikipedia.org/wiki/Sagittarius_A*" target="_blank" rel="noopener">Wikipedia</a>; EHT ring 51.8 ± 2.3 µas.
+        M87*: 6.5 ± 0.7 billion M☉ at 16.8 Mpc, ring 42 ± 3 µas, <a href="https://arxiv.org/abs/1906.11243" target="_blank" rel="noopener">EHT 2019</a>.
+        Cygnus X-1: 21.2 ± 2.2 M☉, <a href="https://en.wikipedia.org/wiki/Cygnus_X-1" target="_blank" rel="noopener">Miller-Jones et al. 2021</a>.
+        GW150914 remnant: 62 M☉ (+4/−3), <a href="https://en.wikipedia.org/wiki/GW150914" target="_blank" rel="noopener">LIGO/Virgo</a>.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ==========================================================================
+   Physics core. Schwarzschild spacetime in geometric units (G = c = 1).
+   Lengths and times are in units of M (= GM/c^2 and GM/c^3).
+   The same ray integrator runs in the GPU shader; this copy powers the
+   probe, the labs and the numerical tests.
+   ========================================================================== */
+(function (root) {
+  'use strict';
+  const PI = Math.PI;
+
+  // SI constants (CODATA 2018 / IAU 2015 nominal values)
+  const K = {
+    G: 6.67430e-11, c: 299792458, h: 6.62607015e-34, hbar: 1.054571817e-34,
+    kB: 1.380649e-23, GMsun: 1.32712440018e20, sigmaSB: 5.670374419e-8,
+    mp: 1.67262192369e-27, sigmaT: 6.6524587321e-29, Lsun: 3.828e26,
+    yr: 3.15576e7, day: 86400, au: 1.495978707e11, ly: 9.4607304725808e15,
+    pc: 3.0856775814913673e16, Rsun: 6.957e8, Rearth: 6.371e6,
+    Mearth: 5.9722e24, GMearth: 3.986004418e14, Mmoon: 7.342e22,
+    TCMB: 2.7255, g0: 9.80665
+  };
+  K.Msun = K.GMsun / K.G;
+
+  /* ---------------- Null geodesics ----------------
+     With u = M/r the photon orbit obeys  d²u/dφ² = -u + 3u²  (exact).
+     k = 1 gives general relativity, k = 0 gives straight lines (flat space). */
+  function acc(u, k) { return -u + 3 * k * u * u; }
+
+  function rk4(u, du, h, k) {
+    const a1 = du, b1 = acc(u, k);
+    const a2 = du + 0.5 * h * b1, b2 = acc(u + 0.5 * h * a1, k);
+    const a3 = du + 0.5 * h * b2, b3 = acc(u + 0.5 * h * a2, k);
+    const a4 = du + h * b3, b4 = acc(u + h * a3, k);
+    return [u + (h / 6) * (a1 + 2 * a2 + 2 * a3 + a4),
+            du + (h / 6) * (b1 + 2 * b2 + 2 * b3 + b4)];
+  }
+
+  // Step in φ. Shrinks only deep inside the horizon where the ODE stiffens.
+  function stepFor(u, base, k) {
+    const w = Math.sqrt(Math.abs(6 * k * u - 1)) * 0.7;
+    return base / Math.max(1, w);
+  }
+
+  /* Initial conditions for a ray leaving the observer's eye backwards in time.
+     n1 = component of the look direction along the outward radial unit vector,
+     nt = magnitude of the tangential component (>= 0).
+     Static observer: local frame of a hovering observer.
+     Falling observer: frame of an observer dropped from rest at infinity
+     (the "raindrop"), valid inside the horizon too.
+     obs = ν_observed / E  (E = photon energy at infinity).
+     E   = sign carrier: E <= 0 means the light came from the white-hole
+           region of the eternal solution; for a real collapsed star it is black. */
+  function initialConditions(r0, n1, nt, falling) {
+    const u0 = 1 / r0;
+    const s = Math.sqrt(2 * u0);
+    let radial, obs, E;
+    if (falling) {
+      radial = n1 + s; E = 1 + n1 * s; obs = 1 / E;
+    } else {
+      const sf = Math.sqrt(Math.max(1 - 2 * u0, 1e-9));
+      radial = sf * n1; E = 1; obs = 1 / sf;
+    }
+    const du0 = nt > 1e-9 ? -u0 * radial / nt : 0;
+    return { u0, du0, radial, obs, E };
+  }
+
+  /* Trace one ray. Options:
+       r0, n1, nt, falling, k (1 GR / 0 flat), base (φ step),
+       a, b  : y-components of the in-plane basis e1 (radial) and e2 (tangential)
+               used to find crossings of the equatorial (disk) plane,
+       disk  : include the disk, diskIn, diskOut,
+       record: keep (φ, u) samples for drawing.
+     Returns fate 'sky' | 'disk' | 'hole' plus details. */
+  function traceRay(o) {
+    const k = o.k == null ? 1 : o.k;
+    const base = o.base || 0.06;
+    const ic = initialConditions(o.r0, o.n1, o.nt, !!o.falling);
+    const res = { fate: 'sky', ic, phiInf: 0, r: 0, phi: 0, order: 0, b: Infinity, steps: 0, pts: o.record ? [] : null };
+    if (ic.E <= 0) { res.fate = 'hole'; res.why = 'white-hole'; return res; }
+    if (o.nt <= 1e-9) {
+      if (ic.radial > 0) { res.fate = 'sky'; res.phiInf = 0; } else { res.fate = 'hole'; res.why = 'radial'; }
+      return res;
+    }
+    let u = ic.u0, du = ic.du0, phi = 0;
+    const invb2 = du * du + u * u * (1 - 2 * k * u);
+    res.b = invb2 > 0 ? 1 / Math.sqrt(invb2) : Infinity;
+    const useDisk = o.disk !== false && o.a != null;
+    let phiC = Infinity;
+    if (useDisk) { phiC = Math.atan2(-o.a, o.b); if (phiC <= 1e-6) phiC += PI; }
+    const rIn = o.diskIn || 6, rOut = o.diskOut || 20;
+    const maxPhi = o.maxPhi || 6 * PI;
+    const maxSteps = o.maxSteps || 4000;
+    if (res.pts) res.pts.push(phi, u);
+    for (let i = 0; i < maxSteps; i++) {
+      res.steps = i + 1;
+      let h = stepFor(u, base, k);
+      let crossing = false;
+      if (phi + h >= phiC) { h = phiC - phi; crossing = true; }
+      const nx = rk4(u, du, h, k);
+      if (nx[0] <= 0) {
+        const t = u / (u - nx[0]);
+        res.phiInf = phi + t * h; res.fate = 'sky';
+        if (res.pts) res.pts.push(res.phiInf, 0);
+        return res;
+      }
+      u = nx[0]; du = nx[1]; phi += h;
+      if (res.pts) res.pts.push(phi, u);
+      if ((u > 0.5 && du > 0) || u > 20) { res.fate = 'hole'; res.phi = phi; res.why = 'horizon'; return res; }
+      if (crossing) {
+        const r = 1 / u;
+        if (r >= rIn && r <= rOut) { res.fate = 'disk'; res.r = r; res.phi = phi; return res; }
+        res.order++; phiC += PI;
+      }
+      if (phi > maxPhi) { res.fate = 'hole'; res.phi = phi; res.why = 'trapped'; return res; }
+    }
+    res.fate = 'hole'; res.why = 'steps';
+    return res;
+  }
+
+  /* Ray from infinity with impact parameter b (M). Returns total sweep Δφ,
+     deflection (Δφ - π) and fate. Optional samples for drawing. */
+  function rayFromInfinity(b, opts) {
+    opts = opts || {};
+    const k = opts.k == null ? 1 : opts.k;
+    const base = opts.base || 0.01;
+    let u = 0, du = 1 / b, phi = 0;
+    const pts = opts.record ? [0, 0] : null;
+    const maxPhi = opts.maxPhi || 12 * PI;
+    for (let i = 0; i < 400000; i++) {
+      const h = stepFor(Math.max(u, 0), base, k);
+      const nx = rk4(u, du, h, k);
+      if (i > 0 && nx[0] <= 0) {
+        const t = u / (u - nx[0]);
+        const sweep = phi + t * h;
+        if (pts) pts.push(sweep, 0);
+        return { fate: 'escape', sweep, deflection: sweep - PI, pts };
+      }
+      u = nx[0]; du = nx[1]; phi += h;
+      if (pts) pts.push(phi, u);
+      if (u > 0.5 && du > 0) return { fate: 'capture', sweep: phi, deflection: Infinity, pts };
+      if (phi > maxPhi) return { fate: 'trapped', sweep: phi, deflection: Infinity, pts };
+    }
+    return { fate: 'trapped', sweep: phi, deflection: Infinity, pts };
+  }
+
+  /* ---------------- Thin accretion disk ----------------
+     Page & Thorne (1974) flux for a Schwarzschild hole, derived from the
+     conservation laws with zero torque at the ISCO (r = 6M):
+       F(r) ∝ [√r − √6 + (√3/2) ln((√r+√3)(√6−√3) / ((√r−√3)(√6+√3)))] / ((r−3) r^{5/2})  */
+  const S3 = Math.sqrt(3), S6 = Math.sqrt(6);
+  function pageThorne(r) {
+    if (r <= 6) return 0;
+    const sr = Math.sqrt(r);
+    const L = Math.log(((sr + S3) * (S6 - S3)) / ((sr - S3) * (S6 + S3)));
+    return (sr - S6 + 0.5 * S3 * L) / ((r - 3) * r * r * sr);
+  }
+  const FLUX_PEAK = (function () {
+    let best = 0, rb = 6;
+    for (let r = 6.001; r < 40; r += 0.001) { const f = pageThorne(r); if (f > best) { best = f; rb = r; } }
+    return { F: best, r: rb };
+  })();
+
+  // Redshift factor g = ν_obs/ν_emit for gas on a circular geodesic at r,
+  // photon with L_z/E = ellz, observer factor obs (ν_obs/E).
+  function diskRedshift(r, ellz, obs, opts) {
+    const Om = Math.pow(r, -1.5);
+    const dop = 1 / (1 - Om * ellz);
+    const grav = Math.sqrt(1 - 3 / r);
+    const useD = !opts || opts.doppler !== false;
+    const useG = !opts || opts.grav !== false;
+    return { g: (useD ? dop : 1) * (useG ? grav * obs : 1), dop, grav: grav * obs };
+  }
+
+  /* ---------------- Blackbody colour ----------------
+     CIE 1931 colour matching functions (Wyman, Sloan & Shirley 2013 fit),
+     Planck spectrum integrated 380–780 nm, converted to linear sRGB (D65). */
+  function cmf(l) {
+    const g = (x, mu, s1, s2) => { const t = (x - mu) / (x < mu ? s1 : s2); return Math.exp(-0.5 * t * t); };
+    return [
+      1.056 * g(l, 599.8, 37.9, 31.0) + 0.362 * g(l, 442.0, 16.0, 26.7) - 0.065 * g(l, 501.1, 20.4, 26.2),
+      0.821 * g(l, 568.8, 46.9, 40.5) + 0.286 * g(l, 530.9, 16.3, 31.1),
+      1.217 * g(l, 437.0, 11.8, 36.0) + 0.681 * g(l, 459.0, 26.0, 13.8)
+    ];
+  }
+  const C2 = K.h * K.c / K.kB; // second radiation constant (m·K)
+  function planckLambda(lnm, T) {
+    const l = lnm * 1e-9;
+    return 1 / (Math.pow(l, 5) * Math.expm1(C2 / (l * T)));
+  }
+  function blackbodyRaw(T) {
+    let X = 0, Y = 0, Z = 0;
+    for (let l = 380; l <= 780; l += 2.5) {
+      const B = planckLambda(l, T); const c = cmf(l);
+      X += B * c[0]; Y += B * c[1]; Z += B * c[2];
+    }
+    let R = 3.2406 * X - 1.5372 * Y - 0.4986 * Z;
+    let G = -0.9689 * X + 1.8758 * Y + 0.0415 * Z;
+    let Bc = 0.0557 * X - 0.2040 * Y + 1.0570 * Z;
+    R = Math.max(R, 0); G = Math.max(G, 0); Bc = Math.max(Bc, 0);
+    return [R, G, Bc];
+  }
+  const BB_REF = (function () { const c = blackbodyRaw(6500); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; })();
+  // Linear sRGB of a blackbody at T, scaled so a 6500 K blackbody has luminance 1.
+  function blackbody(T) {
+    const c = blackbodyRaw(T);
+    return [c[0] / BB_REF, c[1] / BB_REF, c[2] / BB_REF];
+  }
+  function luminance(c) { return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+
+  const BB_TABLE = { n: 256, logMin: Math.log10(400), logMax: Math.log10(120000) };
+  // RGBA float table: rgb chroma (luminance 1), a = log10(luminance)
+  function blackbodyTable() {
+    const n = BB_TABLE.n, out = new Float32Array(n * 4);
+    for (let i = 0; i < n; i++) {
+      const lt = BB_TABLE.logMin + (BB_TABLE.logMax - BB_TABLE.logMin) * i / (n - 1);
+      const c = blackbody(Math.pow(10, lt));
+      const Y = Math.max(luminance(c), 1e-30);
+      out[i * 4] = c[0] / Y; out[i * 4 + 1] = c[1] / Y; out[i * 4 + 2] = c[2] / Y;
+      out[i * 4 + 3] = Math.log10(Y);
+    }
+    return out;
+  }
+  function blackbodyCss(T, gain) {
+    const c = blackbody(T); const m = Math.max(c[0], c[1], c[2]) || 1;
+    const enc = (v) => { v = Math.min(1, Math.max(0, v / m * (gain || 1))); return Math.round(255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); };
+    return 'rgb(' + enc(c[0]) + ',' + enc(c[1]) + ',' + enc(c[2]) + ')';
+  }
+
+  /* ---------------- Timelike orbits ----------------
+     Exact radial equation in proper time τ:
+       d²r/dτ² = −M/r² + L²/r³ − 3ML²/r⁴ ,  dφ/dτ = L/r² ,  dt/dτ = E/(1 − 2M/r)
+     Newtonian comparison drops the last term (and t = τ). */
+  function energySq(r, vr, L) { return vr * vr + (1 - 2 / r) * (1 + L * L / (r * r)); }
+  function vEffGR(r, L) { return -1 / r + L * L / (2 * r * r) - L * L / (r * r * r); }
+  function vEffNewton(r, L) { return -1 / r + L * L / (2 * r * r); }
+  function orbitDeriv(r, vr, L, gr, E) {
+    const L2 = L * L, r2 = r * r;
+    return [vr, -1 / r2 + L2 / (r2 * r) - (gr ? 3 * L2 / (r2 * r2) : 0), L / r2, gr ? E / (1 - 2 / r) : 1];
+  }
+  // state: {r, vr, phi, t, tau}
+  function orbitStep(s, L, gr, E, h) {
+    const d1 = orbitDeriv(s.r, s.vr, L, gr, E);
+    const d2 = orbitDeriv(s.r + 0.5 * h * d1[0], s.vr + 0.5 * h * d1[1], L, gr, E);
+    const d3 = orbitDeriv(s.r + 0.5 * h * d2[0], s.vr + 0.5 * h * d2[1], L, gr, E);
+    const d4 = orbitDeriv(s.r + h * d3[0], s.vr + h * d3[1], L, gr, E);
+    s.r += h / 6 * (d1[0] + 2 * d2[0] + 2 * d3[0] + d4[0]);
+    s.vr += h / 6 * (d1[1] + 2 * d2[1] + 2 * d3[1] + d4[1]);
+    s.phi += h / 6 * (d1[2] + 2 * d2[2] + 2 * d3[2] + d4[2]);
+    s.t += h / 6 * (d1[3] + 2 * d2[3] + 2 * d3[3] + d4[3]);
+    s.tau += h;
+    return s;
+  }
+  // Circular orbit facts
+  function circularL(r) { return r > 3 ? Math.sqrt(r * r / (r - 3)) : Infinity; }
+  // Location and height of the potential barrier (unstable circular orbit) for L
+  function barrier(L) {
+    const L2 = L * L;
+    if (L2 < 12) return null;
+    const r = (L2 / 2) * (1 - Math.sqrt(1 - 12 / L2));
+    return { r, E2: (1 - 2 / r) * (1 + L2 / (r * r)) };
+  }
+  // Inner turning point for a particle released at apoapsis ra with angular momentum L
+  function turningPoints(ra, L) {
+    const E2 = (1 - 2 / ra) * (1 + L * L / (ra * ra));
+    const V = (r) => (1 - 2 / r) * (1 + L * L / (r * r));
+    let lo = 2.0001, hi = ra * 0.999999, found = null;
+    // scan inward from ra for first r with V(r) > E2
+    const n = 4000;
+    let prev = ra;
+    for (let i = 1; i <= n; i++) {
+      const r = ra - (ra - lo) * i / n;
+      if (V(r) > E2) { found = [r, prev]; break; }
+      prev = r;
+    }
+    if (!found) return { E2, peri: null };
+    lo = found[0]; hi = found[1];
+    for (let i = 0; i < 60; i++) { const m = 0.5 * (lo + hi); if (V(m) > E2) lo = m; else hi = m; }
+    return { E2, peri: 0.5 * (lo + hi) };
+  }
+
+  /* ---------------- Astrophysical quantities for a hole of mass M (kg) ---------------- */
+  function bhProps(M) {
+    const GM = K.G * M, c = K.c, c2 = c * c;
+    const rg = GM / c2, tg = GM / (c2 * c);
+    const rs = 2 * rg;
+    return {
+      M, rg, tg, rs,
+      rPhoton: 3 * rg, rIsco: 6 * rg,
+      periodIsco: 2 * PI * Math.pow(6, 1.5) * tg,
+      shadowDiameter: 2 * Math.sqrt(27) * rg,
+      hawkingT: K.hbar * c2 * c / (8 * PI * GM * K.kB),
+      hawkingP: K.hbar * Math.pow(c, 6) / (15360 * PI * GM * GM),
+      evaporation: 5120 * PI * GM * GM * M / (K.hbar * Math.pow(c, 4)),
+      entropy: 4 * PI * GM * M / (K.hbar * c),
+      density: M / (4 / 3 * PI * rs * rs * rs),
+      surfaceGravity: c2 * c2 / (4 * GM),
+      tidalHorizon: 2 * GM * 2 / (rs * rs * rs),
+      tauMax: PI * tg,
+      tauRaindrop: 4 / 3 * tg,
+      eddington: 4 * PI * GM * K.mp * c / K.sigmaT,
+      efficiency: 1 - Math.sqrt(8 / 9),
+      lightCrossing: rs / c
+    };
+  }
+  // Angular diameter of the shadow seen from distance D (m), microarcseconds
+  function shadowMicroArcsec(M, D) {
+    const rg = K.G * M / (K.c * K.c);
+    return 2 * Math.sqrt(27) * rg / D * (180 / PI) * 3600e6;
+  }
+  // Static observer at r (M): angular radius of the shadow (radians)
+  function shadowAngleStatic(r) {
+    const sinA = Math.sqrt(27) / r * Math.sqrt(Math.max(1 - 2 / r, 0));
+    if (r >= 3) return Math.asin(Math.min(1, sinA));
+    return PI - Math.asin(Math.min(1, sinA));
+  }
+
+  /* ---------------- Formatting ---------------- */
+  const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  function sci(x, d) {
+    if (!isFinite(x)) return x > 0 ? '∞' : '—';
+    if (x === 0) return '0';
+    d = d == null ? 3 : d;
+    const ax = Math.abs(x);
+    if (ax >= 1e-3 && ax < 1e5) {
+      const digits = Math.max(0, d - 1 - Math.floor(Math.log10(ax)));
+      return x.toLocaleString('en-US', { maximumFractionDigits: Math.min(digits, 6), minimumFractionDigits: 0 });
+    }
+    let e = Math.floor(Math.log10(ax));
+    let m = x / Math.pow(10, e);
+    let ms = m.toFixed(d - 1);
+    if (Math.abs(parseFloat(ms)) >= 10) { e += 1; ms = (x / Math.pow(10, e)).toFixed(d - 1); }
+    return ms + '×10' + String(e).split('').map((ch) => SUP[ch]).join('');
+  }
+  function fmtLength(m) {
+    const a = Math.abs(m);
+    if (a < 1e-9) return sci(m * 1e15, 3) + ' fm';
+    if (a < 1e-6) return sci(m * 1e9, 3) + ' nm';
+    if (a < 1e-3) return sci(m * 1e6, 3) + ' µm';
+    if (a < 1) return sci(m * 1e3, 3) + ' mm';
+    if (a < 1e3) return sci(m, 3) + ' m';
+    if (a < 1e9) return sci(m / 1e3, 3) + ' km';
+    if (a < 0.05 * K.ly) return sci(m / K.au, 3) + ' AU';
+    return sci(m / K.ly, 3) + ' ly';
+  }
+  function fmtTime(s) {
+    const a = Math.abs(s);
+    if (a < 1e-6) return sci(s * 1e9, 3) + ' ns';
+    if (a < 1e-3) return sci(s * 1e6, 3) + ' µs';
+    if (a < 1) return sci(s * 1e3, 3) + ' ms';
+    if (a < 120) return sci(s, 3) + ' s';
+    if (a < 7200) return sci(s / 60, 3) + ' min';
+    if (a < 2 * K.day) return sci(s / 3600, 3) + ' h';
+    if (a < K.yr) return sci(s / K.day, 3) + ' days';
+    return sci(s / K.yr, 3) + ' years';
+  }
+  const LENGTH_REFS = [
+    [1.7e-15, 'a proton'], [1.06e-10, 'an atom'], [1e-7, 'a virus'], [7e-5, 'a human hair (width)'],
+    [1.5e-3, 'a grain of sand'], [1.5e-2, 'a marble'], [0.22, 'a football'], [105, 'a football pitch'],
+    [21.6e3, 'Manhattan (length)'], [6.371e6, 'Earth (radius)'], [6.957e8, 'the Sun (radius)'],
+    [5.79e10, "Mercury's orbit (radius)"], [K.au, "Earth's orbit (radius)"], [30.1 * K.au, "Neptune's orbit (radius)"],
+    [K.ly, 'a light-year']
+  ];
+  function compareLength(m) {
+    let best = LENGTH_REFS[0], bd = Infinity;
+    for (const ref of LENGTH_REFS) { const d = Math.abs(Math.log10(m / ref[0])); if (d < bd) { bd = d; best = ref; } }
+    const ratio = m / best[0];
+    const rs = ratio >= 10 || ratio < 0.1 ? sci(ratio, 2) : ratio.toFixed(ratio < 1 ? 2 : 1);
+    return { ratio, text: rs + '× ' + best[1] };
+  }
+
+  const BH = {
+    K, PI, rk4, stepFor, initialConditions, traceRay, rayFromInfinity,
+    pageThorne, FLUX_PEAK, diskRedshift,
+    blackbody, blackbodyRaw, luminance, blackbodyTable, BB_TABLE, blackbodyCss,
+    energySq, vEffGR, vEffNewton, orbitStep, circularL, barrier, turningPoints,
+    bhProps, shadowMicroArcsec, shadowAngleStatic,
+    sci, fmtLength, fmtTime, compareLength
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = BH;
+  else root.BH = BH;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* GLSL ES 3.00 sources. */
+(function (root) {
+  'use strict';
+
+  const VERT = `#version 300 es
+out vec2 vUv;
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  vUv = p;
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+  const NOISE = `
+uvec3 pcg3d(uvec3 v) {
+  v = v * 1664525u + 1013904223u;
+  v.x += v.y * v.z; v.y += v.z * v.x; v.z += v.x * v.y;
+  v ^= v >> 16u;
+  v.x += v.y * v.z; v.y += v.z * v.x; v.z += v.x * v.y;
+  return v;
+}
+vec3 hash33(vec3 p) {
+  uvec3 q = uvec3(ivec3(floor(p)) + ivec3(1048576));
+  return vec3(pcg3d(q)) * (1.0 / 4294967295.0);
+}
+float hash13(vec3 p) { return hash33(p).x; }
+float vnoise(vec3 p) {
+  vec3 i = floor(p); vec3 f = fract(p);
+  vec3 w = f * f * (3.0 - 2.0 * f);
+  float a = hash13(i), b = hash13(i + vec3(1.0, 0.0, 0.0));
+  float c = hash13(i + vec3(0.0, 1.0, 0.0)), d = hash13(i + vec3(1.0, 1.0, 0.0));
+  float e = hash13(i + vec3(0.0, 0.0, 1.0)), f1 = hash13(i + vec3(1.0, 0.0, 1.0));
+  float g = hash13(i + vec3(0.0, 1.0, 1.0)), h = hash13(i + vec3(1.0, 1.0, 1.0));
+  return mix(mix(mix(a, b, w.x), mix(c, d, w.x), w.y), mix(mix(e, f1, w.x), mix(g, h, w.x), w.y), w.z);
+}
+float fbm(vec3 p) {
+  float s = 0.0, a = 0.5;
+  for (int i = 0; i < 5; i++) { s += a * vnoise(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; }
+  return s / 0.96875;
+}
+`;
+
+  const BB = `
+uniform sampler2D uBB;
+uniform vec2 uBBRange;
+vec4 bbFetch(float T) {
+  float x = (log2(max(T, 1.0)) * 0.30103 - uBBRange.x) / (uBBRange.y - uBBRange.x);
+  x = (clamp(x, 0.0, 1.0) * 255.0 + 0.5) / 256.0;
+  return texture(uBB, vec2(x, 0.5));
+}
+vec3 bbChroma(float T) { return bbFetch(T).rgb; }
+vec3 blackbody(float T) { vec4 t = bbFetch(T); return t.rgb * exp2(t.a * 3.3219281); }
+`;
+
+  /* ---------- Procedural sky: rendered once into a cube map ---------- */
+  const SKY_FRAG = `#version 300 es
+precision highp float;
+precision highp int;
+uniform int uFace;
+uniform float uSize;
+out vec4 outColor;
+${NOISE}
+${BB}
+vec3 faceDir(int face, vec2 st) {
+  float sc = 2.0 * st.x - 1.0, tc = 2.0 * st.y - 1.0;
+  if (face == 0) return vec3(1.0, -tc, -sc);
+  if (face == 1) return vec3(-1.0, -tc, sc);
+  if (face == 2) return vec3(sc, 1.0, tc);
+  if (face == 3) return vec3(sc, -1.0, -tc);
+  if (face == 4) return vec3(sc, -tc, 1.0);
+  return vec3(-sc, -tc, -1.0);
+}
+const vec3 GAL_N = vec3(-0.3192, 0.8571, 0.4041);
+float bandCheap(vec3 d) {
+  float b = dot(d, GAL_N);
+  return exp(-b * b / 0.06);
+}
+vec3 stars(vec3 d, float K, float density, float seed, float sigmaTex, float fminRel, float fmaxRel, float halo) {
+  const float P0 = 2.0 / 1024.0;
+  float sigma = sigmaTex * 2.0 / uSize;
+  float fmin = fminRel * P0 * P0, fmax = fmaxRel * P0 * P0;
+  vec3 q = d * K;
+  vec3 c0 = floor(q);
+  vec3 acc = vec3(0.0);
+  for (int i = -1; i <= 1; i++)
+  for (int j = -1; j <= 1; j++)
+  for (int k = -1; k <= 1; k++) {
+    vec3 c = c0 + vec3(float(i), float(j), float(k));
+    vec3 h = hash33(c + vec3(seed, 2.0 * seed, 3.0 * seed));
+    vec3 sp = c + hash33(c + vec3(seed + 7.0, seed + 19.0, seed + 31.0));
+    float len = length(sp);
+    if (abs(len - K) > 0.5) continue;
+    vec3 sd = sp / len;
+    float dens = density * (0.45 + 1.4 * bandCheap(sd));
+    if (h.x > dens) continue;
+    float dist = length(sd - d);
+    float flux = clamp(fmin * pow(max(h.y, 1e-4), -0.83), 0.0, fmax);
+    float T = 2700.0 * pow(13.0, pow(h.z, 1.7));
+    float I = flux / (6.2831853 * sigma * sigma) * exp(-0.5 * dist * dist / (sigma * sigma));
+    if (halo > 0.0) {
+      float s2 = sigma * 3.5;
+      I += halo * flux / (6.2831853 * s2 * s2) * exp(-0.5 * dist * dist / (s2 * s2));
+    }
+    acc += I * mix(bbChroma(T), vec3(1.0), 0.3);
+  }
+  return acc;
+}
+vec3 galaxy(vec3 d) {
+  vec3 N = GAL_N;
+  vec3 Cg = normalize(cross(N, vec3(0.0, 0.0, 1.0)));
+  vec3 Bg = cross(N, Cg);
+  float lat = asin(clamp(dot(d, N), -1.0, 1.0));
+  float lon = atan(dot(d, Bg), dot(d, Cg));
+  float warp = 0.03 * sin(lon * 2.0 + 0.7) + 0.015 * sin(lon * 5.0 + 1.3);
+  float lw = lat - warp;
+  float thick = 0.075 + 0.07 * exp(-lon * lon / 0.35);
+  float band = exp(-lw * lw / (thick * thick));
+  float core = exp(-lon * lon / 0.16 - lw * lw / 0.03);
+  float n1 = fbm(d * 4.0 + 3.0);
+  float n2 = fbm(d * 10.0 + 9.0);
+  float n3 = fbm(d * 22.0 + 1.0);
+  float clouds = band * (0.35 + 1.1 * n1 * n1 + 0.35 * n3) + 1.4 * core * (0.7 + 0.6 * n2);
+  float dl = smoothstep(0.50, 0.70, fbm(d * 6.5 + vec3(5.0, 1.0, 2.0)) + 0.22 * (n2 - 0.5) + 0.12 * (n3 - 0.5));
+  float dustMask = exp(-pow(lw / 0.04, 2.0)) * 0.9 + exp(-pow(lw / 0.12, 2.0)) * 0.35;
+  float dust = clamp(dl * dustMask, 0.0, 0.94);
+  vec3 col = mix(bbChroma(5200.0), bbChroma(9000.0), smoothstep(0.35, 0.75, n2)) * clouds;
+  col = mix(col, bbChroma(4100.0) * clouds, core / (core + 0.25));
+  col *= (1.0 - dust);
+  float neb = smoothstep(0.64, 0.82, fbm(d * 3.0 + vec3(11.0, 4.0, 7.0))) * exp(-pow(lw / 0.16, 2.0));
+  float neb2 = smoothstep(0.68, 0.86, fbm(d * 4.6 + vec3(2.0, 17.0, 5.0))) * exp(-pow(lw / 0.25, 2.0));
+  col += neb * vec3(1.0, 0.20, 0.32) * 0.45 * (0.6 + n3) + neb2 * vec3(0.15, 0.55, 0.62) * 0.2;
+  return col * 0.085 + vec3(0.0009, 0.0011, 0.0016);
+}
+void main() {
+  vec2 st = gl_FragCoord.xy / uSize;
+  vec3 d = normalize(faceDir(uFace, st));
+  vec3 c = galaxy(d);
+  c += stars(d, 260.0, 0.20, 1.0, 0.65, 0.04, 1.0, 0.0);
+  c += stars(d, 90.0, 0.32, 5.0, 0.70, 0.14, 6.0, 0.0);
+  c += stars(d, 30.0, 0.35, 9.0, 0.75, 0.5, 60.0, 0.06);
+  outColor = vec4(c, 1.0);
+}`;
+
+  /* ---------- The ray tracer ---------- */
+  const TRACE_FRAG = `#version 300 es
+precision highp float;
+precision highp int;
+uniform vec2 uRes;
+uniform vec2 uJitter;
+uniform vec3 uCamPos, uCamRight, uCamUp, uCamFwd;
+uniform float uTanHalfFov;
+uniform float uTime;
+uniform float uDiskOut;
+uniform float uTpeak;
+uniform float uFluxNorm;
+uniform float uTurb;
+uniform float uDoppler, uGrav, uLensing, uShowDisk, uFalling;
+uniform int uMode;
+uniform float uExposure;
+uniform float uSkyGain;
+uniform float uStep;
+uniform int uMaxSteps;
+uniform float uMaxPhi;
+uniform samplerCube uSky;
+uniform vec3 uBBRef;
+uniform float uHDR;
+out vec4 outColor;
+const float PI = 3.14159265358979;
+${NOISE}
+${BB}
+float pageThorne(float r) {
+  if (r <= 6.0) return 0.0;
+  float sr = sqrt(r);
+  const float s3 = 1.7320508, s6 = 2.4494897;
+  float L = log(((sr + s3) * (s6 - s3)) / ((sr - s3) * (s6 + s3)));
+  return (sr - s6 + 0.5 * s3 * L) / ((r - 3.0) * r * r * sr);
+}
+vec2 dfun(vec2 s, float k) { return vec2(s.y, -s.x + 3.0 * k * s.x * s.x); }
+vec2 rk4(vec2 s, float h, float k) {
+  vec2 a = dfun(s, k);
+  vec2 b = dfun(s + 0.5 * h * a, k);
+  vec2 c = dfun(s + 0.5 * h * b, k);
+  vec2 d = dfun(s + h * c, k);
+  return s + (h / 6.0) * (a + 2.0 * b + 2.0 * c + d);
+}
+float diskLayer(float r, float psi, float t, float seed) {
+  float a = psi - pow(r, -1.5) * t;
+  float lr = log(r);
+  vec3 p = vec3(cos(a) * 2.4, sin(a) * 2.4, lr * 7.0) + vec3(seed * 3.1, seed * 1.7, seed * 5.3);
+  float n = vnoise(p) * 0.5 + vnoise(p * 2.13 + 3.1) * 0.3 + vnoise(p * 4.37 + 7.7) * 0.2;
+  vec3 q = vec3(cos(a) * 10.0, sin(a) * 10.0, lr * 38.0) + vec3(seed * 2.3, 0.0, seed);
+  return mix(n, vnoise(q), 0.32);
+}
+float diskNoise(float r, float psi) {
+  const float P = 70.0;
+  float c1 = floor(uTime / P), c2 = floor((uTime + 0.5 * P) / P);
+  float t1 = uTime - c1 * P, t2 = uTime + 0.5 * P - c2 * P;
+  float w1 = 1.0 - abs(2.0 * t1 / P - 1.0);
+  float w2 = 1.0 - w1;
+  float n1 = diskLayer(r, psi, t1 - 0.5 * P, mod(c1, 97.0));
+  float n2 = diskLayer(r, psi, t2 - 0.5 * P, mod(c2, 97.0) + 41.0);
+  return 0.5 + (w1 * (n1 - 0.5) + w2 * (n2 - 0.5)) / sqrt(w1 * w1 + w2 * w2);
+}
+vec3 aces(vec3 x) {
+  return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
+}
+vec3 toSrgb(vec3 c) {
+  return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));
+}
+// Inverse of the ACES fit, so analysis colours come out on screen exactly as designed.
+vec3 invAces(vec3 y) {
+  y = clamp(y, 0.0, 0.96);
+  vec3 a = 2.43 * y - 2.51, b = 0.59 * y - 0.03, c = 0.14 * y;
+  return (-b - sqrt(max(b * b - 4.0 * a * c, 0.0))) / (2.0 * a);
+}
+vec3 gridSky(vec3 d) {
+  float lat = asin(clamp(d.y, -1.0, 1.0));
+  float lon = atan(d.x, d.z);
+  float lon2 = atan(-d.x, -d.z);
+  const float div = PI / 12.0;
+  vec2 g = vec2(lon, lat) / div;
+  vec2 fw = vec2(min(fwidth(lon), fwidth(lon2)), fwidth(lat)) / div;
+  fw = max(fw, vec2(1e-5));
+  vec2 dist = abs(fract(g + 0.5) - 0.5) / fw;
+  float line = 1.0 - clamp(min(dist.x, dist.y) - 0.6, 0.0, 1.0);
+  vec2 g3 = g / 3.0;
+  vec2 dist3 = abs(fract(g3 + 0.5) - 0.5) / (fw / 3.0);
+  float major = 1.0 - clamp(min(dist3.x, dist3.y) - 1.1, 0.0, 1.0);
+  vec2 cell = floor(g3);
+  float chk = mod(cell.x + cell.y, 2.0);
+  vec3 base = d.y >= 0.0 ? vec3(0.05, 0.10, 0.22) : vec3(0.22, 0.10, 0.03);
+  base *= 0.65 + 0.35 * chk;
+  vec3 col = base + line * vec3(0.30) + major * vec3(0.55, 0.52, 0.45);
+  return col;
+}
+void main() {
+  vec2 frag = gl_FragCoord.xy + uJitter;
+  vec2 ndc = frag / uRes * 2.0 - 1.0;
+  float aspect = uRes.x / uRes.y;
+  vec3 n = normalize(uCamFwd + (ndc.x * aspect * uTanHalfFov) * uCamRight + (ndc.y * uTanHalfFov) * uCamUp);
+
+  float r0 = length(uCamPos);
+  vec3 e1 = uCamPos / r0;
+  float u0 = 1.0 / r0;
+  float n1 = dot(n, e1);
+  vec3 tv = n - n1 * e1;
+  float nt = length(tv);
+  vec3 e2 = nt > 1e-7 ? tv / nt : normalize(cross(e1, abs(e1.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+
+  float s = sqrt(2.0 * u0);
+  float radial, obs, Eph;
+  if (uFalling > 0.5) { Eph = 1.0 + n1 * s; radial = n1 + s; obs = 1.0 / max(Eph, 1e-4); }
+  else { float sf = sqrt(max(1.0 - 2.0 * u0, 1e-6)); radial = sf * n1; obs = 1.0 / sf; Eph = 1.0; }
+
+  float k = uLensing;
+  int fate = 0;
+  vec3 skyDir = n;
+  float hitR = 0.0, hitPsi = 0.0;
+  int order = 0;
+  float bImp = 1e9;
+  float u = u0;
+  float du = nt > 1e-7 ? -u0 * radial / nt : 0.0;
+
+  if (Eph <= 0.0) {
+    fate = 2;
+  } else if (nt <= 1e-7) {
+    if (radial > 0.0) skyDir = e1; else fate = 2;
+  } else {
+    float ib2 = du * du + u * u * (1.0 - 2.0 * k * u);
+    bImp = ib2 > 0.0 ? inversesqrt(ib2) : 1e9;
+    float phiC = 1e9;
+    if (uShowDisk > 0.5) {
+      phiC = atan(-e1.y, e2.y);
+      if (phiC <= 1e-6) phiC += PI;
+    }
+    float phi = 0.0;
+    fate = 2;
+    for (int i = 0; i < 1200; i++) {
+      if (i >= uMaxSteps) break;
+      float h = uStep / max(1.0, sqrt(abs(6.0 * k * u - 1.0)) * 0.7);
+      bool crossing = false;
+      if (phi + h >= phiC) { h = phiC - phi; crossing = true; }
+      vec2 nx = rk4(vec2(u, du), h, k);
+      if (nx.x <= 0.0) {
+        float t = u / (u - nx.x);
+        float pinf = phi + t * h;
+        skyDir = cos(pinf) * e1 + sin(pinf) * e2;
+        fate = 0;
+        break;
+      }
+      u = nx.x; du = nx.y; phi += h;
+      if ((u > 0.5 && du > 0.0) || u > 20.0) { fate = 2; break; }
+      if (crossing) {
+        float r = 1.0 / u;
+        if (r >= 6.0 && r <= uDiskOut) {
+          vec3 P = (cos(phi) * e1 + sin(phi) * e2) * r;
+          hitR = r; hitPsi = atan(P.x, P.z);
+          fate = 1;
+          break;
+        }
+        order++;
+        phiC += PI;
+      }
+      if (phi > uMaxPhi) { fate = 2; break; }
+    }
+  }
+
+  // Sky lookup in uniform control flow so screen-space derivatives are valid.
+  vec3 gx = dFdx(skyDir), gy = dFdy(skyDir);
+  float lx = length(gx), ly = length(gy);
+  const float gmax = 0.05;
+  if (lx > gmax) gx *= gmax / lx;
+  if (ly > gmax) gy *= gmax / ly;
+  vec3 sky = textureGrad(uSky, skyDir, gx, gy).rgb * uSkyGain;
+  vec3 grid = vec3(0.0);
+  if (uMode == 3) grid = gridSky(skyDir);
+
+  // Light from the distant sky is blue/redshifted at the observer.
+  float gs = (uGrav > 0.5 || uFalling > 0.5) ? clamp(obs, 0.25, 4.0) : 1.0;
+  sky *= blackbody(6000.0 * gs) / uBBRef;
+
+  vec3 col = vec3(0.0);
+  bool display = false;   // true: col is a display colour (pre-tonemap inverse applied below)
+  if (fate == 0) {
+    if (uMode == 3) { col = grid; display = true; }
+    else if (uMode == 0) col = sky;
+    else col = vec3(dot(sky, vec3(0.2126, 0.7152, 0.0722))) * 0.5;
+  } else if (fate == 1) {
+    float r = hitR;
+    float Om = pow(r, -1.5);
+    vec3 Lhat = normalize(cross(e1, e2));
+    float ellz = -bImp * Lhat.y;
+    float dop = 1.0 / max(1.0 - Om * ellz, 1e-3);
+    float grav = sqrt(1.0 - 3.0 / r);
+    float g = (uDoppler > 0.5 ? dop : 1.0) * (uGrav > 0.5 ? grav * obs : 1.0);
+    float F = max(pageThorne(r) * uFluxNorm, 0.0);
+    float nz = diskNoise(r, hitPsi);
+    float Tl = uTpeak * pow(max(F, 0.0), 0.25) * (1.0 + 0.12 * uTurb * (2.0 * nz - 1.0));
+    float emis = max(0.0, 1.0 + 0.95 * uTurb * (2.0 * nz - 1.0));
+    float edge = 1.0 - smoothstep(uDiskOut * 0.7, uDiskOut, r);
+    if (uMode == 1) {
+      float lg = log2(g);
+      vec3 cB = vec3(0.10, 0.36, 0.95), cR = vec3(0.95, 0.16, 0.05), cM = vec3(0.30);
+      vec3 cm = lg >= 0.0 ? mix(cM, cB, clamp(lg / 0.55, 0.0, 1.0)) : mix(cM, cR, clamp(-lg / 0.55, 0.0, 1.0));
+      col = cm * (0.25 + 0.75 * sqrt(F)) * edge * (0.85 + 0.15 * emis);
+      display = true;
+    } else if (uMode == 2) {
+      vec3 oc = order == 0 ? vec3(0.95, 0.42, 0.08) : (order == 1 ? vec3(0.12, 0.50, 0.95) : (order == 2 ? vec3(0.90, 0.12, 0.55) : vec3(0.92)));
+      col = oc * (0.25 + 0.75 * sqrt(F)) * edge;
+      display = true;
+    } else {
+      col = blackbody(g * Tl) * emis * edge;
+    }
+  }
+
+  if (display) col = invAces(col) / uExposure;
+  if (uHDR > 0.5) {
+    outColor = vec4(col, 1.0);
+  } else {
+    vec3 c = toSrgb(aces(col * uExposure));
+    float dn = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+    outColor = vec4(c + (dn - 0.5) / 255.0, 1.0);
+  }
+}`;
+
+  const TAA_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uCur, uPrev;
+uniform float uAlpha;
+uniform vec2 uTexel;
+in vec2 vUv;
+out vec4 outColor;
+void main() {
+  vec3 c = texture(uCur, vUv).rgb;
+  vec3 mn = c, mx = c;
+  for (int j = -1; j <= 1; j++)
+  for (int i = -1; i <= 1; i++) {
+    if (i == 0 && j == 0) continue;
+    vec3 s = texture(uCur, vUv + vec2(float(i), float(j)) * uTexel).rgb;
+    mn = min(mn, s); mx = max(mx, s);
+  }
+  vec3 p = clamp(texture(uPrev, vUv).rgb, mn, mx);
+  outColor = vec4(mix(p, c, uAlpha), 1.0);
+}`;
+
+  const DOWN_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uSrc;
+uniform vec2 uTexel;
+uniform float uClampMax;
+in vec2 vUv;
+out vec4 outColor;
+vec3 tap(vec2 o) { return min(texture(uSrc, vUv + o * uTexel).rgb, vec3(uClampMax)); }
+void main() {
+  vec3 a = tap(vec2(-2.0, 2.0)), b = tap(vec2(0.0, 2.0)), c = tap(vec2(2.0, 2.0));
+  vec3 d = tap(vec2(-2.0, 0.0)), e = tap(vec2(0.0)), f = tap(vec2(2.0, 0.0));
+  vec3 g = tap(vec2(-2.0, -2.0)), h = tap(vec2(0.0, -2.0)), i = tap(vec2(2.0, -2.0));
+  vec3 j = tap(vec2(-1.0, 1.0)), k = tap(vec2(1.0, 1.0)), l = tap(vec2(-1.0, -1.0)), m = tap(vec2(1.0, -1.0));
+  vec3 r = e * 0.125 + (a + c + g + i) * 0.03125 + (b + d + f + h) * 0.0625 + (j + k + l + m) * 0.125;
+  outColor = vec4(r, 1.0);
+}`;
+
+  const UP_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uSrc;
+uniform vec2 uTexel;
+uniform float uWeight;
+in vec2 vUv;
+out vec4 outColor;
+void main() {
+  vec2 t = uTexel;
+  vec3 s = texture(uSrc, vUv + vec2(-t.x, t.y)).rgb + 2.0 * texture(uSrc, vUv + vec2(0.0, t.y)).rgb + texture(uSrc, vUv + vec2(t.x, t.y)).rgb
+         + 2.0 * texture(uSrc, vUv + vec2(-t.x, 0.0)).rgb + 4.0 * texture(uSrc, vUv).rgb + 2.0 * texture(uSrc, vUv + vec2(t.x, 0.0)).rgb
+         + texture(uSrc, vUv + vec2(-t.x, -t.y)).rgb + 2.0 * texture(uSrc, vUv + vec2(0.0, -t.y)).rgb + texture(uSrc, vUv + vec2(t.x, -t.y)).rgb;
+  outColor = vec4(s * (uWeight / 16.0), 1.0);
+}`;
+
+  const COMPOSITE_FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uHdr, uBloom;
+uniform float uExposure, uBloomMix, uVignette, uSeed, uBloomNorm;
+in vec2 vUv;
+out vec4 outColor;
+vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
+vec3 toSrgb(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c)); }
+void main() {
+  vec3 c = texture(uHdr, vUv).rgb;
+  vec3 b = texture(uBloom, vUv).rgb / uBloomNorm;
+  c = mix(c, b, uBloomMix);
+  c *= uExposure;
+  vec2 q = vUv - 0.5;
+  c *= 1.0 - uVignette * dot(q, q) * 1.5;
+  c = toSrgb(aces(c));
+  float dn = fract(sin(dot(gl_FragCoord.xy + uSeed, vec2(12.9898, 78.233))) * 43758.5453);
+  outColor = vec4(c + (dn - 0.5) / 255.0, 1.0);
+}`;
+
+  root.SHADERS = { VERT, SKY_FRAG, TRACE_FRAG, TAA_FRAG, DOWN_FRAG, UP_FRAG, COMPOSITE_FRAG };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* WebGL2 renderer: geodesic ray tracer → temporal accumulation → bloom → tone map. */
+(function (root) {
+  'use strict';
+  const S = root.SHADERS, BH = root.BH;
+
+  function compile(gl, type, src) {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS) && !gl.isContextLost()) {
+      const log = gl.getShaderInfoLog(sh);
+      throw new Error('Shader compile failed: ' + log);
+    }
+    return sh;
+  }
+  function program(gl, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, S.VERT));
+    gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error('Program link failed: ' + gl.getProgramInfoLog(p));
+    const loc = {};
+    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < n; i++) {
+      const info = gl.getActiveUniform(p, i);
+      loc[info.name.replace(/\[0\]$/, '')] = gl.getUniformLocation(p, info.name);
+    }
+    return { p, loc };
+  }
+  function target(gl, w, h) {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA16F, w, h);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return { tex, fb, w, h, ok };
+  }
+  const BLOOM_W = 0.72;
+  const BLOOM_NORM = (function () { let s = 0, w = 1; for (let i = 0; i < 6; i++) { s += w; w *= BLOOM_W; } return s; })();
+  function freeTarget(gl, t) { if (!t) return; gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fb); }
+
+  class Renderer {
+    constructor(canvas, opts) {
+      opts = opts || {};
+      this.canvas = canvas;
+      const gl = canvas.getContext('webgl2', {
+        antialias: false, alpha: false, depth: false, stencil: false,
+        premultipliedAlpha: false, preserveDrawingBuffer: !!opts.preserve, powerPreference: 'high-performance'
+      });
+      if (!gl) throw new Error('This browser does not provide WebGL2, which the ray tracer needs.');
+      this.gl = gl;
+      this.opts = opts;
+      this.init();
+    }
+    init() {
+      const gl = this.gl;
+      this.hdr = !this.opts.forceLDR && !!(gl.getExtension('EXT_color_buffer_float') || gl.getExtension('EXT_color_buffer_half_float'));
+      this.aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+      this.vao = gl.createVertexArray();
+      this.trace = program(gl, S.TRACE_FRAG);
+      this.sky = program(gl, S.SKY_FRAG);
+      if (this.hdr) {
+        this.taa = program(gl, S.TAA_FRAG);
+        this.down = program(gl, S.DOWN_FRAG);
+        this.up = program(gl, S.UP_FRAG);
+        this.comp = program(gl, S.COMPOSITE_FRAG);
+      }
+      // Blackbody lookup table
+      const tbl = BH.blackbodyTable();
+      this.bbTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, this.bbTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, BH.BB_TABLE.n, 1, 0, gl.RGBA, gl.FLOAT, tbl);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      this.bbRef = BH.blackbody(6000);
+      // Sky cube map (procedural, generated in strips over a few frames)
+      const maxCube = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
+      const small = this.opts.smallSky || Math.min(screen.width, screen.height) < 820;
+      this.skySize = Math.min(maxCube, this.opts.skySize || (small ? 1024 : 1536));
+      this.skyTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.skyTex);
+      const levels = Math.floor(Math.log2(this.skySize)) + 1;
+      gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, gl.SRGB8_ALPHA8, this.skySize, this.skySize);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      if (this.aniso) gl.texParameterf(gl.TEXTURE_CUBE_MAP, this.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(this.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+      this.skyFb = gl.createFramebuffer();
+      this.skyJobs = [];
+      const strips = this.opts.skyStrips || 4;
+      for (let f = 0; f < 6; f++) for (let s = 0; s < strips; s++) this.skyJobs.push([f, s, strips]);
+      this.skyTotal = this.skyJobs.length;
+      this.skyReady = false;
+      this.targets = null;
+      this.acc = 0;
+      this.seed = 0;
+    }
+    skyProgress() { return 1 - this.skyJobs.length / this.skyTotal; }
+    stepSky(budget) {
+      if (this.skyReady) return true;
+      const gl = this.gl, P = this.sky;
+      gl.useProgram(P.p);
+      gl.bindVertexArray(this.vao);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.bbTex);
+      gl.uniform1i(P.loc.uBB, 0);
+      gl.uniform2f(P.loc.uBBRange, BH.BB_TABLE.logMin, BH.BB_TABLE.logMax);
+      gl.uniform1f(P.loc.uSize, this.skySize);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.skyFb);
+      gl.viewport(0, 0, this.skySize, this.skySize);
+      gl.enable(gl.SCISSOR_TEST);
+      let n = 0;
+      while (this.skyJobs.length && n < budget) {
+        const job = this.skyJobs.shift();
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X + job[0], this.skyTex, 0);
+        const y0 = Math.floor(this.skySize * job[1] / job[2]);
+        const y1 = Math.floor(this.skySize * (job[1] + 1) / job[2]);
+        gl.scissor(0, y0, this.skySize, y1 - y0);
+        gl.uniform1i(P.loc.uFace, job[0]);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        n++;
+      }
+      gl.disable(gl.SCISSOR_TEST);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      if (!this.skyJobs.length) {
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.skyTex);
+        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        this.skyReady = true;
+      }
+      return this.skyReady;
+    }
+    ensureTargets(w, h) {
+      const gl = this.gl;
+      if (this.targets && this.targets.w === w && this.targets.h === h) return;
+      if (this.targets) {
+        freeTarget(gl, this.targets.trace);
+        this.targets.acc.forEach((t) => freeTarget(gl, t));
+        this.targets.bloom.forEach((t) => freeTarget(gl, t));
+      }
+      const T = { w, h, trace: target(gl, w, h), acc: [target(gl, w, h), target(gl, w, h)], bloom: [] };
+      let bw = w, bh = h;
+      for (let i = 0; i < 6; i++) {
+        bw = Math.max(1, Math.floor(bw / 2)); bh = Math.max(1, Math.floor(bh / 2));
+        T.bloom.push(target(gl, bw, bh));
+      }
+      if (!T.trace.ok || !T.acc[0].ok) {
+        this.hdr = false;
+      }
+      this.targets = T;
+      this.resetHistory = true;
+    }
+    render(p) {
+      const gl = this.gl;
+      if (gl.isContextLost()) return;
+      const w = p.width, h = p.height;
+      if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; }
+      if (this.hdr) this.ensureTargets(w, h);
+      gl.bindVertexArray(this.vao);
+      gl.disable(gl.BLEND);
+
+      // 1. Ray trace
+      const P = this.trace, L = P.loc;
+      gl.useProgram(P.p);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.hdr ? this.targets.trace.fb : null);
+      gl.viewport(0, 0, w, h);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.bbTex); gl.uniform1i(L.uBB, 0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.skyTex); gl.uniform1i(L.uSky, 1);
+      gl.uniform2f(L.uBBRange, BH.BB_TABLE.logMin, BH.BB_TABLE.logMax);
+      gl.uniform3fv(L.uBBRef, this.bbRef);
+      gl.uniform2f(L.uRes, w, h);
+      gl.uniform2f(L.uJitter, p.jitter[0], p.jitter[1]);
+      gl.uniform3fv(L.uCamPos, p.cam.pos);
+      gl.uniform3fv(L.uCamRight, p.cam.right);
+      gl.uniform3fv(L.uCamUp, p.cam.up);
+      gl.uniform3fv(L.uCamFwd, p.cam.fwd);
+      gl.uniform1f(L.uTanHalfFov, p.cam.tanHalfFov);
+      gl.uniform1f(L.uTime, p.time);
+      gl.uniform1f(L.uDiskOut, p.diskOut);
+      gl.uniform1f(L.uTpeak, p.tpeak);
+      gl.uniform1f(L.uFluxNorm, 1 / BH.FLUX_PEAK.F);
+      gl.uniform1f(L.uTurb, p.turb);
+      gl.uniform1f(L.uDoppler, p.doppler ? 1 : 0);
+      gl.uniform1f(L.uGrav, p.grav ? 1 : 0);
+      gl.uniform1f(L.uLensing, p.lensing ? 1 : 0);
+      gl.uniform1f(L.uShowDisk, p.showDisk ? 1 : 0);
+      gl.uniform1f(L.uFalling, p.falling ? 1 : 0);
+      gl.uniform1i(L.uMode, p.mode);
+      gl.uniform1f(L.uExposure, p.exposure);
+      gl.uniform1f(L.uSkyGain, this.skyReady ? p.skyGain : 0);
+      gl.uniform1f(L.uStep, p.step);
+      gl.uniform1i(L.uMaxSteps, p.maxSteps);
+      gl.uniform1f(L.uMaxPhi, p.maxPhi);
+      gl.uniform1f(L.uHDR, this.hdr ? 1 : 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if (!this.hdr) return;
+
+      const T = this.targets;
+      // 2. Temporal accumulation
+      const prev = T.acc[this.acc], cur = T.acc[1 - this.acc];
+      gl.useProgram(this.taa.p);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, cur.fb);
+      gl.viewport(0, 0, w, h);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, T.trace.tex); gl.uniform1i(this.taa.loc.uCur, 0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, prev.tex); gl.uniform1i(this.taa.loc.uPrev, 1);
+      gl.uniform1f(this.taa.loc.uAlpha, this.resetHistory ? 1 : p.taaAlpha);
+      gl.uniform2f(this.taa.loc.uTexel, 1 / w, 1 / h);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      this.resetHistory = false;
+      this.acc = 1 - this.acc;
+
+      // 3. Bloom pyramid
+      const useBloom = p.bloom > 0.001;
+      if (useBloom) {
+        gl.useProgram(this.down.p);
+        let src = cur;
+        for (let i = 0; i < T.bloom.length; i++) {
+          const dst = T.bloom[i];
+          gl.bindFramebuffer(gl.FRAMEBUFFER, dst.fb);
+          gl.viewport(0, 0, dst.w, dst.h);
+          gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, src.tex);
+          gl.uniform1i(this.down.loc.uSrc, 0);
+          gl.uniform2f(this.down.loc.uTexel, 1 / src.w, 1 / src.h);
+          gl.uniform1f(this.down.loc.uClampMax, i === 0 ? 40.0 : 1e4);
+          gl.drawArrays(gl.TRIANGLES, 0, 3);
+          src = dst;
+        }
+        gl.useProgram(this.up.p);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.ONE, gl.ONE);
+        for (let i = T.bloom.length - 1; i > 0; i--) {
+          const s = T.bloom[i], d = T.bloom[i - 1];
+          gl.bindFramebuffer(gl.FRAMEBUFFER, d.fb);
+          gl.viewport(0, 0, d.w, d.h);
+          gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, s.tex);
+          gl.uniform1i(this.up.loc.uSrc, 0);
+          gl.uniform2f(this.up.loc.uTexel, 1 / s.w, 1 / s.h);
+          gl.uniform1f(this.up.loc.uWeight, BLOOM_W);
+          gl.drawArrays(gl.TRIANGLES, 0, 3);
+        }
+        gl.disable(gl.BLEND);
+      }
+
+      // 4. Composite to screen
+      gl.useProgram(this.comp.p);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, w, h);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, cur.tex); gl.uniform1i(this.comp.loc.uHdr, 0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, T.bloom[0].tex); gl.uniform1i(this.comp.loc.uBloom, 1);
+      // The bloom pyramid sums 6 weighted levels; uBloomNorm turns that back into an average.
+      gl.uniform1f(this.comp.loc.uBloomMix, useBloom ? p.bloom : 0);
+      gl.uniform1f(this.comp.loc.uBloomNorm, BLOOM_NORM);
+      gl.uniform1f(this.comp.loc.uExposure, p.exposure);
+      gl.uniform1f(this.comp.loc.uVignette, p.vignette);
+      gl.uniform1f(this.comp.loc.uSeed, (this.seed = (this.seed + 1) % 997));
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+  }
+  root.BHRenderer = Renderer;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* Observatory: camera, controls, ray probe, telemetry, dive mode and the render loop. */
+(function () {
+  'use strict';
+  const BH = window.BH;
+  const D2R = Math.PI / 180;
+  const $ = (id) => document.getElementById(id);
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+
+  // ---------- vector helpers ----------
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const scale = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const len = (a) => Math.hypot(a[0], a[1], a[2]);
+  const norm = (a) => scale(a, 1 / (len(a) || 1));
+  function rot(v, k, t) { // Rodrigues rotation of v about unit axis k
+    const c = Math.cos(t), s = Math.sin(t);
+    return add(add(scale(v, c), scale(cross(k, v), s)), scale(k, dot(k, v) * (1 - c)));
+  }
+
+  // ---------- state ----------
+  const RMIN = 2.5, RMAX = 120, TMIN = 2000, TMAX = 40000;
+  const DEFAULTS = {
+    r: 26, az: 0, el: 7 * D2R, yaw: 0, pitch: 0, fov: 55,
+    diskOut: 22, tpeak: 5200, turb: 0.55, speed: 1,
+    showDisk: true, lensing: true, doppler: true, grav: true,
+    mode: 0, ev: 0, bloom: 0.14, stars: 1, quality: 'auto', autoOrbit: false
+  };
+  const S = Object.assign({}, DEFAULTS, { time: 0, falling: false, dive: null });
+  const SGR_TG = 4.297e6 * BH.K.GMsun / Math.pow(BH.K.c, 3); // seconds per M for Sgr A*
+
+  function camR() { return S.dive ? S.dive.r : S.r; }
+  function camBasis() {
+    const r = camR();
+    const ce = Math.cos(S.el), se = Math.sin(S.el);
+    const pos = [r * ce * Math.sin(S.az), r * se, r * ce * Math.cos(S.az)];
+    let fwd = scale(pos, -1 / r);
+    let right = norm(cross(fwd, [0, 1, 0]));
+    let up = cross(right, fwd);
+    if (S.yaw || S.pitch) {
+      fwd = rot(fwd, up, S.yaw); right = rot(right, up, S.yaw);
+      fwd = norm(rot(fwd, right, S.pitch)); up = norm(cross(right, fwd));
+    }
+    let fov = S.fov;
+    if (S.dive) { const t = clamp((14 - r) / 11, 0, 1); fov = S.fov + (Math.max(S.fov, 104) - S.fov) * t * t * (3 - 2 * t); }
+    return { pos, fwd, right, up, r, tanHalfFov: Math.tan(fov * D2R / 2) };
+  }
+
+  // ---------- renderer ----------
+  const canvas = $('view');
+  const obs = $('observatory');
+  let renderer = null;
+  try {
+    const q = new URLSearchParams(location.search);
+    renderer = new window.BHRenderer(canvas, { forceLDR: q.has('ldr'), skySize: q.has('sky') ? +q.get('sky') : 0 });
+  } catch (err) {
+    console.error(err);
+    $('glFail').hidden = false;
+    $('glFailMsg').textContent = err && err.message ? err.message : 'WebGL2 is unavailable.';
+    $('loading').hidden = true;
+  }
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    $('glFail').hidden = false;
+    $('glFailMsg').textContent = 'The graphics context was lost (the GPU was reset or ran out of memory). Reload the page to restart the renderer.';
+  });
+
+  // ---------- controls ----------
+  function setFill(el) {
+    const min = +el.min, max = +el.max;
+    el.style.setProperty('--fill', ((+el.value - min) / (max - min) * 100).toFixed(2) + '%');
+  }
+  const logTo = (v, a, b) => 1000 * Math.log(v / a) / Math.log(b / a);
+  const logFrom = (x, a, b) => a * Math.pow(b / a, x / 1000);
+  const binds = [];
+  function bindRange(id, outId, cfg) {
+    const el = $(id), out = $(outId);
+    const toS = cfg.to || ((v) => v), fromS = cfg.from || ((x) => x);
+    const render = () => { const v = cfg.get(); if (cfg.html) out.innerHTML = cfg.format(v); else out.textContent = cfg.format(v); };
+    const sync = () => { el.value = toS(cfg.get()); setFill(el); render(); };
+    el.addEventListener('input', () => { cfg.set(fromS(+el.value)); setFill(el); render(); if (cfg.after) cfg.after(); });
+    sync();
+    const b = { sync, el };
+    binds.push(b);
+    return b;
+  }
+  const fmt1 = (v) => v.toFixed(1);
+  const bDist = bindRange('cDist', 'oDist', {
+    get: () => S.r, set: (v) => { S.r = v; }, to: (v) => logTo(v, RMIN, RMAX), from: (x) => logFrom(x, RMIN, RMAX),
+    format: (v) => (v < 10 ? v.toFixed(2) : v.toFixed(1)) + ' M'
+  });
+  const bIncl = bindRange('cIncl', 'oIncl', {
+    get: () => S.el / D2R, set: (v) => { S.el = v * D2R; }, format: (v) => (Math.abs(v) < 0.05 ? '0' : v.toFixed(1).replace(/\.0$/, '')) + '°'
+  });
+  bindRange('cFov', 'oFov', { get: () => S.fov, set: (v) => { S.fov = v; }, format: (v) => Math.round(v) + '°' });
+  bindRange('cTemp', 'oTemp', {
+    get: () => S.tpeak, set: (v) => { S.tpeak = Math.round(v / 50) * 50; }, to: (v) => logTo(v, TMIN, TMAX), from: (x) => logFrom(x, TMIN, TMAX),
+    html: true, format: (v) => '<i class="swatch" style="background:' + BH.blackbodyCss(v) + ';color:' + BH.blackbodyCss(v) + '"></i>' + Math.round(v).toLocaleString('en-US') + ' K'
+  });
+  bindRange('cOut', 'oOut', { get: () => S.diskOut, set: (v) => { S.diskOut = v; }, format: (v) => v.toFixed(1).replace(/\.0$/, '') + ' M' });
+  bindRange('cTurb', 'oTurb', { get: () => S.turb, set: (v) => { S.turb = v; }, format: (v) => v.toFixed(2) });
+  bindRange('cSpeed', 'oSpeed', { get: () => S.speed, set: (v) => { S.speed = v; }, format: (v) => (v === 0 ? 'paused' : v.toFixed(2).replace(/0$/, '') + '×') });
+  bindRange('cEv', 'oEv', { get: () => S.ev, set: (v) => { S.ev = v; }, format: (v) => (v > 0 ? '+' : '') + v.toFixed(1) + ' EV' });
+  bindRange('cBloom', 'oBloom', { get: () => S.bloom, set: (v) => { S.bloom = v; }, format: (v) => v.toFixed(2) });
+  bindRange('cStars', 'oStars', { get: () => S.stars, set: (v) => { S.stars = v; }, format: (v) => v.toFixed(2).replace(/0$/, '') + '×' });
+
+  function bindSwitch(id, key) {
+    const el = $(id);
+    el.checked = !!S[key];
+    el.addEventListener('change', () => { S[key] = el.checked; probeDirty = true; });
+    return el;
+  }
+  const swDisk = bindSwitch('cDisk', 'showDisk');
+  const swLens = bindSwitch('cLens', 'lensing');
+  const swDopp = bindSwitch('cDopp', 'doppler');
+  const swGrav = bindSwitch('cGrav', 'grav');
+  const resSel = $('cRes');
+  resSel.addEventListener('change', () => { S.quality = resSel.value; });
+
+  const btnOrbit = $('btnOrbit');
+  btnOrbit.addEventListener('click', () => { S.autoOrbit = !S.autoOrbit; btnOrbit.setAttribute('aria-pressed', String(S.autoOrbit)); });
+  $('btnReset').addEventListener('click', () => {
+    if (S.dive) stopDive();
+    Object.assign(S, { r: DEFAULTS.r, az: DEFAULTS.az, el: DEFAULTS.el, yaw: 0, pitch: 0, fov: DEFAULTS.fov });
+    binds.forEach((b) => b.sync());
+  });
+
+  // view modes
+  const modeBtns = Array.from(document.querySelectorAll('#modes button'));
+  const legend = $('legend');
+  const LEGENDS = {
+    1: '<div class="ramp"><span>0.5×</span><i></i><span>2×</span></div><p>Frequency seen ÷ frequency emitted (g). Grey means the two cancel; blue means motion toward you beats gravity\'s pull.</p>',
+    2: '<div class="orders"><span><i style="background:#ff9938"></i>Direct (n = 0)</span><span><i style="background:#4db3ff"></i>One wrap (n = 1)</span><span><i style="background:#f252b8"></i>Two (n = 2)</span><span><i style="background:#fff"></i>More</span></div><p>How many times the light crossed the disk plane before landing on the disk.</p>',
+    3: '<p>The sky painted as a 15° grid, northern half blue, southern half amber. Where the grid wraps into a ring, you are seeing the Einstein ring.</p>'
+  };
+  function setMode(m) {
+    S.mode = m;
+    modeBtns.forEach((b) => { const on = +b.dataset.mode === m; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; });
+    legend.hidden = !LEGENDS[m];
+    legend.innerHTML = LEGENDS[m] || '';
+  }
+  modeBtns.forEach((b, i) => {
+    b.addEventListener('click', () => setMode(+b.dataset.mode));
+    b.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const j = (i + (e.key === 'ArrowRight' ? 1 : modeBtns.length - 1)) % modeBtns.length;
+        setMode(+modeBtns[j].dataset.mode); modeBtns[j].focus();
+      }
+    });
+  });
+  setMode(0);
+
+  // mobile rail
+  const rail = $('rail'), railOpen = $('railOpen');
+  railOpen.addEventListener('click', () => { rail.classList.add('open'); railOpen.setAttribute('aria-expanded', 'true'); });
+  $('railClose').addEventListener('click', () => { rail.classList.remove('open'); railOpen.setAttribute('aria-expanded', 'false'); railOpen.focus(); });
+
+  // ---------- hint & toast ----------
+  const hint = $('hint');
+  if (coarse) hint.textContent = 'Swipe sideways to orbit · pinch to zoom · tap to trace a ray';
+  else hint.textContent = 'Drag to orbit · click, then scroll to zoom · hover to trace a ray';
+  let hintGone = false;
+  function hideHint() { if (!hintGone) { hintGone = true; hint.classList.add('gone'); } }
+  const toast = $('toast');
+  let toastTimer = 0, toastLast = 0, toastCount = 0;
+  function showToast(msg) {
+    const now = performance.now();
+    if (now - toastLast < 8000 || toastCount >= 3) return;
+    toastLast = now; toastCount++;
+    toast.textContent = msg; toast.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.hidden = true; }, 1600);
+  }
+
+  // ---------- pointer interaction ----------
+  const pointers = new Map();
+  let drag = null, pinch = null, active = false;
+  let probePt = null, probeDirty = false, probePinned = false, probeExample = false;
+  const mark = document.createElement('div');
+  mark.className = 'probe-mark'; mark.hidden = true; obs.appendChild(mark);
+  function relPos(e) { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height }; }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    active = true; hideHint();
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      const p = Array.from(pointers.values());
+      pinch = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), r: S.r };
+      drag = null;
+    } else {
+      drag = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false };
+    }
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && pointers.size === 2) {
+      const p = Array.from(pointers.values());
+      const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      if (!S.dive && d > 10) { S.r = clamp(pinch.r * pinch.d / d, RMIN, RMAX); bDist.sync(); }
+      return;
+    }
+    if (drag && pointers.has(e.pointerId)) {
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      drag.x = e.clientX; drag.y = e.clientY;
+      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) > 5) { drag.moved = true; canvas.classList.add('dragging'); }
+      if (!drag.moved) return;
+      if (S.dive) {
+        S.yaw += dx * 0.0035;
+        S.pitch = clamp(S.pitch - dy * 0.0035, -1.45, 1.45);
+      } else {
+        S.az -= dx * 0.0055;
+        S.el = clamp(S.el + dy * 0.0045, -85 * D2R, 85 * D2R);
+        bIncl.sync();
+      }
+      return;
+    }
+    if (e.pointerType === 'mouse' && !probePinned) { probePt = relPos(e); probeDirty = true; probeExample = false; }
+  });
+  function endPointer(e) {
+    const wasDrag = drag;
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (wasDrag && !wasDrag.moved && e.type === 'pointerup') {
+      // a tap or click: probe (and pin on touch)
+      probePt = relPos(e); probeDirty = true; probePinned = e.pointerType !== 'mouse'; probeExample = false;
+    }
+    if (pointers.size === 0) { drag = null; canvas.classList.remove('dragging'); }
+  }
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
+  canvas.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'mouse' && !probePinned) { mark.hidden = true; $('probe').classList.add('idle'); probePt = null; }
+  });
+  obs.addEventListener('pointerleave', () => { active = false; });
+  canvas.addEventListener('wheel', (e) => {
+    if (S.dive) return;
+    if (!(active || e.ctrlKey)) { showToast('Click the view first, then scroll to zoom'); return; }
+    e.preventDefault();
+    const k = Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.04 : 0.0012));
+    S.r = clamp(S.r * k, RMIN, RMAX); bDist.sync(); hideHint();
+  }, { passive: false });
+  canvas.addEventListener('keydown', (e) => {
+    let used = true;
+    if (e.key === 'ArrowLeft') S.az += 0.05;
+    else if (e.key === 'ArrowRight') S.az -= 0.05;
+    else if (e.key === 'ArrowUp') { S.el = clamp(S.el + 0.04, -85 * D2R, 85 * D2R); bIncl.sync(); }
+    else if (e.key === 'ArrowDown') { S.el = clamp(S.el - 0.04, -85 * D2R, 85 * D2R); bIncl.sync(); }
+    else if ((e.key === '+' || e.key === '=') && !S.dive) { S.r = clamp(S.r / 1.08, RMIN, RMAX); bDist.sync(); }
+    else if ((e.key === '-' || e.key === '_') && !S.dive) { S.r = clamp(S.r * 1.08, RMIN, RMAX); bDist.sync(); }
+    else used = false;
+    if (used) { e.preventDefault(); hideHint(); }
+  });
+
+  // ---------- ray probe ----------
+  const probeEl = $('probe'), probeFate = $('probeFate'), probeData = $('probeData');
+  const probeLabel = probeEl.querySelector('.label');
+  const inset = $('probeInset');
+  const insetCtx = inset.getContext('2d');
+  (function sizeInset() { const d = Math.min(window.devicePixelRatio || 1, 2); inset.width = inset.height = Math.round(228 * d); })();
+  const css = getComputedStyle(document.documentElement);
+  const C = (name) => css.getPropertyValue(name).trim();
+
+  function rayForPixel(px, py, w, h) {
+    const cam = camBasis();
+    const x = (px / w) * 2 - 1, y = 1 - (py / h) * 2;
+    const aspect = w / h;
+    const n = norm(add(cam.fwd, add(scale(cam.right, x * aspect * cam.tanHalfFov), scale(cam.up, y * cam.tanHalfFov))));
+    const e1 = scale(cam.pos, 1 / cam.r);
+    const n1 = dot(n, e1);
+    const tv = sub(n, scale(e1, n1));
+    const nt = len(tv);
+    const e2 = nt > 1e-9 ? scale(tv, 1 / nt) : norm(cross(e1, Math.abs(e1[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]));
+    const res = BH.traceRay({
+      r0: cam.r, n1, nt, falling: S.falling, k: S.lensing ? 1 : 0,
+      a: e1[1], b: e2[1], disk: S.showDisk, diskOut: S.diskOut, record: true, base: 0.02, maxPhi: 5 * Math.PI
+    });
+    return { res, n, e1, e2, cam };
+  }
+  function row(k, v) { return '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>'; }
+  const ORD = ['direct', 'after 1 wrap', 'after 2 wraps', 'after 3 wraps'];
+  function runProbe() {
+    if (!probePt) return;
+    const { x, y, w, h } = probePt;
+    if (x < 0 || y < 0 || x > w || y > h) return;
+    mark.hidden = false;
+    mark.style.left = x + 'px'; mark.style.top = y + 'px';
+    probeEl.classList.remove('idle', 'empty');
+    const P = rayForPixel(x, y, w, h);
+    const r = P.res;
+    const bc = Math.sqrt(27);
+    let fate, rows = '';
+    const bTxt = isFinite(r.b) && r.b < 1e6 ? r.b.toFixed(2) + ' M · ' + (r.b / bc).toFixed(3) + '× crit.' : '—';
+    if (r.fate === 'disk') {
+      const L = norm(cross(P.e1, P.e2));
+      const ellz = -r.b * L[1];
+      const z = BH.diskRedshift(r.r, ellz, r.ic.obs, { doppler: S.doppler, grav: S.grav });
+      const Tl = S.tpeak * Math.pow(BH.pageThorne(r.r) / BH.FLUX_PEAK.F, 0.25);
+      fate = 'Lands on the disk' + (r.order ? ', ' + (ORD[r.order] || 'after ' + r.order + ' wraps') : '');
+      rows += row('Disk radius', r.r.toFixed(2) + ' M');
+      rows += row('Shift g', z.g.toFixed(3) + (z.g > 1.005 ? ' · blue' : z.g < 0.995 ? ' · red' : ''));
+      rows += row('Doppler × grav.', (S.doppler ? z.dop : 1).toFixed(3) + ' × ' + (S.grav ? z.grav : 1).toFixed(3));
+      rows += row('Temperature', Math.round(Tl).toLocaleString('en-US') + ' → ' + Math.round(Tl * z.g).toLocaleString('en-US') + ' K');
+      rows += row('Impact b', bTxt);
+    } else if (r.fate === 'sky') {
+      const D = add(scale(P.e1, Math.cos(r.phiInf)), scale(P.e2, Math.sin(r.phiInf)));
+      const bend = Math.acos(clamp(dot(D, P.n), -1, 1)) / D2R;
+      fate = 'Escapes to the sky';
+      rows += row('Bent by', bend.toFixed(bend < 10 ? 2 : 1) + '°');
+      rows += row('Swept angle', (r.phiInf / D2R).toFixed(1) + '°');
+      rows += row('Impact b', bTxt);
+      if (r.order) rows += row('Disk plane', 'crossed ' + r.order + '×');
+    } else {
+      fate = r.why === 'white-hole' ? 'Dark: no light comes from here' : r.why === 'trapped' ? 'Orbits the photon sphere' : 'Falls into the hole';
+      rows += row('Impact b', bTxt);
+      rows += row('Why', r.why === 'white-hole' ? 'only the collapsed star' : r.why === 'trapped' ? 'b ≈ 3√3 M exactly' : (isFinite(r.b) && r.b < bc ? 'b < 3√3 M ≈ 5.196 M' : 'dips inside 3M'));
+    }
+    probeFate.textContent = fate;
+    probeLabel.textContent = probeExample ? 'Ray probe · example' : 'Ray probe';
+    probeData.innerHTML = rows;
+    drawInset(P);
+  }
+
+  function drawInset(P) {
+    const ctx = insetCtx, W = inset.width, H = inset.height;
+    const r = P.res;
+    ctx.clearRect(0, 0, W, H);
+    const r0 = P.cam.r;
+    const R = Math.max(r0, S.showDisk ? S.diskOut : 8, 8) * 1.15;
+    const sc = (W / 2) / R;
+    const phiN = Math.atan2(-P.e1[1], P.e2[1]);
+    const perpY = -Math.sin(phiN) * P.e1[1] + Math.cos(phiN) * P.e2[1];
+    const flip = perpY < 0 ? -1 : 1;
+    const c = Math.cos(-phiN), s = Math.sin(-phiN);
+    const tx = (x, y) => [W / 2 + (x * c - y * s) * sc, H / 2 - flip * (x * s + y * c) * sc];
+    const dpr = W / 228;
+    // photon sphere and horizon
+    ctx.lineWidth = 1 * dpr;
+    ctx.setLineDash([3 * dpr, 3 * dpr]);
+    ctx.strokeStyle = 'rgba(236,230,220,0.28)';
+    ctx.beginPath(); ctx.arc(W / 2, H / 2, 3 * sc, 0, 2 * Math.PI); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(W / 2, H / 2, 2 * sc, 0, 2 * Math.PI); ctx.fill();
+    ctx.strokeStyle = 'rgba(242,162,78,0.55)';
+    ctx.beginPath(); ctx.arc(W / 2, H / 2, 2 * sc, 0, 2 * Math.PI); ctx.stroke();
+    // disk as a glowing line (edge-on in this slice)
+    if (S.showDisk) {
+      for (let side = -1; side <= 1; side += 2) {
+        const steps = 40;
+        for (let i = 0; i < steps; i++) {
+          const ra = 6 + (S.diskOut - 6) * i / steps, rb = 6 + (S.diskOut - 6) * (i + 1) / steps;
+          const f = Math.sqrt(BH.pageThorne(0.5 * (ra + rb)) / BH.FLUX_PEAK.F);
+          ctx.strokeStyle = 'rgba(242,162,78,' + (0.15 + 0.85 * f).toFixed(3) + ')';
+          ctx.lineWidth = 2.5 * dpr;
+          const A = tx(side * ra, 0), B = tx(side * rb, 0);
+          ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+        }
+      }
+    }
+    // ray path in its orbital plane (plane coords: e1 = x, e2 = y)
+    const pts = r.pts || [];
+    ctx.strokeStyle = C('--blueshift') || '#7cc4ff';
+    ctx.lineWidth = 1.6 * dpr;
+    ctx.beginPath();
+    let started = false, lastX = 0, lastY = 0;
+    for (let i = 0; i < pts.length; i += 2) {
+      const ph = pts[i], u = pts[i + 1];
+      if (u <= 1 / (R * 6)) continue;
+      const x = Math.cos(ph) / u, y = Math.sin(ph) / u;
+      const q = tx(x, y);
+      if (!started) { ctx.moveTo(q[0], q[1]); started = true; } else ctx.lineTo(q[0], q[1]);
+      lastX = x; lastY = y;
+    }
+    if (r.fate === 'sky' && started) {
+      const far = R * 8;
+      const q = tx(lastX + Math.cos(r.phiInf) * far, lastY + Math.sin(r.phiInf) * far);
+      ctx.lineTo(q[0], q[1]);
+    }
+    ctx.stroke();
+    // end marker
+    if (r.fate === 'disk') {
+      const q = tx(Math.cos(r.phi) * r.r, Math.sin(r.phi) * r.r);
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(q[0], q[1], 3.2 * dpr, 0, 2 * Math.PI); ctx.fill();
+    }
+    // observer
+    const o = tx(r0, 0);
+    ctx.fillStyle = C('--ember-ink') || '#ffc48a';
+    ctx.beginPath(); ctx.arc(o[0], o[1], 3.6 * dpr, 0, 2 * Math.PI); ctx.fill();
+    ctx.font = (10 * dpr) + 'px ' + (C('--font-mono') || 'monospace');
+    ctx.fillStyle = 'rgba(236,230,220,0.7)';
+    ctx.textAlign = o[0] > W / 2 ? 'right' : 'left';
+    ctx.fillText('you', o[0] + (o[0] > W / 2 ? -7 : 7) * dpr, o[1] - 6 * dpr);
+  }
+
+  // ---------- telemetry ----------
+  const tm = { r: $('tmR'), clock: $('tmClock'), shadow: $('tmShadow'), render: $('tmRender') };
+  const shadowCache = new Map();
+  function fallingShadow(r0) {
+    const key = r0.toFixed(2);
+    if (shadowCache.has(key)) return shadowCache.get(key);
+    let lo = 0, hi = Math.PI;
+    const captured = (al) => BH.traceRay({ r0, n1: -Math.cos(al), nt: Math.sin(al), falling: true, disk: false, base: 0.03 }).fate === 'hole';
+    for (let i = 0; i < 26; i++) { const m = 0.5 * (lo + hi); if (captured(m)) lo = m; else hi = m; }
+    const v = 0.5 * (lo + hi);
+    if (shadowCache.size > 400) shadowCache.clear();
+    shadowCache.set(key, v);
+    return v;
+  }
+  let fpsAvg = 60;
+  function updateTelemetry(w, h) {
+    const r = camR();
+    tm.r.textContent = 'r = ' + (r < 10 ? r.toFixed(2) : r.toFixed(1)) + ' M · ' + (r / 2).toFixed(r < 20 ? 2 : 1) + ' rₛ';
+    if (!S.falling) {
+      tm.clock.textContent = Math.sqrt(1 - 2 / r).toFixed(4) + '× far-away rate';
+    } else {
+      tm.clock.textContent = r > 2 ? (1 - 2 / r).toFixed(4) + '× far-away rate (falling)' : 'no outside clock to compare';
+    }
+    if (!S.lensing) {
+      tm.shadow.textContent = (2 * Math.asin(Math.min(1, 2 / r)) / D2R).toFixed(1) + '° across (no bending)';
+    } else if (!S.falling) {
+      const a = 2 * BH.shadowAngleStatic(r) / D2R;
+      tm.shadow.textContent = a.toFixed(1) + '° across' + (a > 180 ? ' (most of the sky)' : '');
+    } else {
+      tm.shadow.textContent = (2 * fallingShadow(r) / D2R).toFixed(1) + '° across';
+    }
+    tm.render.textContent = w + '×' + h + ' · ' + Math.round(fpsAvg) + ' fps' + (renderer && renderer.hdr ? '' : ' · basic');
+  }
+
+  // ---------- dive ----------
+  const diveHud = $('diveHud'), btnDive = $('btnDive');
+  function startDive() {
+    if (S.dive || !renderer) return;
+    const r0 = S.r;
+    S.dive = { r: r0, r0, tau: 0, crossed: false, done: false, kappa: Math.log(r0 / 0.3) / (reduceMotion ? 30 : 19) };
+    S.falling = true; S.yaw = 0; S.pitch = 0;
+    S.wasOrbit = S.autoOrbit; S.autoOrbit = false; btnOrbit.setAttribute('aria-pressed', 'false');
+    diveHud.hidden = false; $('diveTitle').textContent = 'Falling from rest'; $('diveTitle').classList.remove('crossed');
+    btnDive.disabled = true; btnDive.textContent = 'Falling…';
+    bDist.el.disabled = true;
+    probePinned = false; probePt = null; mark.hidden = true; probeExample = false;
+    probeEl.classList.add('idle', 'empty'); probeFate.textContent = 'Hover to trace a ray from here'; probeData.innerHTML = '';
+    insetCtx.clearRect(0, 0, inset.width, inset.height);
+    rail.classList.remove('open');
+  }
+  function stopDive() {
+    S.dive = null; S.falling = false; S.yaw = 0; S.pitch = 0;
+    diveHud.hidden = true; btnDive.disabled = false; btnDive.textContent = 'Dive in';
+    bDist.el.disabled = false;
+  }
+  btnDive.addEventListener('click', startDive);
+  $('diveStop').addEventListener('click', stopDive);
+  function stepDive(dt) {
+    const d = S.dive;
+    if (!d || d.done) return;
+    const r1 = d.r;
+    let r2 = r1 * Math.exp(-d.kappa * dt);
+    if (r2 <= 0.3) { r2 = 0.3; d.done = true; }
+    d.tau += (2 / 3) * (Math.pow(r1, 1.5) - Math.pow(r2, 1.5)) / Math.SQRT2;
+    d.r = r2;
+  }
+  function updateDiveHud() {
+    const d = S.dive; if (!d) return;
+    const r = d.r;
+    const tauLeft = (2 / 3) * Math.pow(r, 1.5) / Math.SQRT2;
+    const title = $('diveTitle');
+    if (d.done) { title.textContent = 'Singularity reached'; title.classList.add('crossed'); }
+    else if (r < 2) { title.textContent = 'Inside the event horizon'; title.classList.add('crossed'); }
+    $('diveR').textContent = r.toFixed(r < 10 ? 3 : 2) + ' M';
+    $('diveTau').textContent = tauLeft.toFixed(2) + ' M (' + (tauLeft * SGR_TG).toFixed(1) + ' s for Sgr A*)';
+    $('diveV').textContent = r > 2 ? Math.sqrt(2 / r).toFixed(3) + ' c' : 'none exist in here';
+    $('diveShift').textContent = '×' + (1 / (1 + Math.sqrt(2 / r))).toFixed(3) + ' frequency';
+    $('diveNote').textContent = d.done
+      ? 'Proper time ran out after ' + d.tau.toFixed(1) + ' M (' + (d.tau * SGR_TG / 60).toFixed(1) + ' minutes for Sgr A*). Every path inside the horizon ends here.'
+      : 'Drag to look around. The view widens as you fall, and playback slows so the last moments stay visible; readouts are physical.';
+  }
+
+  // ---------- render loop ----------
+  const DR = { scale: coarse ? 0.55 : 0.75, ceil: 1, floor: 0.3, samples: [], minDt: 1 / 60, lastUp: 0, lastCeil: 0 };
+  let cssW = 1, cssH = 1;
+  const ro = new ResizeObserver(() => { const r = canvas.getBoundingClientRect(); cssW = Math.max(1, r.width); cssH = Math.max(1, r.height); probeDirty = true; });
+  ro.observe(canvas);
+  function renderSize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const s = S.quality === 'auto' ? DR.scale : parseFloat(S.quality);
+    let w = Math.max(96, Math.round(cssW * dpr * s)), h = Math.max(64, Math.round(cssH * dpr * s));
+    const maxPix = 4.5e6;
+    if (w * h > maxPix) { const k = Math.sqrt(maxPix / (w * h)); w = Math.round(w * k); h = Math.round(h * k); }
+    return [w, h];
+  }
+  function updateDR(dt, now) {
+    if (S.quality !== 'auto' || !renderer || !renderer.skyReady) return;
+    if (dt > 0.004) DR.minDt = Math.min(DR.minDt * 1.002, Math.max(dt, 1 / 240));
+    DR.samples.push(dt);
+    if (DR.samples.length < 40) return;
+    const sorted = DR.samples.slice().sort((a, b) => a - b);
+    const med = sorted[sorted.length >> 1];
+    DR.samples.length = 0;
+    const target = Math.max(DR.minDt, 1 / 120);
+    if (med > target * 1.45 && DR.scale > DR.floor) {
+      DR.ceil = Math.min(DR.ceil, DR.scale * 0.98);
+      DR.scale = Math.max(DR.floor, DR.scale * (med > target * 2.5 ? 0.7 : 0.85));
+      DR.lastUp = now;
+    } else if (med < target * 1.15 && DR.scale < DR.ceil && now - DR.lastUp > 2000) {
+      DR.scale = Math.min(DR.ceil, DR.scale * 1.08);
+      DR.lastUp = now;
+    }
+    if (now - DR.lastCeil > 15000) { DR.ceil = Math.min(1, DR.ceil * 1.04); DR.lastCeil = now; }
+  }
+  function halton(i, b) { let f = 1, r = 0; while (i > 0) { f /= b; r += f * (i % b); i = Math.floor(i / b); } return r; }
+
+  let visible = true;
+  new IntersectionObserver((ents) => { visible = ents[0].isIntersecting; }, { threshold: 0.02 }).observe(obs);
+  let last = performance.now(), frameNo = 0, lastParamKey = '', lastCamKey = '', telemetryT = 0, loadingDone = false;
+  const loading = $('loading'), loadBar = $('loadBar');
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dtRaw = Math.max(0, (now - last) / 1000);
+    last = now;
+    if (!renderer || !visible || document.hidden) return;
+    const dt = Math.min(dtRaw, 0.1);
+    fpsAvg = fpsAvg * 0.94 + (dtRaw > 0 ? 1 / dtRaw : 60) * 0.06;
+    updateDR(dtRaw, now);
+
+    if (S.speed > 0) S.time += dt * S.speed * 10;
+    if (S.autoOrbit && !S.dive && !drag) S.az -= dt * (reduceMotion ? 0.02 : 0.05);
+    if (S.dive) stepDive(dt);
+
+    if (!renderer.skyReady) {
+      renderer.stepSky(2);
+      loadBar.style.width = Math.round(renderer.skyProgress() * 100) + '%';
+    } else if (!loadingDone) {
+      loadingDone = true; loading.classList.add('done');
+      setTimeout(() => { loading.hidden = true; }, 600);
+    }
+
+    const cam = camBasis();
+    const [w, h] = renderSize();
+    const exposure = Math.pow(2, S.ev) * 0.5 / BH.luminance(BH.blackbody(S.tpeak));
+    const paramKey = [S.diskOut, S.tpeak, S.turb.toFixed(3), S.showDisk, S.lensing, S.doppler, S.grav, S.mode, S.falling, renderer.skyReady, w, h, S.fov].join('|');
+    const camKey = cam.pos.map((v) => v.toFixed(4)).join(',') + cam.fwd.map((v) => v.toFixed(4)).join(',');
+    let alpha;
+    if (paramKey !== lastParamKey) alpha = 1;
+    else if (camKey !== lastCamKey) alpha = S.dive ? 0.6 : 0.5;
+    else alpha = S.speed > 0 ? 0.24 : 0.1;
+    if (paramKey !== lastParamKey || camKey !== lastCamKey) probeDirty = true;
+    lastParamKey = paramKey; lastCamKey = camKey;
+    const jIdx = (frameNo++ % 16) + 1;
+    const jitter = [halton(jIdx, 2) - 0.5, halton(jIdx, 3) - 0.5];
+    renderer.render({
+      width: w, height: h, cam, time: S.time, jitter,
+      diskOut: S.diskOut, tpeak: S.tpeak, turb: S.turb,
+      doppler: S.doppler, grav: S.grav, lensing: S.lensing, showDisk: S.showDisk, falling: S.falling,
+      mode: S.mode, exposure, skyGain: 0.5 * S.stars, step: 0.06, maxSteps: 700, maxPhi: 5 * Math.PI,
+      bloom: S.bloom, taaAlpha: alpha, vignette: 0.55
+    });
+    if (!exampleTried && frameNo > 2) { exampleTried = true; exampleProbe(); }
+    if (S.speed > 0 && probePt) probeDirty = probeDirty || (frameNo % 6 === 0);
+    if (probeDirty && probePt) { probeDirty = false; runProbe(); }
+    if (now - telemetryT > 200) { telemetryT = now; updateTelemetry(w, h); updateDiveHud(); }
+  }
+  // Start with a real example in the probe: the first ray just outside the shadow's top edge.
+  function exampleProbe() {
+    if (coarse || probePt) return;
+    const w = cssW, h = cssH;
+    if (w < 50 || h < 50) return;
+    const x = w / 2;
+    let yEdge = null;
+    for (let y = h / 2; y > 2; y -= 1) {
+      if (rayForPixel(x, y, w, h).res.fate !== 'hole') { yEdge = y; break; }
+    }
+    if (yEdge == null) return;
+    probePt = { x, y: yEdge - 1, w, h }; probeExample = true; probeDirty = true;
+  }
+  let exampleTried = false;
+  if (renderer) requestAnimationFrame(frame);
+  updateTelemetry(0, 0);
+  window.__bh = { S, camBasis, rayForPixel, renderer: () => renderer, startDive, stopDive, setMode, DR, frames: () => frameNo, vis: () => [visible, document.hidden] };
+})();
+
+</script>
+<script>
+/* Physics bench: orbits, light bending, time dilation, tides, black hole calculator. */
+(function () {
+  'use strict';
+  const BH = window.BH, K = BH.K, PI = Math.PI, D2R = PI / 180;
+  const $ = (id) => document.getElementById(id);
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const css = getComputedStyle(document.documentElement);
+  const tok = (n) => css.getPropertyValue(n).trim();
+  const T = {
+    ink: tok('--ink') || '#ece6dc', ink2: tok('--ink-2') || '#b7b3ab', muted: tok('--muted') || '#868c99',
+    surface: tok('--surface') || '#0d1016', surface3: tok('--surface-3') || '#1c2230',
+    grid: tok('--grid') || '#1a1f29', axis: tok('--axis') || '#323947',
+    s1: tok('--series-1') || '#cc7826', s2: tok('--series-2') || '#3a8ae0', s3: tok('--series-3') || '#d55181',
+    ember: tok('--ember') || '#f2a24e', emberInk: tok('--ember-ink') || '#ffc48a',
+    blue: tok('--blueshift') || '#7cc4ff', red: tok('--redshift') || '#ff7a59',
+    mono: tok('--font-mono') || 'monospace', body: tok('--font-body') || 'sans-serif', display: tok('--font-display') || 'serif'
+  };
+  const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  function setFill(el) { el.style.setProperty('--fill', ((+el.value - +el.min) / (+el.max - +el.min) * 100).toFixed(2) + '%'); }
+  function fitCanvas(cv) {
+    const W = cv.clientWidth, H = cv.clientHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(W * dpr)), h = Math.max(1, Math.round(H * dpr));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, W, H, dpr };
+  }
+  function dl(items) {
+    return items.map((it) => '<div' + (it.wide ? ' class="wide"' : '') + '><dt>' + it.k + '</dt><dd>' + it.v + (it.s ? '<small>' + it.s + '</small>' : '') + '</dd></div>').join('');
+  }
+  function table(head, rows) {
+    return '<table><thead><tr>' + head.map((h) => '<th scope="col">' + h + '</th>').join('') + '</tr></thead><tbody>' +
+      rows.map((r) => '<tr>' + r.map((c) => '<td>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+  }
+  const f = (x, d) => (isFinite(x) ? x.toFixed(d) : '—');
+  const sci = BH.sci;
+  const SUPS = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  function p10(v) {
+    const e = Math.round(Math.log10(v));
+    if (Math.abs(v - Math.pow(10, e)) > 1e-9 * v) return sci(v, 2);
+    if (e === 0) return '1';
+    if (e === 1) return '10';
+    return '10' + String(e).split('').map((c) => SUPS[c]).join('');
+  }
+
+  /* ---------------- tiny line chart with hover ---------------- */
+  function niceStep(span, count) {
+    const s0 = span / Math.max(1, count), mag = Math.pow(10, Math.floor(Math.log10(s0))), e = s0 / mag;
+    return (e >= 7.5 ? 10 : e >= 3.5 ? 5 : e >= 1.5 ? 2 : 1) * mag;
+  }
+  function ticksFor(a, count) {
+    if (a.ticks) return a.ticks;
+    if (a.log) {
+      const out = [];
+      const e0 = Math.ceil(Math.log10(a.min) - 1e-9), e1 = Math.floor(Math.log10(a.max) + 1e-9);
+      const stride = Math.max(1, Math.ceil((e1 - e0 + 1) / 7));
+      for (let e = e0; e <= e1; e += stride) out.push(Math.pow(10, e));
+      if (out.length < 3) {
+        for (let e = e0 - 1; e <= e1; e++) [2, 5].forEach((m) => { const v = m * Math.pow(10, e); if (v >= a.min && v <= a.max) out.push(v); });
+        out.sort((x, y) => x - y);
+      }
+      return out;
+    }
+    const st = niceStep(a.max - a.min, count);
+    const out = [];
+    for (let v = Math.ceil(a.min / st) * st; v <= a.max + st * 1e-6; v += st) out.push(Math.abs(v) < st * 1e-9 ? 0 : v);
+    return out;
+  }
+  function mapper(a, p0, p1) {
+    if (a.log) {
+      const l0 = Math.log10(a.min), l1 = Math.log10(a.max);
+      return { to: (v) => p0 + (Math.log10(v) - l0) / (l1 - l0) * (p1 - p0), from: (p) => Math.pow(10, l0 + (p - p0) / (p1 - p0) * (l1 - l0)) };
+    }
+    return { to: (v) => p0 + (v - a.min) / (a.max - a.min) * (p1 - p0), from: (p) => a.min + (p - p0) / (p1 - p0) * (a.max - a.min) };
+  }
+  function interp(pts, x) {
+    if (!pts.length || x < pts[0][0] || x > pts[pts.length - 1][0]) return null;
+    let lo = 0, hi = pts.length - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (pts[m][0] <= x) lo = m; else hi = m; }
+    const a = pts[lo], b = pts[hi];
+    if (a[1] == null || b[1] == null) return null;
+    const t = b[0] === a[0] ? 0 : (x - a[0]) / (b[0] - a[0]);
+    return a[1] + t * (b[1] - a[1]);
+  }
+  class Chart {
+    constructor(cv) {
+      this.cv = cv; this.d = null; this.hx = null;
+      new ResizeObserver(() => this.draw()).observe(cv);
+      cv.tabIndex = 0;
+      cv.addEventListener('pointermove', (e) => { const r = cv.getBoundingClientRect(); this.hx = e.clientX - r.left; this.draw(); });
+      cv.addEventListener('pointerleave', () => { this.hx = null; this.draw(); });
+      cv.addEventListener('focus', () => { if (this.hx == null) { this.hx = cv.clientWidth * 0.5; this.draw(); } });
+      cv.addEventListener('blur', () => { this.hx = null; this.draw(); });
+      cv.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        this.hx = clamp((this.hx == null ? cv.clientWidth / 2 : this.hx) + (e.key === 'ArrowRight' ? 1 : -1) * cv.clientWidth * 0.025, 0, cv.clientWidth);
+        this.draw();
+      });
+    }
+    set(d) { this.d = d; this.draw(); }
+    draw() {
+      const d = this.d; if (!d) return;
+      const { ctx, W, H } = fitCanvas(this.cv);
+      if (W < 20 || H < 20) return;
+      ctx.clearRect(0, 0, W, H);
+      const m = { l: 50, r: 14, t: 22, b: 26 };
+      const pw = W - m.l - m.r, ph = H - m.t - m.b;
+      const X = mapper(d.x, m.l, m.l + pw), Y = mapper(d.y, m.t + ph, m.t);
+      ctx.font = '10.5px ' + T.mono;
+      ctx.lineWidth = 1;
+      // grid + y ticks
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ticksFor(d.y, 4).forEach((v) => {
+        const y = Math.round(Y.to(v)) + 0.5;
+        if (y < m.t - 1 || y > m.t + ph + 1) return;
+        ctx.strokeStyle = T.grid; ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(m.l + pw, y); ctx.stroke();
+        ctx.fillStyle = T.muted; ctx.fillText((d.y.fmt || String)(v), m.l - 7, y);
+      });
+      // x ticks
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ticksFor(d.x, Math.max(3, Math.floor(pw / 80))).forEach((v) => {
+        const x = Math.round(X.to(v)) + 0.5;
+        if (x < m.l - 1 || x > m.l + pw + 1) return;
+        ctx.strokeStyle = T.axis; ctx.beginPath(); ctx.moveTo(x, m.t + ph); ctx.lineTo(x, m.t + ph + 4); ctx.stroke();
+        ctx.fillStyle = T.muted; ctx.fillText((d.x.fmt || String)(v), x, m.t + ph + 7);
+      });
+      ctx.strokeStyle = T.axis; ctx.beginPath(); ctx.moveTo(m.l, m.t + ph + 0.5); ctx.lineTo(m.l + pw, m.t + ph + 0.5); ctx.stroke();
+      if (d.x.label) { ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = T.muted; ctx.fillText(d.x.label, m.l + pw, m.t + ph - 4); }
+      if (d.y.label) { ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillStyle = T.muted; ctx.fillText(d.y.label, m.l + 4, 4); }
+      ctx.save();
+      ctx.beginPath(); ctx.rect(m.l, m.t - 2, pw, ph + 4); ctx.clip();
+      // reference lines
+      (d.vlines || []).forEach((v) => {
+        if (v.x < d.x.min || v.x > d.x.max) return;
+        const x = Math.round(X.to(v.x)) + 0.5;
+        ctx.strokeStyle = v.color || T.axis; ctx.setLineDash(v.dash || []);
+        ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, m.t + ph); ctx.stroke(); ctx.setLineDash([]);
+        if (v.label) { ctx.fillStyle = T.ink2; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(v.label, x + 4, m.t + 2 + (v.row || 0) * 13); }
+      });
+      (d.hlines || []).forEach((hl) => {
+        if (hl.y < Math.min(d.y.min, d.y.max) || hl.y > Math.max(d.y.min, d.y.max)) return;
+        const y = Math.round(Y.to(hl.y)) + 0.5;
+        ctx.strokeStyle = hl.color || T.axis; ctx.lineWidth = hl.width || 1; ctx.setLineDash(hl.dash || []);
+        ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(m.l + pw, y); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 1;
+        if (hl.label) { ctx.fillStyle = T.ink2; ctx.textAlign = hl.align || 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(hl.label, hl.align === 'left' ? m.l + 6 : m.l + pw - 4, y - 3); }
+      });
+      // series
+      d.series.forEach((s) => {
+        ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2; ctx.setLineDash(s.dash || []); ctx.lineJoin = 'round';
+        ctx.beginPath();
+        let pen = false;
+        for (const p of s.pts) {
+          if (p[1] == null || !isFinite(p[1]) || (d.y.log && p[1] <= 0)) { pen = false; continue; }
+          const x = X.to(p[0]), y = Y.to(clamp(p[1], Math.min(d.y.min, d.y.max) - Math.abs(d.y.max - d.y.min), Math.max(d.y.min, d.y.max) + Math.abs(d.y.max - d.y.min)));
+          if (!pen) { ctx.moveTo(x, y); pen = true; } else ctx.lineTo(x, y);
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+      });
+      // markers
+      (d.markers || []).forEach((mk) => {
+        if (mk.x < d.x.min || mk.x > d.x.max || mk.y == null) return;
+        const x = X.to(mk.x), y = Y.to(mk.y);
+        ctx.fillStyle = T.surface; ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * PI); ctx.fill();
+        ctx.fillStyle = mk.color; ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * PI); ctx.fill();
+      });
+      ctx.restore();
+      // legend (>= 2 series)
+      const named = d.series.filter((s) => s.name);
+      if (named.length >= 2) {
+        ctx.font = '11px ' + T.body; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+        let lx = m.l + pw;
+        const items = named.map((s) => ({ s, w: ctx.measureText(s.name).width + 22 }));
+        lx -= items.reduce((a, b) => a + b.w, 0);
+        items.forEach((it) => {
+          ctx.fillStyle = it.s.color; ctx.fillRect(lx, 8, 10, 2.5);
+          ctx.fillStyle = T.ink2; ctx.fillText(it.s.name, lx + 14, 9.5);
+          lx += it.w;
+        });
+      }
+      // hover
+      if (this.hx != null && this.hx >= m.l && this.hx <= m.l + pw) {
+        const xv = X.from(this.hx);
+        ctx.strokeStyle = 'rgba(236,230,220,0.35)'; ctx.beginPath(); ctx.moveTo(Math.round(this.hx) + 0.5, m.t); ctx.lineTo(Math.round(this.hx) + 0.5, m.t + ph); ctx.stroke();
+        const lines = [{ t: (d.x.hoverFmt || d.x.fmt || String)(xv), c: null }];
+        d.series.forEach((s) => {
+          if (!s.name) return;
+          const yv = interp(s.pts, xv);
+          if (yv == null) return;
+          lines.push({ t: s.name + '  ' + (d.y.hoverFmt || d.y.fmt || String)(yv), c: s.color });
+          const yy = Y.to(yv);
+          if (yy >= m.t && yy <= m.t + ph) { ctx.fillStyle = T.surface; ctx.beginPath(); ctx.arc(this.hx, yy, 5, 0, 2 * PI); ctx.fill(); ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(this.hx, yy, 3.2, 0, 2 * PI); ctx.fill(); }
+        });
+        ctx.font = '11px ' + T.mono;
+        const bw = Math.max.apply(null, lines.map((l) => ctx.measureText(l.t).width)) + 26, bh = lines.length * 16 + 10;
+        let bx = this.hx + 12; if (bx + bw > W - 4) bx = this.hx - 12 - bw;
+        const by = m.t + 6;
+        ctx.fillStyle = 'rgba(20,25,34,0.95)'; ctx.strokeStyle = 'rgba(236,230,220,0.18)';
+        ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, bw, bh, 6) : ctx.rect(bx, by, bw, bh); ctx.fill(); ctx.stroke();
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        lines.forEach((l, i) => {
+          const ly = by + 13 + i * 16;
+          if (l.c) { ctx.fillStyle = l.c; ctx.beginPath(); ctx.arc(bx + 11, ly, 3.5, 0, 2 * PI); ctx.fill(); }
+          ctx.fillStyle = i === 0 ? T.muted : T.ink;
+          ctx.fillText(l.t, bx + (l.c ? 20 : 9), ly);
+        });
+      }
+    }
+  }
+
+  function bindSlider(id, outId, get, set, toS, fromS, fmt, after) {
+    const el = $(id), out = $(outId);
+    const sync = () => { el.value = toS(get()); setFill(el); out.textContent = fmt(get()); };
+    el.addEventListener('input', () => { set(fromS(+el.value)); setFill(el); out.textContent = fmt(get()); if (after) after(); });
+    sync();
+    return { el, sync };
+  }
+  function segGroup(rootId, attr, onPick) {
+    const btns = Array.from(document.querySelectorAll('#' + rootId + ' [role="radio"]'));
+    const pick = (v) => { btns.forEach((b) => { const on = b.dataset[attr] === v; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; }); onPick(v); };
+    btns.forEach((b, i) => {
+      b.addEventListener('click', () => pick(b.dataset[attr]));
+      b.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        const j = (i + (e.key === 'ArrowRight' ? 1 : btns.length - 1)) % btns.length;
+        pick(btns[j].dataset[attr]); btns[j].focus();
+      });
+    });
+    return pick;
+  }
+  const logTo = (v, a, b) => 1000 * Math.log(v / a) / Math.log(b / a);
+  const logFrom = (x, a, b) => a * Math.pow(b / a, x / 1000);
+
+  function drawHole(ctx, x, y, rPx, glow) {
+    if (glow) {
+      const g = ctx.createRadialGradient(x, y, rPx * 0.9, x, y, rPx * 2.4);
+      g.addColorStop(0, 'rgba(242,162,78,0.32)'); g.addColorStop(1, 'rgba(242,162,78,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rPx * 2.4, 0, 2 * PI); ctx.fill();
+    }
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x, y, rPx, 0, 2 * PI); ctx.fill();
+    ctx.strokeStyle = 'rgba(242,162,78,0.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, rPx, 0, 2 * PI); ctx.stroke();
+  }
+  function ring(ctx, x, y, rPx, label, color) {
+    ctx.strokeStyle = color || 'rgba(236,230,220,0.22)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.arc(x, y, rPx, 0, 2 * PI); ctx.stroke(); ctx.setLineDash([]);
+    if (label) { ctx.fillStyle = T.muted; ctx.font = '10.5px ' + T.mono; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(label, x + rPx * 0.72 + 4, y - rPx * 0.72 - 2); }
+  }
+
+  /* ======================= ORBITS ======================= */
+  function OrbitsLab() {
+    const cv = $('orbitCanvas');
+    const chart = new Chart($('potCanvas'));
+    const O = { r0: 30, L: 4.2, newton: true, clock: 'tau', speed: 1, playing: !reduceMotion };
+    const PRESETS = {
+      rosette: { r0: 30, L: 4.2 },
+      zoom: { r0: 40, L: 3.83 },
+      isco: { r0: 6, L: Math.sqrt(12) },
+      unstable: { r0: 4.5, L: Math.sqrt(4.5 * 4.5 / 1.5) * (1 - 1e-5) },
+      plunge: { r0: 20, L: 3.6 },
+      far: { r0: 160, L: 11 }
+    };
+    let gr, nw, trail, trailN, peris, info, status, timeBase, periPhis, lastVr;
+    const ro = bindSlider('oR0', 'oR0o', () => O.r0, (v) => { O.r0 = v; }, (v) => logTo(v, 4, 200), (x) => logFrom(x, 4, 200), (v) => f(v, v < 10 ? 2 : 1) + ' M', () => { clearPreset(); reset(); });
+    const lo = bindSlider('oL', 'oLo', () => O.L, (v) => { O.L = v; }, (v) => v, (x) => x, (v) => f(v, 3) + ' M', () => { clearPreset(); reset(); });
+    const presetBtns = Array.from(document.querySelectorAll('#orbitPresets .chip'));
+    function clearPreset() { presetBtns.forEach((b) => b.setAttribute('aria-pressed', 'false')); }
+    presetBtns.forEach((b) => b.addEventListener('click', () => {
+      const p = PRESETS[b.dataset.preset];
+      O.r0 = p.r0; O.L = p.L; ro.sync(); lo.sync();
+      presetBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      reset();
+    }));
+    $('oNewton').addEventListener('change', (e) => { O.newton = e.target.checked; draw(); });
+    segGroup('oClock', 'clock', (v) => { O.clock = v; });
+    bindSlider('oSpeed', 'oSpeedo', () => O.speed, (v) => { O.speed = v; }, (v) => v, (x) => x, (v) => f(v, 2).replace(/0$/, '') + '×');
+    const playBtn = $('oPlay');
+    const syncPlay = () => { playBtn.textContent = O.playing ? 'Pause' : 'Play'; playBtn.setAttribute('aria-pressed', String(O.playing)); };
+    playBtn.addEventListener('click', () => { O.playing = !O.playing; syncPlay(); });
+    syncPlay();
+    $('oReset').addEventListener('click', reset);
+    $('oNudge').addEventListener('click', () => {
+      if (!gr || !gr.alive) return;
+      gr.vr -= 0.004;
+      O.E = Math.sqrt(BH.energySq(gr.r, gr.vr, O.L));
+      O.nudged = true; periPhis = [];
+      readout();
+    });
+
+    function reset() {
+      const E2 = BH.energySq(O.r0, 0, O.L);
+      O.E = Math.sqrt(E2);
+      gr = { r: O.r0, vr: 0, phi: 0, t: 0, tau: 0, alive: true, crossed: false, frozen: false };
+      O.nudged = false;
+      nw = { r: O.r0, vr: 0, phi: 0, t: 0, tau: 0 };
+      trail = []; trailN = []; peris = []; periPhis = []; lastVr = 0;
+      info = BH.turningPoints(O.r0, O.L);
+      info.barrier = BH.barrier(O.L);
+      const rp = info.peri;
+      const a = rp ? 0.5 * (O.r0 + rp) : O.r0;
+      timeBase = 2 * PI * Math.pow(Math.max(a, 4), 1.5) / 5.5; // ~5.5 s per orbit
+      status = '';
+      // Run ahead about one orbit so the shape is visible straight away.
+      if (info.peri && Math.abs(info.peri - O.r0) > 1e-3 * O.r0) {
+        const spd = O.speed; O.speed = 1;
+        for (let k = 0; k < 120 && gr.alive && periPhis.length < 2; k++) step(0.1);
+        O.speed = spd;
+      }
+      updateChart();
+      draw();
+      readout();
+    }
+    function step(dtWall) {
+      if (!gr) return;
+      let budget = dtWall * O.speed * timeBase;
+      const E = O.E;
+      let guard = 0;
+      while (budget > 1e-9 && guard++ < 4000) {
+        let h = Math.min(budget, 0.012 * Math.pow(Math.max(gr.alive ? gr.r : nw.r, 2.2), 1.5));
+        if (gr.alive) {
+          let hTau = h;
+          if (O.clock === 't') hTau = h * (1 - 2 / gr.r) / E;
+          const prevPhi = gr.phi, prevVr = gr.vr;
+          BH.orbitStep(gr, O.L, true, E, hTau);
+          if (prevVr < 0 && gr.vr >= 0 && gr.r > 2.05) {
+            const t = -prevVr / (gr.vr - prevVr);
+            const ph = prevPhi + t * (gr.phi - prevPhi);
+            periPhis.push(ph);
+            peris.push({ phi: ph, r: gr.r });
+            if (peris.length > 40) peris.shift();
+          }
+          if (gr.r <= 2.0005) {
+            if (O.clock === 'tau') { gr.alive = false; gr.crossed = true; gr.r = 2; }
+            else { gr.frozen = true; }
+          }
+          if (gr.r > 8 * Math.max(O.r0, 20)) gr.alive = false;
+          if (O.clock === 't' && gr.r < 2.003) gr.frozen = true;
+          const x = gr.r * Math.cos(gr.phi), y = gr.r * Math.sin(gr.phi);
+          trail.push(x, y);
+          if (trail.length > 24000) trail.splice(0, trail.length - 24000);
+        }
+        if (O.newton) {
+          const hn = Math.min(h, 0.012 * Math.pow(Math.max(nw.r, 0.5), 1.5));
+          BH.orbitStep(nw, O.L, false, 1, hn);
+          trailN.push(nw.r * Math.cos(nw.phi), nw.r * Math.sin(nw.phi));
+          if (trailN.length > 6000) trailN.splice(0, trailN.length - 6000);
+        }
+        budget -= h;
+      }
+    }
+    function updateChart() {
+      const L = O.L;
+      const rMax = Math.max(24, O.r0 * 1.25);
+      const pts = [], ptsN = [];
+      const n = 260;
+      for (let i = 0; i <= n; i++) {
+        const r = 2 + (rMax - 2) * i / n;
+        pts.push([r, BH.vEffGR(r, L)]);
+        ptsN.push([r, BH.vEffNewton(r, L)]);
+      }
+      const eps = (O.E * O.E - 1) / 2;
+      const rLo = info.barrier ? Math.max(2.4, info.barrier.r * 0.8) : 3;
+      const vis = pts.filter((q) => q[0] >= rLo).map((q) => q[1]);
+      let yMin = Math.min(eps, ...vis);
+      let yMax = Math.max(eps, 0);
+      if (info.barrier && info.barrier.r < rMax) yMax = Math.max(yMax, BH.vEffGR(info.barrier.r, L));
+      const pad = (yMax - yMin) * 0.18 + 0.002;
+      yMin = Math.max(yMin - pad, -0.5); yMax += pad;
+      const step = niceStep(yMax - yMin, 4);
+      const yfmt = (v) => (Math.abs(v) < step * 1e-6 ? '0' : v.toFixed(Math.max(0, -Math.floor(Math.log10(step)))));
+      chart.set({
+        x: { min: 2, max: rMax, fmt: (v) => Math.round(v) + '', hoverFmt: (v) => 'r = ' + v.toFixed(2) + ' M', label: 'r (M)' },
+        y: { min: yMin, max: yMax, fmt: yfmt, hoverFmt: (v) => v.toFixed(4) },
+        series: [
+          { name: 'Relativity', color: T.s1, pts },
+          ...(O.newton ? [{ name: 'Newton', color: T.s2, pts: ptsN }] : [])
+        ],
+        hlines: [{ y: eps, color: 'rgba(236,230,220,0.55)', dash: [5, 4], label: 'particle energy', align: 'right' }],
+        vlines: [{ x: 6, label: 'ISCO 6M', dash: [2, 3] }, { x: 3, label: '3M', dash: [2, 3], row: 1 }],
+        markers: gr ? [{ x: gr.r, y: eps, color: T.emberInk }] : []
+      });
+      const rows = [];
+      [2.5, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50, 80, 120, 200].filter((r) => r <= rMax).forEach((r) => rows.push([r.toFixed(1), BH.vEffGR(r, L).toFixed(5), BH.vEffNewton(r, L).toFixed(5)]));
+      $('potTable').innerHTML = table(['r (M)', 'V relativity', 'V Newton'], rows);
+    }
+    function draw() {
+      const { ctx, W, H } = fitCanvas(cv);
+      if (W < 40 || H < 40) return;
+      ctx.clearRect(0, 0, W, H);
+      const cx = W / 2, cy = H / 2 + 8;
+      const extent = Math.max(O.r0 * 1.08, 10, (info && info.peri) ? 0 : O.r0 * 1.5);
+      const sc = Math.min(W, H - 30) / 2 / extent;
+      // scale bar
+      const bar = niceStep(extent, 2.5);
+      ctx.strokeStyle = T.muted; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(16, H - 18); ctx.lineTo(16 + bar * sc, H - 18); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(16, H - 22); ctx.lineTo(16, H - 14); ctx.moveTo(16 + bar * sc, H - 22); ctx.lineTo(16 + bar * sc, H - 14); ctx.stroke();
+      ctx.fillStyle = T.muted; ctx.font = '10.5px ' + T.mono; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.fillText(bar + ' M', 16, H - 23);
+      ring(ctx, cx, cy, 6 * sc, 6 * sc > 26 ? 'ISCO' : '', 'rgba(242,162,78,0.28)');
+      ring(ctx, cx, cy, 3 * sc, 3 * sc > 30 ? 'photon sphere' : '');
+      drawHole(ctx, cx, cy, Math.max(2 * sc, 2.5), true);
+      // Newton trail
+      if (O.newton && trailN.length > 2) {
+        ctx.strokeStyle = T.s2; ctx.globalAlpha = 0.75; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        for (let i = 0; i < trailN.length; i += 2) { const x = cx + trailN[i] * sc, y = cy - trailN[i + 1] * sc; if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+        ctx.stroke(); ctx.globalAlpha = 1;
+      }
+      // relativistic trail, older segments fainter
+      if (trail.length > 2) {
+        const n = trail.length / 2;
+        const chunks = 12;
+        ctx.lineWidth = 1.6; ctx.strokeStyle = T.s1;
+        for (let c = 0; c < chunks; c++) {
+          const a = Math.floor(n * c / chunks), b = Math.min(n - 1, Math.floor(n * (c + 1) / chunks) + 1);
+          ctx.globalAlpha = 0.18 + 0.82 * Math.pow((c + 1) / chunks, 1.6);
+          ctx.beginPath();
+          for (let i = a; i <= b; i++) { const x = cx + trail[2 * i] * sc, y = cy - trail[2 * i + 1] * sc; if (i === a) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
+      // periapsis ticks
+      ctx.strokeStyle = 'rgba(236,230,220,0.55)'; ctx.lineWidth = 1;
+      peris.forEach((p) => {
+        const c = Math.cos(p.phi), s = Math.sin(p.phi);
+        ctx.beginPath(); ctx.moveTo(cx + (p.r - 1.2) * c * sc, cy - (p.r - 1.2) * s * sc); ctx.lineTo(cx + (p.r + 1.2) * c * sc, cy - (p.r + 1.2) * s * sc); ctx.stroke();
+      });
+      // bodies
+      if (O.newton && nw) {
+        const x = cx + nw.r * Math.cos(nw.phi) * sc, y = cy - nw.r * Math.sin(nw.phi) * sc;
+        ctx.fillStyle = T.surface; ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * PI); ctx.fill();
+        ctx.fillStyle = T.s2; ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * PI); ctx.fill();
+      }
+      if (gr) {
+        const x = cx + gr.r * Math.cos(gr.phi) * sc, y = cy - gr.r * Math.sin(gr.phi) * sc;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 14);
+        g.addColorStop(0, 'rgba(255,196,138,0.55)'); g.addColorStop(1, 'rgba(255,196,138,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 14, 0, 2 * PI); ctx.fill();
+        ctx.fillStyle = T.surface; ctx.beginPath(); ctx.arc(x, y, 6.5, 0, 2 * PI); ctx.fill();
+        ctx.fillStyle = gr.alive ? T.emberInk : T.muted; ctx.beginPath(); ctx.arc(x, y, 4.5, 0, 2 * PI); ctx.fill();
+      }
+      // clocks
+      ctx.font = '11px ' + T.mono; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillStyle = T.ink2;
+      if (gr) {
+        ctx.fillText('particle τ = ' + gr.tau.toFixed(0) + ' M', W - 14, H - 30);
+        ctx.fillText('distant t = ' + (gr.crossed ? '∞' : gr.t.toFixed(0)) + ' M', W - 14, H - 14);
+      }
+    }
+    function readout() {
+      if (!gr) return;
+      const L = O.L, E = O.E, eps = (E * E - 1) / 2;
+      const bar = info.barrier;
+      const circ = Math.abs(L - BH.circularL(O.r0)) < 2e-3 * L || (info.peri && Math.abs(info.peri - O.r0) < 1e-3 * O.r0);
+      let kind;
+      if (!info.peri && E >= 1) kind = '<span class="tag cool">unbound</span>';
+      else if (!info.peri) kind = '<span class="tag hot">plunges</span>';
+      else if (circ) kind = '<span class="tag warm">circular</span>';
+      else kind = '<span class="tag warm">bound</span>';
+      if (gr.crossed) kind = '<span class="tag hot">crossed the horizon</span>';
+      else if (gr.frozen) kind = '<span class="tag hot">frozen at horizon (distant view)</span>';
+      else if (!gr.alive) kind = '<span class="tag cool">escaped</span>';
+      const p = info.peri ? 2 * O.r0 * info.peri / (O.r0 + info.peri) : null;
+      let prec = '—', precS = '';
+      if (periPhis.length >= 2) {
+        const dphi = periPhis[periPhis.length - 1] - periPhis[periPhis.length - 2] - 2 * PI;
+        prec = f(dphi / D2R, 2) + '° per orbit';
+      } else if (info.peri && !(Math.abs(info.peri - O.r0) < 1e-3 * O.r0)) prec = 'measuring…';
+      if (p) precS = 'weak-field formula 6πM/p: ' + f(6 * PI / p / D2R, 2) + '°';
+      const rate = gr.alive ? (1 - 2 / gr.r) / E : 0;
+      $('orbitReadout').innerHTML = dl([
+        { k: 'Orbit', v: kind, wide: true },
+        { k: 'Energy E', v: f(E, 5), s: E < 1 ? 'below 1: bound' : 'at or above 1: can escape' },
+        { k: 'Turning points', v: O.nudged ? 'changed by the nudge' : circ ? 'circular at ' + f(O.r0, 2) + ' M' : info.peri ? f(info.peri, 2) + ' – ' + f(O.r0, 2) + ' M' : 'none inside', s: circ ? (O.r0 < 6.0001 ? (O.r0 > 5.999 ? 'marginally stable: try a nudge' : 'unstable: any nudge grows') : 'stable') : info.peri ? 'periapsis – apoapsis' : 'falls straight through' },
+        { k: 'Precession', v: prec, s: precS, wide: true },
+        { k: 'Barrier', v: bar ? 'r = ' + f(bar.r, 2) + ' M' : 'none (L < √12 M)', s: bar ? (E * E > bar.E2 ? 'energy clears it' : 'energy below its top') : 'nothing stops a plunge' },
+        { k: 'Clock rate', v: gr.alive && !gr.crossed ? f(rate, 4) : '—', s: 'dτ/dt, particle vs distant' }
+      ]);
+      updateChart();
+    }
+    let raf = 0, lastT = 0, readT = 0, running = false;
+    function loop(now) {
+      if (!running) return;
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(0.05, (now - lastT) / 1000 || 0); lastT = now;
+      if (O.playing) step(dt);
+      draw();
+      if (now - readT > 250) { readT = now; readout(); }
+    }
+    new ResizeObserver(() => draw()).observe(cv);
+    presetBtns[0].setAttribute('aria-pressed', 'true');
+    reset();
+    return {
+      start() { if (running) return; running = true; lastT = performance.now(); raf = requestAnimationFrame(loop); },
+      stop() { running = false; cancelAnimationFrame(raf); }
+    };
+  }
+
+  /* ======================= LIGHT ======================= */
+  function LightLab() {
+    const cv = $('lightCanvas');
+    const chart = new Chart($('deflCanvas'));
+    const BC = Math.sqrt(27);
+    const L = { mode: 'beam', b: 5.4, src: 4 };
+    // slider: cubic around the critical value for fine control near 3√3 M
+    const XC = 420;
+    const bTo = (b) => (b >= BC ? XC + (1000 - XC) * Math.cbrt((b - BC) / (15 - BC)) : XC - XC * Math.cbrt((BC - b) / BC));
+    const bFrom = (x) => (x >= XC ? BC + (15 - BC) * Math.pow((x - XC) / (1000 - XC), 3) : BC - BC * Math.pow((XC - x) / XC, 3));
+    const bs = bindSlider('lB', 'lBo', () => L.b, (v) => { L.b = v; }, bTo, bFrom, (v) => (Math.abs(v - BC) < 0.01 ? v.toFixed(5) : v.toFixed(3)) + ' M', () => { buildProbe(); readout(); });
+    bindSlider('lSrc', 'lSrco', () => L.src, (v) => { L.src = v; }, (v) => v, (x) => x, (v) => v.toFixed(2) + ' M', () => { buildFlash(); readout(); });
+    segGroup('lMode', 'mode', (v) => {
+      L.mode = v; $('lBWrap').hidden = v !== 'beam'; $('lSrcWrap').hidden = v !== 'flash'; $('lCrit').hidden = v !== 'beam';
+      T0 = 0; readout();
+    });
+    $('lCrit').addEventListener('click', () => { L.b = BC * (1 + 2e-5); bs.sync(); buildProbe(); readout(); });
+
+    // Coordinate-time path builder: pts are (x, y, t) in M
+    function pathFromInfinity(b) {
+      const res = BH.rayFromInfinity(Math.abs(b), { record: true, base: 0.008 });
+      const sign = b < 0 ? -1 : 1;
+      const out = [];
+      const p = res.pts;
+      const Rstart = 40;
+      let t = 0, prev = null;
+      let umax = 0;
+      for (let i = 0; i < p.length; i += 2) {
+        const ps = p[i], u = p[i + 1];
+        if (u <= 0) continue;
+        umax = Math.max(umax, u);
+        const x = -Math.cos(ps) / u, y = sign * Math.sin(ps) / u;
+        if (x < -Rstart && !prev) continue;
+        if (Math.hypot(x, y) > 60 && prev && x > 0) break;
+        if (prev) {
+          const r = 0.5 * (Math.hypot(x, y) + Math.hypot(prev[0], prev[1]));
+          const dr = Math.hypot(x, y) - Math.hypot(prev[0], prev[1]);
+          const ds2 = (x - prev[0]) ** 2 + (y - prev[1]) ** 2;
+          const rdphi2 = Math.max(0, ds2 - dr * dr);
+          const fct = Math.max(1 - 2 / r, 1e-6);
+          t += Math.sqrt(dr * dr / (fct * fct) + rdphi2 / fct);
+        }
+        out.push([x, y, t]);
+        prev = [x, y];
+      }
+      return { pts: out, fate: res.fate, deflection: res.deflection, sweep: res.sweep, rmin: umax > 0 ? 1 / umax : Infinity };
+    }
+    let beam = [], probe = null, flash = [], T0 = 0;
+    function buildBeam() {
+      beam = [];
+      for (let b = -11.5; b <= 11.5 + 1e-9; b += 1) beam.push(pathFromInfinity(b));
+    }
+    function buildProbe() { probe = pathFromInfinity(L.b); updateMarker(); }
+    function buildFlash() {
+      flash = [];
+      const N = 72;
+      for (let i = 0; i < N; i++) {
+        const al = (i + 0.5) / N * 2 * PI;
+        const n1 = Math.cos(al), ntS = Math.sin(al);
+        const res = BH.traceRay({ r0: L.src, n1, nt: Math.abs(ntS), falling: false, disk: false, record: true, base: 0.01, maxPhi: 6 * PI });
+        const sign = ntS < 0 ? -1 : 1;
+        const out = [];
+        let t = 0, prev = null;
+        for (let k = 0; k < res.pts.length; k += 2) {
+          const ph = res.pts[k], u = res.pts[k + 1];
+          if (u <= 0) break;
+          const x = Math.cos(ph) / u, y = sign * Math.sin(ph) / u;
+          if (Math.hypot(x, y) > 60) break;
+          if (prev) {
+            const rA = Math.hypot(prev[0], prev[1]), rB = Math.hypot(x, y), r = 0.5 * (rA + rB), dr = rB - rA;
+            const ds2 = (x - prev[0]) ** 2 + (y - prev[1]) ** 2;
+            const fct = Math.max(1 - 2 / r, 1e-6);
+            t += Math.sqrt(dr * dr / (fct * fct) + Math.max(0, ds2 - dr * dr) / fct);
+          }
+          out.push([x, y, t]); prev = [x, y];
+        }
+        flash.push({ pts: out, fate: res.fate, al });
+      }
+    }
+    function posAt(path, t) {
+      const p = path.pts;
+      if (!p.length) return null;
+      if (t <= 0) return p[0];
+      let lo = 0, hi = p.length - 1;
+      if (t >= p[hi][2]) return p[hi];
+      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (p[m][2] <= t) lo = m; else hi = m; }
+      const a = p[lo], b = p[hi], k = (t - a[2]) / Math.max(1e-9, b[2] - a[2]);
+      return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, t];
+    }
+    function drawPath(ctx, path, tx, color, width, alpha, tMax) {
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      let pen = false;
+      for (const q of path.pts) {
+        if (tMax != null && q[2] > tMax) break;
+        const s = tx(q[0], q[1]);
+        if (!pen) { ctx.moveTo(s[0], s[1]); pen = true; } else ctx.lineTo(s[0], s[1]);
+      }
+      ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    function draw() {
+      const { ctx, W, H } = fitCanvas(cv);
+      if (W < 40 || H < 40) return;
+      ctx.clearRect(0, 0, W, H);
+      const view = L.mode === 'beam' ? 15 : Math.max(9, L.src * 1.9);
+      const sc = Math.min(W / (2 * view * 1.25), H / (2 * view * 0.95));
+      const cx = W / 2 + (L.mode === 'flash' ? -L.src * sc * 0.25 : 0), cy = H / 2 + 6;
+      const tx = (x, y) => [cx + x * sc, cy - y * sc];
+      // critical band for beam
+      if (L.mode === 'beam') {
+        ctx.fillStyle = 'rgba(255,122,89,0.06)';
+        ctx.fillRect(0, cy - BC * sc, W, 2 * BC * sc);
+        ctx.strokeStyle = 'rgba(255,122,89,0.35)'; ctx.setLineDash([4, 5]); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, cy - BC * sc); ctx.lineTo(W, cy - BC * sc); ctx.moveTo(0, cy + BC * sc); ctx.lineTo(W, cy + BC * sc); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = T.muted; ctx.font = '10.5px ' + T.mono; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('b = 3√3 M: inside this band, light is captured', 12, cy - BC * sc - 4);
+      }
+      ring(ctx, cx, cy, 3 * sc, 'photon sphere');
+      drawHole(ctx, cx, cy, 2 * sc, true);
+      const tNow = T0;
+      if (L.mode === 'beam') {
+        beam.forEach((p) => drawPath(ctx, p, tx, p.fate === 'escape' ? T.ink2 : T.red, 1, p.fate === 'escape' ? 0.3 : 0.45));
+        if (probe) drawPath(ctx, probe, tx, T.s1, 2.2, 1);
+        // photons
+        const all = probe ? beam.concat([probe]) : beam;
+        all.forEach((p, i) => {
+          const q = posAt(p, tNow);
+          if (!q) return;
+          const s = tx(q[0], q[1]);
+          const isProbe = p === probe;
+          ctx.fillStyle = isProbe ? T.emberInk : (p.fate === 'escape' ? T.ink : T.red);
+          ctx.beginPath(); ctx.arc(s[0], s[1], isProbe ? 3.6 : 2.2, 0, 2 * PI); ctx.fill();
+        });
+      } else {
+        flash.forEach((p) => drawPath(ctx, p, tx, p.fate === 'sky' ? T.ink2 : T.red, 1, 0.38, tNow));
+        flash.forEach((p) => {
+          const q = posAt(p, tNow); if (!q) return;
+          const s = tx(q[0], q[1]);
+          ctx.fillStyle = p.fate === 'sky' ? T.ink : T.red;
+          ctx.beginPath(); ctx.arc(s[0], s[1], 2.2, 0, 2 * PI); ctx.fill();
+        });
+        const s = tx(L.src, 0);
+        const g = ctx.createRadialGradient(s[0], s[1], 0, s[0], s[1], 12);
+        g.addColorStop(0, 'rgba(255,196,138,0.9)'); g.addColorStop(1, 'rgba(255,196,138,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s[0], s[1], 12, 0, 2 * PI); ctx.fill();
+      }
+      ctx.fillStyle = T.muted; ctx.font = '10.5px ' + T.mono; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      ctx.fillText('photons move in a distant observer\'s time', W - 12, H - 10);
+    }
+    function readout() {
+      if (L.mode === 'beam') {
+        const p = probe;
+        const items = [];
+        const wf = 4 / L.b / D2R;
+        if (p.fate === 'escape') {
+          const d = p.deflection / D2R;
+          items.push({ k: 'Fate', v: '<span class="tag cool">escapes</span>' });
+          items.push({ k: 'Closest approach', v: f(p.rmin, 3) + ' M' });
+          items.push({ k: 'Deflection (exact)', v: (d < 1000 ? f(d, 2) : sci(d, 4)) + '°', s: d > 360 ? 'loops the hole ' + f(d / 360, 2) + ' times' : '' });
+          items.push({ k: 'Weak-field 4M/b', v: f(wf, 2) + '°', s: 'off by ' + f((1 - wf / d) * 100, 1) + '%' });
+        } else {
+          items.push({ k: 'Fate', v: '<span class="tag hot">captured</span>' });
+          items.push({ k: 'Why', v: 'b < 3√3 M', s: 'no turning point outside the photon sphere' });
+          items.push({ k: 'Weak-field 4M/b', v: f(wf, 2) + '°', s: 'meaningless this close' });
+        }
+        items.push({ k: 'Critical b', v: f(BC, 4) + ' M', s: 'shadow radius seen from far away' });
+        items.push({ k: 'b / critical', v: f(L.b / BC, 6) });
+        $('lightReadout').innerHTML = dl(items);
+      } else {
+        const r = L.src;
+        const sinA = Math.min(1, BC / r * Math.sqrt(1 - 2 / r));
+        const a = Math.asin(sinA);
+        const esc = r >= 3 ? (1 + Math.cos(a)) / 2 : (1 - Math.cos(a)) / 2;
+        const escN = flash.filter((p) => p.fate === 'sky').length / Math.max(1, flash.length);
+        $('lightReadout').innerHTML = dl([
+          { k: 'Light that escapes', v: f(esc * 100, 1) + '%', s: 'of all directions, in 3D' },
+          { k: 'In this slice', v: f(escN * 100, 1) + '%', s: 'of the 72 rays drawn' },
+          { k: r >= 3 ? 'Capture cone' : 'Escape cone', v: f((r >= 3 ? a : a) / D2R, 2) + '° half-angle', s: r >= 3 ? 'centered on the inward direction' : 'centered on straight up', wide: true },
+          { k: 'Frequency far away', v: '×' + f(Math.sqrt(1 - 2 / r), 4), s: 'gravitational redshift √(1 − 2M/r)', wide: true }
+        ]);
+      }
+    }
+    function buildChart() {
+      const ex = [], wf = [];
+      const n = 140;
+      for (let i = 0; i <= n; i++) {
+        const b = BC * 1.0005 * Math.pow(60 / (BC * 1.0005), i / n);
+        const r = BH.rayFromInfinity(b, { base: 0.01 });
+        ex.push([b, r.deflection / D2R]);
+        wf.push([b, 4 / b / D2R]);
+      }
+      chart.set({
+        x: { min: 5, max: 60, log: true, fmt: (v) => (v < 10 ? v : Math.round(v)) + '', hoverFmt: (v) => 'b = ' + v.toFixed(3) + ' M', label: 'b (M)', ticks: [5, 10, 20, 50] },
+        y: { min: 1, max: 1500, log: true, ticks: [1, 10, 100, 1000], fmt: (v) => v.toLocaleString('en-US') + '°', hoverFmt: (v) => v.toFixed(2) + '°' },
+        series: [{ name: 'Relativity (exact)', color: T.s1, pts: ex }, { name: 'Weak field 4M/b', color: T.s2, pts: wf }],
+        vlines: [{ x: BC, label: '3√3 M', dash: [2, 3] }],
+        hlines: [{ y: 360, label: 'one full loop', color: 'rgba(236,230,220,0.25)', dash: [3, 4], align: 'right' }],
+        markers: [{ x: L.b, y: probe && probe.fate === 'escape' ? probe.deflection / D2R : null, color: T.emberInk }]
+      });
+      const rows = [5.25, 5.3, 5.5, 6, 7, 8, 10, 15, 20, 30, 50].map((b) => [b.toFixed(2), f(BH.rayFromInfinity(b, { base: 0.005 }).deflection / D2R, 3), f(4 / b / D2R, 3)]);
+      $('deflTable').innerHTML = table(['b (M)', 'exact (°)', '4M/b (°)'], rows);
+    }
+    function updateMarker() {
+      if (!chart.d) return;
+      chart.d.markers = [{ x: L.b, y: probe && probe.fate === 'escape' ? probe.deflection / D2R : null, color: T.emberInk }];
+      chart.draw();
+    }
+    buildBeam(); buildProbe(); buildFlash(); buildChart(); readout();
+    let raf = 0, lastT = 0, running = false;
+    function loop(now) {
+      if (!running) return;
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(0.05, (now - lastT) / 1000 || 0); lastT = now;
+      T0 += dt * (reduceMotion ? 6 : 16);
+      const tEnd = L.mode === 'beam' ? 95 : 70;
+      if (T0 > tEnd) T0 = 0;
+      draw();
+    }
+    new ResizeObserver(() => draw()).observe(cv);
+    return {
+      start() { if (running) return; running = true; lastT = performance.now(); raf = requestAnimationFrame(loop); },
+      stop() { running = false; cancelAnimationFrame(raf); }
+    };
+  }
+
+  /* ======================= TIME ======================= */
+  function TimeLab() {
+    const cv = $('clockCanvas');
+    const chart = new Chart($('rateCanvas'));
+    const S = { r: 6, M: 4.297e6, far: 0, hov: 0, orb: 0 };
+    const rs = bindSlider('tR', 'tRo', () => S.r, (v) => { S.r = v; }, (v) => logTo(v - 2, 0.001, 98), (x) => 2 + logFrom(x, 0.001, 98), (v) => (v < 2.1 ? v.toFixed(4) : v < 10 ? v.toFixed(2) : v.toFixed(1)) + ' M', () => { readout(); marker(); });
+    $('tMass').addEventListener('change', (e) => { S.M = +e.target.value; readout(); });
+    $('tReset').addEventListener('click', () => { S.far = S.hov = S.orb = 0; });
+    const rateHover = (r) => Math.sqrt(1 - 2 / r);
+    const rateOrbit = (r) => (r > 3 ? Math.sqrt(1 - 3 / r) : null);
+    function marker() {
+      if (!chart.d) return;
+      chart.d.markers = [{ x: S.r, y: rateHover(S.r), color: T.s1 }, ...(S.r > 3 ? [{ x: S.r, y: rateOrbit(S.r), color: T.s2 }] : [])];
+      chart.draw();
+    }
+    (function buildChart() {
+      const a = [], b = [];
+      for (let i = 0; i <= 300; i++) {
+        const r = 2 + 0.0005 * Math.pow(98 / 0.0005, i / 300);
+        a.push([r, rateHover(r)]);
+        b.push([r, rateOrbit(r)]);
+      }
+      chart.set({
+        x: { min: 2, max: 100, log: true, ticks: [2, 3, 6, 10, 20, 50, 100], fmt: (v) => v + '', hoverFmt: (v) => 'r = ' + v.toFixed(3) + ' M', label: 'r (M)' },
+        y: { min: 0, max: 1, fmt: (v) => v.toFixed(1), hoverFmt: (v) => v.toFixed(4) },
+        series: [{ name: 'Hovering', color: T.s1, pts: a }, { name: 'Orbiting', color: T.s2, pts: b }],
+        vlines: [{ x: 3, label: '3M', dash: [2, 3] }, { x: 6, label: 'ISCO', dash: [2, 3] }],
+        markers: []
+      });
+      const rows = [2.01, 2.1, 2.5, 3, 4, 6, 10, 20, 50, 100].map((r) => [r.toFixed(2), f(rateHover(r), 5), r > 3 ? f(rateOrbit(r), 5) : '—']);
+      $('rateTable').innerHTML = table(['r (M)', 'hovering', 'orbiting'], rows);
+      marker();
+    })();
+    function readout() {
+      const r = S.r, M = S.M * K.Msun;
+      const rg = K.G * M / (K.c * K.c), tg = rg / K.c;
+      const h = rateHover(r), o = rateOrbit(r);
+      const thrust = (K.c * K.c / rg) / (r * r * Math.sqrt(1 - 2 / r)) / K.g0;
+      const items = [
+        { k: 'Hovering clock', v: f(h, 5), s: '1 hour there = ' + fmtHours(1 / h) + ' far away' },
+        { k: 'Orbiting clock', v: o ? f(o, 5) : '—', s: o ? (r < 6 ? 'orbit exists but is unstable' : '1 hour there = ' + fmtHours(1 / o) + ' far away') : 'no circular orbits inside 3M' },
+        { k: 'Thrust to hover', v: sci(thrust, 3) + ' g', s: 'proper acceleration, for the chosen hole' },
+        { k: 'Orbital speed', v: o ? f(1 / Math.sqrt(r - 2), 3) + ' c' : '—', s: 'as measured by a hovering observer' },
+        { k: 'Orbital period', v: o ? BH.fmtTime(2 * PI * Math.pow(r, 1.5) * tg) : '—', s: 'on the distant clock' },
+        { k: 'This radius', v: BH.fmtLength(r * rg), s: 'from the center' }
+      ];
+      $('timeReadout').innerHTML = dl(items);
+    }
+    function fmtHours(hh) {
+      if (hh < 48) return f(hh, hh < 10 ? 3 : 1) + ' h';
+      if (hh < 24 * 365 * 2) return f(hh / 24, 1) + ' days';
+      return sci(hh / (24 * 365.25), 3) + ' years';
+    }
+    (function facts() {
+      const c2 = K.c * K.c;
+      const rGPS = 2.656e7;
+      const grav = K.GMearth / c2 * (1 / K.Rearth - 1 / rGPS) * K.day * 1e6;
+      const vel = (K.GMearth / rGPS) / (2 * c2) * K.day * 1e6;
+      const earth = K.GMearth / (K.Rearth * c2);
+      const sun = K.GMsun / (K.Rsun * c2);
+      const ns = Math.sqrt(1 - 2 * 1.4 * K.GMsun / (12000 * c2));
+      const items = [
+        'GPS satellites: clocks gain <b>' + f(grav, 1) + ' µs/day</b> from weaker gravity and lose <b>' + f(vel, 1) + ' µs/day</b> from speed, net <b>+' + f(grav - vel, 1) + ' µs/day</b>. Uncorrected, positions drift by about ' + f((grav - vel) * 1e-6 * K.c / 1000, 0) + ' km a day.',
+        'Earth\'s surface vs deep space: slower by ' + f(earth * 1e9, 2) + ' parts per billion, <b>' + f(earth * K.yr * 1000, 0) + ' ms per year</b>.',
+        'The Sun\'s surface: slower by <b>' + f(sun * K.yr, 0) + ' s per year</b>.',
+        'A neutron star surface (1.4 M☉, 12 km): clocks run at <b>' + f(ns, 3) + '</b>, about ' + f((1 - ns) * 100, 0) + '% slow.',
+        'Miller\'s planet in <i>Interstellar</i> needs about <b>61,000×</b>. Around a non-spinning hole the slowest stable orbital clock runs at <b>0.707</b> (at 6 M). The film\'s numbers need a hole spinning at almost the maximum rate.'
+      ];
+      $('timeFacts').innerHTML = items.map((t) => '<li>' + t + '</li>').join('');
+    })();
+    function drawClock(ctx, x, y, R, label, sub, secs, enabled, color) {
+      ctx.save();
+      ctx.globalAlpha = enabled ? 1 : 0.35;
+      ctx.fillStyle = '#080a0f'; ctx.beginPath(); ctx.arc(x, y, R, 0, 2 * PI); ctx.fill();
+      ctx.strokeStyle = 'rgba(236,230,220,0.18)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, R, 0, 2 * PI); ctx.stroke();
+      for (let i = 0; i < 60; i++) {
+        const a = i / 60 * 2 * PI, big = i % 5 === 0;
+        ctx.strokeStyle = big ? 'rgba(236,230,220,0.6)' : 'rgba(236,230,220,0.18)';
+        ctx.lineWidth = big ? 1.5 : 1;
+        ctx.beginPath(); ctx.moveTo(x + Math.sin(a) * R * (big ? 0.82 : 0.88), y - Math.cos(a) * R * (big ? 0.82 : 0.88)); ctx.lineTo(x + Math.sin(a) * R * 0.95, y - Math.cos(a) * R * 0.95); ctx.stroke();
+      }
+      if (enabled) {
+        const a = (secs % 60) / 60 * 2 * PI;
+        ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x - Math.sin(a) * R * 0.12, y + Math.cos(a) * R * 0.12); ctx.lineTo(x + Math.sin(a) * R * 0.78, y - Math.cos(a) * R * 0.78); ctx.stroke();
+        const am = (secs % 3600) / 3600 * 2 * PI;
+        ctx.strokeStyle = T.ink2; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.sin(am) * R * 0.5, y - Math.cos(am) * R * 0.5); ctx.stroke();
+      }
+      ctx.fillStyle = T.ink; ctx.beginPath(); ctx.arc(x, y, 3, 0, 2 * PI); ctx.fill();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = T.ink; ctx.font = '13px ' + T.body; ctx.textBaseline = 'bottom';
+      ctx.fillText(label, x, y - R - 22);
+      ctx.fillStyle = T.muted; ctx.font = '10.5px ' + T.mono;
+      ctx.fillText(sub, x, y - R - 8);
+      ctx.textBaseline = 'top'; ctx.fillStyle = enabled ? T.ink : T.muted; ctx.font = '13px ' + T.mono;
+      ctx.fillText(enabled ? secs.toFixed(2) + ' s' : '—', x, y + R + 10);
+      ctx.restore();
+    }
+    function draw() {
+      const { ctx, W, H } = fitCanvas(cv);
+      if (W < 40 || H < 40) return;
+      ctx.clearRect(0, 0, W, H);
+      const R = Math.min(W / 8.4, (H - 92) / 2);
+      const y = H / 2 + 6;
+      const o = rateOrbit(S.r);
+      drawClock(ctx, W * 0.18, y, R, 'Far away', 'reference, rate 1', S.far, true, T.ink);
+      drawClock(ctx, W * 0.5, y, R, 'Hovering at r', 'rate ' + rateHover(S.r).toFixed(4), S.hov, true, T.s1);
+      drawClock(ctx, W * 0.82, y, R, 'Orbiting at r', o ? 'rate ' + o.toFixed(4) + (S.r < 6 ? ' (unstable)' : '') : 'no orbit inside 3M', S.orb, !!o, T.s2);
+    }
+    let raf = 0, lastT = 0, running = false;
+    function loop(now) {
+      if (!running) return;
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(0.05, (now - lastT) / 1000 || 0); lastT = now;
+      S.far += dt; S.hov += dt * rateHover(S.r); const o = rateOrbit(S.r); if (o) S.orb += dt * o;
+      draw();
+    }
+    new ResizeObserver(() => draw()).observe(cv);
+    readout();
+    return {
+      start() { if (running) return; running = true; lastT = performance.now(); raf = requestAnimationFrame(loop); },
+      stop() { running = false; cancelAnimationFrame(raf); }
+    };
+  }
+
+  /* ======================= TIDES ======================= */
+  function TidesLab() {
+    const cv = $('tideCanvas');
+    const chart = new Chart($('tideChart'));
+    const BODY = 2.0, MASS = 70, WIDTH = 0.5, SHRED = 100; // m, kg, m, g
+    const S = { M: 10, x: 80 }; // x = r / r_s
+    const presets = Array.from(document.querySelectorAll('#tidePresets .chip'));
+    const ms = bindSlider('tdM', 'tdMo', () => S.M, (v) => { S.M = v; }, (v) => logTo(v, 1, 1e10), (x) => logFrom(x, 1, 1e10), fmtMass, () => { presets.forEach((b) => b.setAttribute('aria-pressed', 'false')); update(); });
+    const rsS = bindSlider('tdR', 'tdRo', () => S.x, (v) => { S.x = v; }, (v) => logTo(v, 1, 1e4), (x) => logFrom(x, 1, 1e4), (v) => fmtDist(v), () => update(true));
+    presets.forEach((b) => b.addEventListener('click', () => {
+      S.M = +b.dataset.m; ms.sync();
+      presets.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      update();
+    }));
+    function fmtMass(m) { return m >= 1e5 ? sci(m, 3) + ' M☉' : (m < 100 ? m.toFixed(1).replace(/\.0$/, '') : Math.round(m).toLocaleString('en-US')) + ' M☉'; }
+    function geom() {
+      const M = S.M * K.Msun, GM = K.G * M, rs = 2 * GM / (K.c * K.c);
+      return { M, GM, rs };
+    }
+    function fmtDist(x) { const g = geom(); return BH.fmtLength(x * g.rs) + ' · ' + (x < 10 ? x.toFixed(2) : sci(x, 3)) + ' rₛ'; }
+    const tidal = (GM, r) => 2 * GM * BODY / (r * r * r);
+    function update(onlyR) {
+      const g = geom();
+      rsS.sync();
+      const r = S.x * g.rs;
+      const da = tidal(g.GM, r);
+      const daG = da / K.g0;
+      const tension = MASS * da / 8;
+      const squeeze = g.GM * WIDTH / (r * r * r) / K.g0;
+      const rShred = Math.cbrt(2 * g.GM * BODY / (SHRED * K.g0));
+      const atH = tidal(g.GM, g.rs) / K.g0;
+      const tg = g.GM / Math.pow(K.c, 3);
+      let verdict;
+      if (rShred > g.rs) verdict = '<span class="tag hot">shredded outside the horizon</span>';
+      else verdict = '<span class="tag cool">crosses the horizon intact</span>';
+      const items = [
+        { k: 'Verdict', v: verdict, s: rShred > g.rs ? 'stretch passes ' + SHRED + ' g at ' + BH.fmtLength(rShred) + ' (' + sci(rShred / g.rs, 3) + ' rₛ), ' + BH.fmtLength(rShred - g.rs) + ' before the horizon' : 'stretch at the horizon is only ' + sci(atH, 3) + ' g', wide: true },
+        { k: 'Head-to-foot stretch', v: sci(daG, 3) + ' g', s: sci(da, 3) + ' m/s² across 2 m' },
+        { k: 'Pull on your waist', v: sci(tension, 3) + ' N', s: tension > 700 ? 'like ' + sci(tension / (MASS * K.g0), 2) + ' people hanging from your feet' : 'about ' + sci(tension / K.g0, 2) + ' kg hanging from your feet' },
+        { k: 'Sideways squeeze', v: sci(squeeze, 3) + ' g', s: 'across your 0.5 m width' },
+        { k: 'Event horizon', v: BH.fmtLength(g.rs), s: 'radius rₛ = 2GM/c²' },
+        { k: 'Horizon to center', v: BH.fmtTime(4 / 3 * tg), s: 'falling in from far away; at most ' + BH.fmtTime(PI * tg) + ' on any path', wide: true }
+      ];
+      $('tideReadout').innerHTML = dl(items);
+      if (!onlyR) buildChart(); else moveMarker();
+      draw();
+    }
+    function buildChart() {
+      const g = geom();
+      const pts = [];
+      for (let i = 0; i <= 120; i++) { const x = Math.pow(10, 4 * i / 120); pts.push([x * g.rs / 1000, tidal(g.GM, x * g.rs) / K.g0]); }
+      const ymin = Math.max(1e-6, pts[pts.length - 1][1] * 0.5), ymax = Math.max(1e3, pts[0][1] * 2);
+      const kmMin = g.rs / 1000, kmMax = 1e4 * g.rs / 1000;
+      chart.set({
+        x: { min: kmMin, max: kmMax, log: true, fmt: (v) => kmFmt(v), hoverFmt: (v) => kmHover(v) + ' from center' },
+        y: { min: ymin, max: ymax, log: true, fmt: p10, hoverFmt: (v) => sci(v, 3) + ' g' },
+        series: [{ name: 'Stretch', color: T.s1, pts }],
+        hlines: [
+          { y: 1, label: '1 g: you feel it', color: 'rgba(236,230,220,0.25)', dash: [3, 4], align: 'right' },
+          { y: SHRED, label: SHRED + ' g: torn apart', color: 'rgba(255,122,89,0.55)', dash: [3, 4], align: 'right' }
+        ],
+        vlines: [{ x: kmMin * 1.0001, label: 'horizon', color: 'rgba(242,162,78,0.6)' }],
+        markers: [{ x: S.x * g.rs / 1000, y: tidal(g.GM, S.x * g.rs) / K.g0, color: T.emberInk }]
+      });
+      const rows = [1, 2, 5, 10, 30, 100, 1000, 1e4].map((x) => [sci(x, 2), BH.fmtLength(x * g.rs), sci(tidal(g.GM, x * g.rs) / K.g0, 3)]);
+      $('tideTable').innerHTML = table(['r / rₛ', 'distance', 'stretch (g)'], rows);
+    }
+    function kmFmt(v) { return p10(v) + ' km'; }
+    function kmHover(v) { return v >= 1e6 ? sci(v * 1000 / K.au, 3) + ' AU' : sci(v, 3) + ' km'; }
+    function moveMarker() {
+      const g = geom();
+      if (!chart.d) return;
+      chart.d.markers = [{ x: S.x * g.rs / 1000, y: tidal(g.GM, S.x * g.rs) / K.g0, color: T.emberInk }];
+      chart.draw();
+    }
+    function draw() {
+      const { ctx, W, H } = fitCanvas(cv);
+      if (W < 40 || H < 40) return;
+      ctx.clearRect(0, 0, W, H);
+      const g = geom();
+      const hx = Math.max(70, W * 0.14), cy = H * 0.5;
+      const Rh = Math.min(H * 0.22, W * 0.09);
+      const x0 = hx + Rh, x1 = W - 64;
+      const toX = (x) => x0 + Math.log10(x) / 4 * (x1 - x0);
+      const rShred = Math.cbrt(2 * g.GM * BODY / (SHRED * K.g0)) / g.rs;
+      if (rShred > 1) {
+        const xe = toX(Math.min(rShred, 1e4));
+        const gr = ctx.createLinearGradient(x0, 0, xe, 0);
+        gr.addColorStop(0, 'rgba(255,122,89,0.32)'); gr.addColorStop(1, 'rgba(255,122,89,0.04)');
+        ctx.fillStyle = gr; ctx.fillRect(x0, cy - H * 0.3, xe - x0, H * 0.6);
+        ctx.fillStyle = T.red; ctx.font = '10.5px ' + T.mono; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText('torn apart (> ' + SHRED + ' g)', x0 + 8, cy - H * 0.3 + 6);
+      }
+      drawHole(ctx, hx, cy, Rh, true);
+      ctx.fillStyle = T.muted; ctx.font = '10.5px ' + T.mono; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText('horizon', hx, cy + Rh + 8);
+      // axis
+      ctx.strokeStyle = T.axis; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x0, cy + H * 0.33 + 0.5); ctx.lineTo(x1, cy + H * 0.33 + 0.5); ctx.stroke();
+      for (let e = 0; e <= 4; e++) {
+        const x = Math.round(toX(Math.pow(10, e))) + 0.5;
+        ctx.beginPath(); ctx.moveTo(x, cy + H * 0.33); ctx.lineTo(x, cy + H * 0.33 + 5); ctx.stroke();
+        ctx.fillStyle = T.muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(['1', '10', '100', '1,000', '10⁴'][e] + ' rₛ', x, cy + H * 0.33 + 8);
+        ctx.fillStyle = 'rgba(134,140,153,0.75)';
+        ctx.fillText(BH.fmtLength(Math.pow(10, e) * g.rs), x, cy + H * 0.33 + 22);
+      }
+      // astronaut, feet toward the hole
+      const ax = toX(S.x);
+      const da = tidal(g.GM, S.x * g.rs) / K.g0;
+      const stretch = clamp(1 + 0.55 * Math.log10(1 + da), 1, 7);
+      const base = Math.min(H * 0.16, 54);
+      const len = base * stretch, thick = Math.max(1.5, base * 0.16 / Math.sqrt(stretch));
+      ctx.save();
+      ctx.translate(ax, cy);
+      if (da > SHRED) {
+        const gr2 = ctx.createLinearGradient(-len / 2, 0, len / 2, 0);
+        gr2.addColorStop(0, 'rgba(255,122,89,0.95)'); gr2.addColorStop(1, 'rgba(255,196,138,0.9)');
+        ctx.strokeStyle = gr2; ctx.lineCap = 'round'; ctx.lineWidth = Math.max(1.5, thick * 0.7);
+        ctx.beginPath(); ctx.moveTo(-len / 2, 0); ctx.bezierCurveTo(-len / 6, -thick, len / 6, thick, len / 2, 0); ctx.stroke();
+      } else {
+        ctx.strokeStyle = T.ink; ctx.fillStyle = T.ink; ctx.lineCap = 'round'; ctx.lineWidth = Math.max(1.5, thick * 0.55);
+        const L2 = len / 2;
+        // legs (toward the hole on the left)
+        ctx.beginPath(); ctx.moveTo(-L2, -thick * 0.9); ctx.lineTo(-L2 * 0.1, 0); ctx.moveTo(-L2, thick * 0.9); ctx.lineTo(-L2 * 0.1, 0); ctx.stroke();
+        // torso
+        ctx.beginPath(); ctx.moveTo(-L2 * 0.1, 0); ctx.lineTo(L2 * 0.62, 0); ctx.stroke();
+        // arms
+        ctx.beginPath(); ctx.moveTo(L2 * 0.5, 0); ctx.lineTo(L2 * 0.2, -thick * 1.4); ctx.moveTo(L2 * 0.5, 0); ctx.lineTo(L2 * 0.2, thick * 1.4); ctx.stroke();
+        // head
+        ctx.beginPath(); ctx.ellipse(L2 * 0.82, 0, Math.max(3, base * 0.11 * Math.sqrt(stretch) * 0.8), Math.max(3, base * 0.11 / Math.sqrt(stretch) * 1.1), 0, 0, 2 * PI); ctx.fill();
+      }
+      ctx.restore();
+      ctx.fillStyle = da > SHRED ? T.red : T.ink2; ctx.font = '11px ' + T.mono; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(sci(da, 3) + ' g stretch', ax, cy - Math.max(base * 0.6, 26));
+    }
+    new ResizeObserver(() => draw()).observe(cv);
+    presets[0].setAttribute('aria-pressed', 'true');
+    update();
+    return { start() {}, stop() {} };
+  }
+
+  /* ======================= NUMBERS ======================= */
+  function NumbersLab() {
+    const S = { kg: 4.297e6 * K.Msun, unit: 'msun' };
+    const presets = Array.from(document.querySelectorAll('#numPresets .chip'));
+    const val = $('nMval'), unitSel = $('nUnit');
+    const UNITS = { msun: K.Msun, kg: 1, mearth: K.Mearth };
+    const ms = bindSlider('nM', 'nMo', () => S.kg, (v) => { S.kg = v; }, (v) => (Math.log10(v) - 10) / 32 * 1000, (x) => Math.pow(10, 10 + 32 * x / 1000), fmtMass, () => { presets.forEach((b) => b.setAttribute('aria-pressed', 'false')); syncInput(); render(); });
+    function fmtMass(kg) { const m = kg / K.Msun; return m >= 0.01 ? sci(m, 3) + ' M☉' : sci(kg, 3) + ' kg'; }
+    function syncInput() { const v = S.kg / UNITS[S.unit]; val.value = Number(v.toPrecision(5)); }
+    val.addEventListener('change', () => {
+      const v = parseFloat(val.value);
+      if (!(v > 0)) { syncInput(); return; }
+      S.kg = clamp(v * UNITS[S.unit], 1e3, 1e45);
+      ms.sync(); presets.forEach((b) => b.setAttribute('aria-pressed', 'false')); render();
+    });
+    unitSel.addEventListener('change', () => { S.unit = unitSel.value; syncInput(); });
+    presets.forEach((b) => b.addEventListener('click', () => {
+      S.kg = b.dataset.kg ? +b.dataset.kg : +b.dataset.m * K.Msun;
+      ms.sync(); syncInput();
+      presets.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      render();
+    }));
+    const AGE = 13.8e9 * K.yr;
+    function card(k, v, s) { return '<div class="num-card"><div class="k">' + k + '</div><div class="v">' + v + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>'; }
+    function group(title, cards) { return '<div class="num-group"><h4 class="label">' + title + '</h4><div class="num-grid">' + cards.join('') + '</div></div>'; }
+    function render() {
+      const p = BH.bhProps(S.kg);
+      const cmp = BH.compareLength(p.rs);
+      const growing = p.hawkingT < K.TCMB;
+      const dens = p.density;
+      const densS = dens < 1.2 ? 'thinner than air (1.2 kg/m³)' : dens < 1000 ? 'less dense than water' : dens < 2.3e17 ? sci(dens / 1000, 2) + '× water' : sci(dens / 2.3e17, 2) + '× an atomic nucleus';
+      const html = [
+        group('Size and orbits', [
+          card('Event horizon radius', BH.fmtLength(p.rs), '≈ ' + cmp.text),
+          card('Photon sphere', BH.fmtLength(p.rPhoton), 'light can circle here, unstably'),
+          card('Innermost stable orbit', BH.fmtLength(p.rIsco), 'one lap takes ' + BH.fmtTime(p.periodIsco)),
+          card('Shadow diameter', BH.fmtLength(p.shadowDiameter), '2√27 GM/c², about 2.6× the horizon')
+        ]),
+        group('Gravity and tides', [
+          card('Surface gravity', sci(p.surfaceGravity / K.g0, 3) + ' g', 'κ = c⁴/4GM, as measured from far away'),
+          card('Stretch at the horizon', sci(p.tidalHorizon / K.g0, 3) + ' g', 'head to foot, 2 m body'),
+          card('Average density', sci(dens, 3) + ' kg/m³', densS),
+          card('Horizon to singularity', BH.fmtTime(p.tauMax), 'the longest anyone can last inside')
+        ]),
+        group('Quantum (Hawking radiation)', [
+          card('Temperature', sci(p.hawkingT, 3) + ' K', growing ? 'colder than the 2.7 K microwave background, so it is growing' : 'hotter than the microwave background, so it is shrinking'),
+          card('Power radiated', sci(p.hawkingP, 3) + ' W', 'photons only'),
+          card('Evaporation time', BH.fmtTime(p.evaporation), p.evaporation > AGE ? sci(p.evaporation / AGE, 2) + '× the age of the universe' : 'shorter than the age of the universe'),
+          card('Entropy', sci(p.entropy, 3) + ' k_B', sci(p.entropy / Math.LN2, 3) + ' bits of hidden information')
+        ]),
+        group('Feeding', [
+          card('Eddington luminosity', sci(p.eddington, 3) + ' W', sci(p.eddington / K.Lsun, 3) + ' Suns: radiation pressure balances gravity'),
+          card('Disk efficiency', f(p.efficiency * 100, 1) + '%', 'of infalling rest mass turned to light; fusion manages 0.7%'),
+          card('Light-crossing time', BH.fmtTime(p.lightCrossing), 'across the horizon radius'),
+          card('Eddington feeding rate', sci(p.eddington / (p.efficiency * K.c * K.c) * K.yr / K.Msun, 3) + ' M☉/yr', 'the most it can swallow while shining steadily')
+        ])
+      ].join('');
+      $('numbers').innerHTML = html;
+      const eht = $('ehtCard');
+      const m = S.kg / K.Msun;
+      if (Math.abs(m / 4.297e6 - 1) < 1e-3) {
+        eht.hidden = false;
+        eht.innerHTML = '<span class="label">Check against the Event Horizon Telescope</span><p>From 8,277 pc away the shadow should span <b>' + f(BH.shadowMicroArcsec(S.kg, 8277 * K.pc), 1) + ' µas</b>. EHT measured a bright ring of <b>51.8 ± 2.3 µas</b> (2022).</p>';
+      } else if (Math.abs(m / 6.5e9 - 1) < 1e-3) {
+        eht.hidden = false;
+        eht.innerHTML = '<span class="label">Check against the Event Horizon Telescope</span><p>From 16.8 Mpc away the shadow should span <b>' + f(BH.shadowMicroArcsec(S.kg, 16.8e6 * K.pc), 1) + ' µas</b>. EHT measured a ring of <b>42 ± 3 µas</b> (2019); the glowing ring sits just outside the shadow edge.</p>';
+      } else eht.hidden = true;
+    }
+    presets.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.m === '4.297e6')));
+    ms.sync(); syncInput(); render();
+    return { start() {}, stop() {} };
+  }
+
+  /* ---------------- tabs ---------------- */
+  const tabs = Array.from(document.querySelectorAll('.tabs [role="tab"]'));
+  const makers = { 'lab-orbits': OrbitsLab, 'lab-light': LightLab, 'lab-time': TimeLab, 'lab-tides': TidesLab, 'lab-numbers': NumbersLab };
+  const labs = {};
+  let current = null, benchVisible = false;
+  function show(id, focus) {
+    tabs.forEach((t) => {
+      const on = t.getAttribute('aria-controls') === id;
+      t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+      $(t.getAttribute('aria-controls')).hidden = !on;
+      if (on && focus) t.focus();
+    });
+    if (current && labs[current]) labs[current].stop();
+    current = id;
+    if (!labs[id]) { try { labs[id] = makers[id](); } catch (err) { console.error(err); labs[id] = { start() {}, stop() {} }; } }
+    if (benchVisible) labs[id].start();
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => show(t.getAttribute('aria-controls')));
+    t.addEventListener('keydown', (e) => {
+      let j = null;
+      if (e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = tabs.length - 1;
+      if (j != null) { e.preventDefault(); show(tabs[j].getAttribute('aria-controls'), true); }
+    });
+  });
+  new IntersectionObserver((ents) => {
+    benchVisible = ents[0].isIntersecting;
+    if (!current || !labs[current]) return;
+    if (benchVisible) labs[current].start(); else labs[current].stop();
+  }, { threshold: 0.01 }).observe($('labs'));
+  const initial = (location.hash || '').replace('#', '');
+  show(makers[initial] ? initial : 'lab-orbits');
+  window.__labs = { labs, show };
+})();
+
+</script>
+</body></html>

@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BONES">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script src="../../assets/bones.js" data-root="../../" data-home="bl:58" defer></script>
+
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Interactive Double-Slit Experiment</title>
+<style>
+  :root{color-scheme:dark;--bg:#071019;--line:#20394a;--text:#e9f8ff;--muted:#9db4c2;--cyan:#55ddff;--accent:#ffc857;--wave:#36ff36}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(circle at 55% 5%,#123149 0%,var(--bg) 48%,#03080d 100%);color:var(--text);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+  #app{height:100vh;height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) 350px}
+  #scene{position:relative;min-width:0;height:100%;overflow:hidden}
+  #scene canvas{display:block;width:100%;height:100%;outline:none}
+  .title{position:absolute;top:20px;left:22px;right:22px;pointer-events:none;text-shadow:0 2px 14px #000}
+  .title h1{margin:0;font-size:clamp(20px,2.3vw,32px);letter-spacing:.02em}
+  .title p{margin:6px 0 0;color:var(--muted);max-width:520px}
+  .badge{position:absolute;bottom:16px;left:20px;padding:8px 11px;border:1px solid #345268;border-radius:8px;background:#07131bcc;color:#b8d2df;font-size:12px;pointer-events:none}
+  .fallback{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted);background:#071019e6}
+  aside{height:100%;overflow:auto;padding:20px 20px 28px;border-left:1px solid var(--line);background:linear-gradient(180deg,#0f2230f7,#08131df7)}
+  h2{margin:0 0 6px;font-size:18px}
+  h3{margin:22px 0 8px;font-size:14px;font-weight:650;color:#9bcce0}
+  .intro{margin:0;color:var(--muted)}
+  .control{margin:12px 0}
+  .control label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;color:#dff5ff}
+  .value{color:var(--accent);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;margin:0;accent-color:var(--cyan)}
+  .spectrum{height:4px;margin-top:6px;border-radius:2px;opacity:.7;background:linear-gradient(90deg,#9e009e,#8500e8 9%,#0000ff 19%,#00ffff 34%,#00ff00 41%,#ffff00 62%,#ff0000 83%)}
+  .buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  button{padding:10px 8px;border:1px solid #39647a;border-radius:7px;background:#123040;color:#eafdff;font:inherit;font-weight:650;cursor:pointer}
+  button:hover{background:#17455b}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+  button[aria-pressed="true"]{background:#155d74;border-color:#65e2ff;box-shadow:0 0 14px #2fc8f955}
+  .readout{margin-top:14px;padding:11px 12px;border:1px solid #244657;border-radius:8px;background:#07151ecc;color:#bdd3dd}
+  .readout strong{display:block;margin-bottom:4px;color:#fff}
+  .readout p{margin:0;font-size:12.5px}
+  #chart{display:block;width:100%;height:150px;border:1px solid #244657;border-radius:8px;background:#06121a}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:12px;color:#bdd3dd}
+  .swatch{display:inline-block;width:14px;height:9px;margin-right:6px;border-radius:2px;vertical-align:middle}
+  .swatch.bars{background:var(--wave);opacity:.75}
+  .swatch.line{height:3px;background:var(--accent)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 0}
+  .stats div{padding:7px 9px;border:1px solid #1d3b4b;border-radius:7px;background:#07151ecc}
+  .stats dt{font-size:11px;color:var(--muted)}
+  .stats dd{margin:2px 0 0;color:#fff;font-variant-numeric:tabular-nums}
+  .note{margin-top:14px;padding:10px 11px;border-left:3px solid var(--accent);background:#2b241327;color:#d8cfb5;font-size:12px}
+  @media (max-width:800px){
+    body{overflow:auto}
+    #app{height:auto;min-height:100%;grid-template-columns:1fr}
+    #scene{height:58vh;height:58svh}
+    aside{height:auto;overflow:visible;border-left:0;border-top:1px solid var(--line)}
+    .title{top:12px;left:14px}
+    .title p{display:none}
+    .badge{bottom:10px;left:10px;font-size:11px}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="scene">
+    <div class="title">
+      <h1>Double-Slit Experiment</h1>
+      <p>Each photon lands at one random spot. The fringes only exist in the statistics.</p>
+    </div>
+    <div class="badge">Drag to orbit, scroll or pinch to zoom, right-drag to pan</div>
+    <div id="fallback" class="fallback" role="alert" hidden></div>
+  </main>
+
+  <aside>
+    <h2>Experiment controls</h2>
+    <p class="intro">Far-field (Fraunhofer) model in real units. Slits are drawn larger than scale in 3D, but the detector uses the true values. The glow between slits and screen is time-averaged intensity, not photon paths.</p>
+
+    <h3>Optics</h3>
+    <div class="control">
+      <label for="wavelength">Wavelength <span class="value" id="wavelengthOut"></span></label>
+      <input id="wavelength" type="range" min="380" max="700" step="5" value="520">
+      <div class="spectrum" aria-hidden="true"></div>
+    </div>
+    <div class="control">
+      <label for="separation">Slit separation <span class="value" id="separationOut"></span></label>
+      <input id="separation" type="range" min="0.10" max="0.50" step="0.01" value="0.20">
+    </div>
+    <div class="control">
+      <label for="slitWidth">Slit width <span class="value" id="widthOut"></span></label>
+      <input id="slitWidth" type="range" min="0.020" max="0.080" step="0.005" value="0.050">
+    </div>
+    <div class="control">
+      <label for="distance">Screen distance <span class="value" id="distanceOut"></span></label>
+      <input id="distance" type="range" min="0.50" max="2.00" step="0.05" value="1.00">
+    </div>
+
+    <h3>Detection</h3>
+    <div class="control">
+      <label for="rate">Photon rate <span class="value" id="rateOut"></span></label>
+      <input id="rate" type="range" min="0" max="100" step="1" value="80">
+    </div>
+    <div class="buttons">
+      <button id="runBtn" type="button">Pause</button>
+      <button id="clearBtn" type="button">Clear detector</button>
+      <button id="measurementBtn" type="button" aria-pressed="false">Which-path: Off</button>
+      <button id="viewBtn" type="button">Reset view</button>
+    </div>
+    <div class="readout" aria-live="polite">
+      <strong id="modeText"></strong>
+      <p id="modeNote"></p>
+    </div>
+
+    <h3>Detector histogram</h3>
+    <canvas id="chart" role="img" aria-label="Histogram of detected photon positions compared with the theoretical expectation"></canvas>
+    <div class="legend"><span><i class="swatch bars"></i>Detected counts</span><span><i class="swatch line"></i>Expected from theory</span></div>
+    <dl class="stats">
+      <div><dt>Photons detected</dt><dd id="statCount">0</dd></div>
+      <div><dt>Fringe spacing λL/d</dt><dd id="statSpacing"></dd></div>
+      <div><dt>Central peak width 2λL/a</dt><dd id="statEnvelope"></dd></div>
+      <div><dt>Bright fringes in central peak</dt><dd id="statFringes"></dd></div>
+    </dl>
+    <p class="note">Changing an optics setting or the which-path mode clears the detector, so the histogram always comes from a single configuration.</p>
+  </aside>
+</div>
+
+<script>
+  // Shows a clear message if the module below never finishes (no WebGL, CDN blocked, very old browser).
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var el = document.getElementById('fallback');
+      if (!window.__doubleSlitReady && el && el.hidden) {
+        el.textContent = 'The 3D view did not start. It needs WebGL and access to cdn.jsdelivr.net to load three.js.';
+        el.hidden = false;
+      }
+    }, 2500);
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+(() => {
+
+const $ = (id) => document.getElementById(id);
+function showFatal(message) {
+  const el = $('fallback');
+  el.textContent = message;
+  el.hidden = false;
+}
+if (typeof THREE === 'undefined' || !THREE.OrbitControls) {
+  showFatal('three.js did not load. The page needs access to cdn.jsdelivr.net.');
+  return;
+}
+const { OrbitControls } = THREE;
+// Match the colour handling of newer three.js releases: hex colours are sRGB, output is sRGB
+THREE.ColorManagement.legacyMode = false;
+
+/* ---------------- Physics, in real units ----------------
+   Fraunhofer double slit on a flat screen:
+   I(s) = sinc^2(pi a s / lambda) * 0.5 * (1 + V cos(2 pi d s / lambda)),   s = sin(theta)
+   V = 1 when nothing records the path, V = 0 when the path is measured. */
+const SCREEN_HALF_MM = 15;   // detector spans -15 mm to +15 mm
+const NB = 240;              // histogram bins
+const SUB = 8;               // CDF samples per histogram bin
+const NS = NB * SUB;
+
+const params = { wavelength: 520, d: 0.2, a: 0.05, L: 1, rate: 251, measured: false, running: true };
+
+function intensityAt(yMm) {
+  const lambdaMm = params.wavelength * 1e-6;
+  const s = yMm / Math.hypot(yMm, params.L * 1000);
+  const beta = Math.PI * params.a * s / lambdaMm;
+  const sinc = Math.abs(beta) < 1e-9 ? 1 : Math.sin(beta) / beta;
+  const V = params.measured ? 0 : 1;
+  return sinc * sinc * 0.5 * (1 + V * Math.cos(2 * Math.PI * params.d * s / lambdaMm));
+}
+
+const cdf = new Float64Array(NS);
+const binProb = new Float64Array(NB);
+const hist = new Uint32Array(NB);
+let totalHits = 0;
+
+function rebuildDistribution() {
+  const step = (2 * SCREEN_HALF_MM) / NS;
+  let sum = 0;
+  for (let j = 0; j < NS; j++) {
+    sum += intensityAt(-SCREEN_HALF_MM + (j + 0.5) * step);
+    cdf[j] = sum;
+  }
+  for (let j = 0; j < NS; j++) cdf[j] /= sum;
+  for (let i = 0; i < NB; i++) binProb[i] = cdf[(i + 1) * SUB - 1] - (i ? cdf[i * SUB - 1] : 0);
+}
+
+// Inverse-CDF sampling: follows the distribution exactly and never wastes samples
+function sampleY() {
+  const u = Math.random();
+  let lo = 0, hi = NS - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (cdf[mid] < u) lo = mid + 1; else hi = mid;
+  }
+  return -SCREEN_HALF_MM + (lo + Math.random()) * ((2 * SCREEN_HALF_MM) / NS);
+}
+
+function gaussian() {
+  let u = 0;
+  while (u === 0) u = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * Math.random());
+}
+const expSample = (rate) => -Math.log(1 - Math.random()) / rate;               // Poisson arrival gaps
+const rateFromSlider = (v) => Math.max(1, Math.round(Math.pow(1000, v / 100)));  // 1 to 1000 per second
+
+// Approximate spectral colour (after Dan Bruton), as sRGB components in 0..1
+function wavelengthToSRGB(nm) {
+  let r = 0, g = 0, b = 0;
+  if (nm < 440) { r = (440 - nm) / 60; b = 1; }
+  else if (nm < 490) { g = (nm - 440) / 50; b = 1; }
+  else if (nm < 510) { g = 1; b = (510 - nm) / 20; }
+  else if (nm < 580) { r = (nm - 510) / 70; g = 1; }
+  else if (nm < 645) { r = 1; g = (645 - nm) / 65; }
+  else { r = 1; }
+  const falloff = nm < 420 ? 0.55 + 0.45 * (nm - 380) / 40 : 1;
+  return [r, g, b].map((c) => Math.pow(c * falloff, 0.8));
+}
+
+/* ---------------- Scene layout (scene units) ---------------- */
+const BEAM_Y = 1.75;
+const SLIT_SCALE = 2.4;                 // scene units per mm of slit geometry
+const BARRIER_T = 0.08, BARRIER_W = 3.4, BARRIER_H = 2.0, SLIT_H = 1.3;
+const LASER_X = -5.4;
+const DISPLAY_W = 4.2, DISPLAY_H = 2.1;
+const SIGMA_V = 0.42;                   // vertical spread of hits from the finite beam height
+const screenXFor = (L) => 1.9 + 3.3 * L;
+
+const sceneEl = $('scene');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+} catch (err) {
+  showFatal('WebGL is not available in this browser, so the 3D view cannot start.');
+  console.error(err);
+  return;
+}
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.physicallyCorrectLights = true;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+sceneEl.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x071019, 24, 62);
+
+const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 200);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 5;
+controls.maxDistance = 45;
+controls.maxPolarAngle = Math.PI * 0.49;
+let userMovedCamera = false;
+controls.addEventListener('start', () => { userMovedCamera = true; });
+
+scene.add(new THREE.HemisphereLight(0x9adfff, 0x061018, 1.5));
+const keyLight = new THREE.DirectionalLight(0xc8f0ff, 2.2);
+keyLight.position.set(-6, 10, 7);
+scene.add(keyLight);
+const rimLight = new THREE.DirectionalLight(0x3a8cff, 0.5);
+rimLight.position.set(8, 5, -8);
+scene.add(rimLight);
+
+const std = (color, metalness = 0.45, roughness = 0.4) => new THREE.MeshStandardMaterial({ color, metalness, roughness });
+
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(90, 70), std(0x061520, 0.2, 0.8));
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+const grid = new THREE.GridHelper(60, 60, 0x12303f, 0x0f2838);
+grid.position.y = 0.003;
+grid.material.transparent = true;
+grid.material.opacity = 0.4;
+scene.add(grid);
+
+const RAIL_X0 = -7.2, RAIL_X1 = 9.6, RAIL_LEN = RAIL_X1 - RAIL_X0, RAIL_CX = (RAIL_X0 + RAIL_X1) / 2;
+const rail = new THREE.Mesh(new THREE.BoxGeometry(RAIL_LEN, 0.22, 1.2), std(0x2b4550, 0.35, 0.6));
+rail.position.set(RAIL_CX, 0.25, 0);
+scene.add(rail);
+const lipGeo = new THREE.BoxGeometry(RAIL_LEN, 0.1, 0.1);
+const lipMat = std(0x4d6d7a, 0.7, 0.3);
+for (const z of [-0.55, 0.55]) {
+  const lip = new THREE.Mesh(lipGeo, lipMat);
+  lip.position.set(RAIL_CX, 0.41, z);
+  scene.add(lip);
+}
+
+function makeStand(topY) {
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.46, 0.14, 28), std(0x314b58));
+  base.position.y = 0.43;
+  g.add(base);
+  const h = topY - 0.5;
+  if (h > 0.02) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, h, 16), std(0x5a7784, 0.6, 0.35));
+    post.position.y = 0.5 + h / 2;
+    g.add(post);
+  }
+  return g;
+}
+
+// Laser
+const laser = new THREE.Group();
+const housing = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 1.3, 32), std(0x1b4e62, 0.5, 0.35));
+housing.rotation.z = Math.PI / 2;
+laser.add(housing);
+const apertureMat = new THREE.MeshStandardMaterial({ color: 0x0b1a22, metalness: 0.4, roughness: 0.4, emissive: 0x000000, emissiveIntensity: 1.8 });
+const aperture = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.3, 0.3, 32), apertureMat);
+aperture.rotation.z = -Math.PI / 2;
+aperture.position.x = 0.8;
+laser.add(aperture);
+laser.position.set(LASER_X, BEAM_Y, 0);
+scene.add(laser);
+const laserStand = makeStand(BEAM_Y - 0.36);
+laserStand.position.x = LASER_X;
+scene.add(laserStand);
+
+// Incident beam: expands so it covers both slits
+const BEAM_X0 = LASER_X + 0.95, BEAM_X1 = -BARRIER_T / 2, BEAM_LEN = BEAM_X1 - BEAM_X0;
+const glowOptions = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false };
+const beamMat = new THREE.MeshBasicMaterial({ ...glowOptions, opacity: 0.08 });
+const coreMat = new THREE.MeshBasicMaterial({ ...glowOptions, opacity: 0.55 });
+const beam = new THREE.Mesh(new THREE.BufferGeometry(), beamMat);
+beam.rotation.z = -Math.PI / 2;
+beam.position.set((BEAM_X0 + BEAM_X1) / 2, BEAM_Y, 0);
+scene.add(beam);
+const core = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, BEAM_LEN, 12, 1, true), coreMat);
+core.rotation.z = -Math.PI / 2;
+core.position.copy(beam.position);
+scene.add(core);
+
+// Barrier built from five plates so both slits follow the sliders
+const barrier = new THREE.Group();
+barrier.position.set(0, BEAM_Y, 0);
+scene.add(barrier);
+const plateMat = std(0x1a2831, 0.5, 0.45);
+const unitBox = new THREE.BoxGeometry(1, 1, 1);
+const addPlate = () => { const m = new THREE.Mesh(unitBox, plateMat); barrier.add(m); return m; };
+const plateTop = addPlate(), plateBottom = addPlate(), plateLeft = addPlate(), plateMid = addPlate(), plateRight = addPlate();
+const slitGlowMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85, depthWrite: false, fog: false });
+const slitGlows = [0, 1].map(() => {
+  const m = new THREE.Mesh(unitBox, slitGlowMat);
+  barrier.add(m);
+  return m;
+});
+scene.add(makeStand(BEAM_Y - BARRIER_H / 2));
+
+// Which-path detectors, only visible when the path is measured
+const detMats = [0, 1].map(() => new THREE.MeshStandardMaterial({ color: 0x2a2110, emissive: 0xffc857, emissiveIntensity: 0.3, metalness: 0.3, roughness: 0.5 }));
+const pathDetectors = detMats.map((m) => {
+  const box = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.14, 0.14), m);
+  box.visible = false;
+  barrier.add(box);
+  return box;
+});
+const detPulse = [0, 0];
+
+function layoutBarrier() {
+  const dS = params.d * SLIT_SCALE, aS = params.a * SLIT_SCALE;
+  const band = (BARRIER_H - SLIT_H) / 2;
+  plateTop.scale.set(BARRIER_T, band, BARRIER_W);
+  plateTop.position.set(0, SLIT_H / 2 + band / 2, 0);
+  plateBottom.scale.set(BARRIER_T, band, BARRIER_W);
+  plateBottom.position.set(0, -(SLIT_H / 2 + band / 2), 0);
+  const inner = dS / 2 - aS / 2, outer = dS / 2 + aS / 2, side = BARRIER_W / 2 - outer;
+  plateMid.scale.set(BARRIER_T, SLIT_H, 2 * inner);
+  plateMid.position.set(0, 0, 0);
+  plateLeft.scale.set(BARRIER_T, SLIT_H, side);
+  plateLeft.position.set(0, 0, -(outer + side / 2));
+  plateRight.scale.set(BARRIER_T, SLIT_H, side);
+  plateRight.position.set(0, 0, outer + side / 2);
+  slitGlows.forEach((m, i) => {
+    m.scale.set(BARRIER_T + 0.016, SLIT_H, aS);
+    m.position.set(0, 0, (i ? 1 : -1) * dS / 2);
+  });
+  pathDetectors.forEach((m, i) => m.position.set(0, BARRIER_H / 2 + 0.07, (i ? 1 : -1) * dS / 2));
+  beam.geometry.dispose();
+  beam.geometry = new THREE.CylinderGeometry(Math.max(0.3, outer + 0.15), 0.1, BEAM_LEN, 40, 1, true);
+}
+
+// Detection screen
+const screenGroup = new THREE.Group();
+scene.add(screenGroup);
+const frame = new THREE.Mesh(new THREE.BoxGeometry(0.16, DISPLAY_H + 0.3, DISPLAY_W + 0.34), std(0x2f4651, 0.5, 0.4));
+frame.position.y = BEAM_Y;
+screenGroup.add(frame);
+screenGroup.add(makeStand(BEAM_Y - (DISPLAY_H + 0.3) / 2));
+
+// Detector image lives in a fixed-size texture, so the cost stays flat no matter how many photons land
+const DET_W = 1024, DET_H = 512;
+const detData = new Uint8Array(DET_W * DET_H * 4);
+const detBase = new Uint8Array(DET_W * DET_H * 4);
+const counts = new Float32Array(DET_W * DET_H);
+const detTex = new THREE.DataTexture(detData, DET_W, DET_H, THREE.RGBAFormat, THREE.UnsignedByteType);
+detTex.encoding = THREE.sRGBEncoding;
+detTex.magFilter = THREE.LinearFilter;
+detTex.minFilter = THREE.LinearMipmapLinearFilter;
+detTex.generateMipmaps = true;
+detTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+const display = new THREE.Mesh(new THREE.PlaneGeometry(DISPLAY_W, DISPLAY_H), new THREE.MeshBasicMaterial({ map: detTex, fog: false }));
+display.rotation.y = -Math.PI / 2;   // faces the slits; texture u runs along +z
+display.position.set(-0.081, BEAM_Y, 0);
+screenGroup.add(display);
+
+// Time-averaged intensity between slits and screen, mapped so its bright rays land on the detector fringes
+const fanMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uColor: { value: new THREE.Color() },
+    uLam: { value: 5.2e-4 },
+    uD: { value: 0.2 },
+    uA: { value: 0.05 },
+    uGain: { value: 27 },
+    uVis: { value: 1 },
+    uTime: { value: 0 },
+    uHalfW: { value: DISPLAY_W / 2 }
+  },
+  vertexShader: `
+    varying vec3 vPos;
+    void main() {
+      vec4 wp = modelMatrix * vec4(position, 1.0);
+      vPos = wp.xyz;
+      gl_Position = projectionMatrix * viewMatrix * wp;
+    }`,
+  fragmentShader: `
+    uniform vec3 uColor;
+    uniform float uLam, uD, uA, uGain, uVis, uTime, uHalfW;
+    varying vec3 vPos;
+    const float PI = 3.141592653589793;
+    void main() {
+      float xs = max(vPos.x, 1e-3);
+      float s = (vPos.z / xs) / uGain;
+      float beta = PI * uA * s / uLam;
+      float sb = abs(beta) < 1e-4 ? 1.0 : sin(beta) / beta;
+      float ph = 2.0 * PI * uD * s / uLam;
+      float resolvable = 1.0 - smoothstep(1.0, 2.5, fwidth(ph));
+      float I = sb * sb * 0.5 * (1.0 + uVis * resolvable * cos(ph));
+      float r = length(vec2(xs, vPos.z));
+      float falloff = 1.0 / (1.0 + 0.3 * r);
+      float fadeIn = smoothstep(0.0, 0.3, xs);
+      float edge = 1.0 - smoothstep(uHalfW - 0.25, uHalfW, abs(vPos.z));
+      float shimmer = 0.92 + 0.08 * sin(2.0 * PI * (r / 0.45 - uTime * 0.6));
+      gl_FragColor = vec4(uColor * (I * falloff * fadeIn * edge * shimmer * 0.95), 1.0);
+      #include <encodings_fragment>
+    }`,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  side: THREE.DoubleSide
+});
+fanMat.extensions.derivatives = true;
+const fan = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), fanMat);
+fan.rotation.x = -Math.PI / 2;
+fan.position.y = BEAM_Y;
+scene.add(fan);
+
+function layoutScreen() {
+  const sx = screenXFor(params.L);
+  screenGroup.position.x = sx;
+  const displayX = sx - 0.081;
+  const x0 = BARRIER_T / 2 + 0.002;
+  fan.scale.set(displayX - x0, DISPLAY_W, 1);
+  fan.position.x = (displayX + x0) / 2;
+  fanMat.uniforms.uGain.value = (params.L * 1000 * (DISPLAY_W / 2)) / (SCREEN_HALF_MM * displayX);
+}
+
+// Short-lived flashes where photons land
+function makeDotTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.25, 'rgba(255,255,255,0.8)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c);
+  t.encoding = THREE.sRGBEncoding;
+  return t;
+}
+const FLASH_N = 160, FLASH_LIFE = 0.45;
+const flashPos = new Float32Array(FLASH_N * 3);
+const flashCol = new Float32Array(FLASH_N * 3);
+const flashAge = new Float32Array(FLASH_N).fill(Infinity);
+let flashHead = 0, flashesDirty = false;
+const flashGeo = new THREE.BufferGeometry();
+flashGeo.setAttribute('position', new THREE.BufferAttribute(flashPos, 3).setUsage(THREE.DynamicDrawUsage));
+flashGeo.setAttribute('color', new THREE.BufferAttribute(flashCol, 3).setUsage(THREE.DynamicDrawUsage));
+const flashPoints = new THREE.Points(flashGeo, new THREE.PointsMaterial({
+  size: 0.2, map: makeDotTexture(), vertexColors: true, transparent: true,
+  depthWrite: false, blending: THREE.AdditiveBlending, fog: false
+}));
+flashPoints.frustumCulled = false;
+scene.add(flashPoints);
+
+/* ---------------- Colour ---------------- */
+const waveColor = new THREE.Color();
+let waveRGB = [0, 1, 0];
+function applyWavelengthColor() {
+  waveRGB = wavelengthToSRGB(params.wavelength);
+  waveColor.setRGB(waveRGB[0], waveRGB[1], waveRGB[2], THREE.SRGBColorSpace);
+  for (const m of [beamMat, coreMat, slitGlowMat]) m.color.copy(waveColor);
+  apertureMat.emissive.copy(waveColor);
+  fanMat.uniforms.uColor.value.copy(waveColor);
+  document.documentElement.style.setProperty('--wave', `rgb(${waveRGB.map((c) => Math.round(c * 255)).join(',')})`);
+}
+
+/* ---------------- Detector ---------------- */
+const KERNEL = [];
+for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) KERNEL.push(Math.exp(-(dx * dx + dy * dy) / 2.2));
+const HIT_GAIN = 2.0;
+let texDirty = false;
+
+function buildDetectorBase() {
+  const c = document.createElement('canvas');
+  c.width = DET_W;
+  c.height = DET_H;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, DET_H);
+  grad.addColorStop(0, '#050b10');
+  grad.addColorStop(0.5, '#08131b');
+  grad.addColorStop(1, '#050b10');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, DET_W, DET_H);
+  g.fillStyle = 'rgba(150,195,220,0.45)';
+  for (let mm = -SCREEN_HALF_MM; mm <= SCREEN_HALF_MM; mm++) {
+    const x = Math.round(((mm + SCREEN_HALF_MM) / (2 * SCREEN_HALF_MM)) * (DET_W - 1));
+    const len = mm % 5 === 0 ? 20 : 9;
+    g.fillRect(x - 1, DET_H - len, 3, len);
+    g.fillRect(x - 1, 0, 3, len);
+  }
+  const src = g.getImageData(0, 0, DET_W, DET_H).data;
+  const row = DET_W * 4;
+  for (let y = 0; y < DET_H; y++) detBase.set(src.subarray((DET_H - 1 - y) * row, (DET_H - y) * row), y * row);
+}
+
+function shadePixel(p) {
+  const v = 1 - Math.exp(-HIT_GAIN * counts[p]);
+  const hot = v > 0.6 ? (v - 0.6) * 1.2 : 0;
+  const o = p * 4;
+  detData[o] = Math.min(255, detBase[o] + (waveRGB[0] * v + hot) * 255);
+  detData[o + 1] = Math.min(255, detBase[o + 1] + (waveRGB[1] * v + hot) * 255);
+  detData[o + 2] = Math.min(255, detBase[o + 2] + (waveRGB[2] * v + hot) * 255);
+  detData[o + 3] = 255;
+}
+
+function splat(px, py) {
+  const cx = Math.min(DET_W - 3, Math.max(2, Math.round(px)));
+  const cy = Math.min(DET_H - 3, Math.max(2, Math.round(py)));
+  let k = 0;
+  for (let dy = -2; dy <= 2; dy++) {
+    const rowStart = (cy + dy) * DET_W;
+    for (let dx = -2; dx <= 2; dx++, k++) {
+      const p = rowStart + cx + dx;
+      counts[p] += KERNEL[k];
+      shadePixel(p);
+    }
+  }
+  texDirty = true;
+}
+
+function addFlash(z, y) {
+  const i = flashHead;
+  flashHead = (flashHead + 1) % FLASH_N;
+  flashPos[i * 3] = screenGroup.position.x - 0.1;
+  flashPos[i * 3 + 1] = y;
+  flashPos[i * 3 + 2] = z;
+  flashAge[i] = 0;
+  flashesDirty = true;
+}
+
+function updateFlashes(dt) {
+  let alive = false;
+  for (let i = 0; i < FLASH_N; i++) {
+    if (flashAge[i] === Infinity) continue;
+    flashAge[i] += dt;
+    const f = flashAge[i] >= FLASH_LIFE ? 0 : 1 - flashAge[i] / FLASH_LIFE;
+    if (f === 0) flashAge[i] = Infinity;
+    const k = f * f * 1.8, w = f * f * f * 0.6;
+    flashCol[i * 3] = waveColor.r * k + w;
+    flashCol[i * 3 + 1] = waveColor.g * k + w;
+    flashCol[i * 3 + 2] = waveColor.b * k + w;
+    alive = true;
+  }
+  if (alive || flashesDirty) {
+    flashGeo.attributes.position.needsUpdate = true;
+    flashGeo.attributes.color.needsUpdate = true;
+    flashesDirty = false;
+  }
+}
+
+function detectOne() {
+  const yMm = sampleY();
+  const u = (yMm + SCREEN_HALF_MM) / (2 * SCREEN_HALF_MM);
+  hist[Math.min(NB - 1, Math.floor(u * NB))]++;
+  totalHits++;
+  let g;
+  do { g = gaussian(); } while (Math.abs(g) > 2.4);
+  const h = g * SIGMA_V;
+  splat(u * (DET_W - 1), DET_H / 2 + h * (DET_H / DISPLAY_H));
+  addFlash(-DISPLAY_W / 2 + u * DISPLAY_W, BEAM_Y + h);
+  // With the path measured, every detection comes tagged with the slit it went through
+  if (params.measured) detPulse[Math.random() < 0.5 ? 0 : 1] = 1;
+}
+
+/* ---------------- Histogram and readouts ---------------- */
+const chart = $('chart');
+const chartCtx = chart.getContext('2d');
+
+function resizeChart() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  chart.width = Math.max(1, Math.round(chart.clientWidth * dpr));
+  chart.height = Math.max(1, Math.round(chart.clientHeight * dpr));
+  chartCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawChart();
+}
+
+function drawChart() {
+  const w = chart.clientWidth, h = chart.clientHeight;
+  if (!w || !h) return;
+  const ctx = chartCtx;
+  ctx.clearRect(0, 0, w, h);
+  const top = 8, bottom = h - 18, plotH = bottom - top;
+  let maxCount = 0, maxProb = 0;
+  for (let i = 0; i < NB; i++) {
+    if (hist[i] > maxCount) maxCount = hist[i];
+    if (binProb[i] > maxProb) maxProb = binProb[i];
+  }
+  const N = totalHits;
+  const yMax = (N > 0 ? Math.max(maxCount, maxProb * N) : maxProb) * 1.1;
+
+  ctx.strokeStyle = 'rgba(120,170,200,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(Math.round(w / 2) + 0.5, top);
+  ctx.lineTo(Math.round(w / 2) + 0.5, bottom);
+  ctx.moveTo(0, bottom + 0.5);
+  ctx.lineTo(w, bottom + 0.5);
+  ctx.stroke();
+
+  if (N > 0) {
+    const [r, g, b] = waveRGB.map((c) => Math.round(c * 255));
+    ctx.fillStyle = `rgba(${r},${g},${b},0.6)`;
+    ctx.beginPath();
+    ctx.moveTo(0, bottom);
+    for (let i = 0; i < NB; i++) {
+      const y = bottom - (hist[i] / yMax) * plotH;
+      ctx.lineTo((i / NB) * w, y);
+      ctx.lineTo(((i + 1) / NB) * w, y);
+    }
+    ctx.lineTo(w, bottom);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const scale = N > 0 ? N : 1;
+  ctx.strokeStyle = '#ffc857';
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let i = 0; i < NB; i++) {
+    const x = ((i + 0.5) / NB) * w;
+    const y = bottom - ((binProb[i] * scale) / yMax) * plotH;
+    if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = '#9db4c2';
+  ctx.font = '10px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(`\u2212${SCREEN_HALF_MM} mm`, 4, h - 5);
+  ctx.textAlign = 'center';
+  ctx.fillText('0', w / 2, h - 5);
+  ctx.textAlign = 'right';
+  ctx.fillText(`+${SCREEN_HALF_MM} mm`, w - 4, h - 5);
+}
+
+function updateStats() {
+  const lambdaMm = params.wavelength * 1e-6, Lmm = params.L * 1000;
+  $('statCount').textContent = totalHits.toLocaleString();
+  $('statSpacing').textContent = `${((lambdaMm * Lmm) / params.d).toFixed(2)} mm`;
+  $('statEnvelope').textContent = `${((2 * lambdaMm * Lmm) / params.a).toFixed(1)} mm`;
+  // Orders that fall exactly on an envelope zero are missing, hence the small offset
+  $('statFringes').textContent = String(2 * Math.floor(params.d / params.a - 1e-9) + 1);
+}
+
+function updateLabels() {
+  $('wavelengthOut').textContent = `${params.wavelength} nm`;
+  $('separationOut').textContent = `${params.d.toFixed(2)} mm`;
+  $('widthOut').textContent = `${params.a.toFixed(3)} mm`;
+  $('distanceOut').textContent = `${params.L.toFixed(2)} m`;
+  $('rateOut').textContent = `${params.rate} /s`;
+}
+
+function updateMode() {
+  const btn = $('measurementBtn');
+  btn.setAttribute('aria-pressed', String(params.measured));
+  btn.textContent = params.measured ? 'Which-path: On' : 'Which-path: Off';
+  $('modeText').textContent = params.measured ? 'Which-path measured' : 'Interference';
+  $('modeNote').textContent = params.measured
+    ? 'Every photon is tagged with the slit it used. The interference term drops out and the screen fills in as the sum of two single-slit patterns.'
+    : 'Nothing records which slit a photon used, so the two paths add as amplitudes and fringes build up one detection at a time.';
+  pathDetectors.forEach((m) => { m.visible = params.measured; });
+}
+
+function updateFanUniforms() {
+  const u = fanMat.uniforms;
+  u.uLam.value = params.wavelength * 1e-6;
+  u.uD.value = params.d;
+  u.uA.value = params.a;
+}
+
+/* ---------------- State changes ---------------- */
+let simTime = 0, nextArrival = 0, needsClear = false, chartDirty = true;
+
+function clearDetector() {
+  counts.fill(0);
+  hist.fill(0);
+  totalHits = 0;
+  detData.set(detBase);
+  texDirty = true;
+  chartDirty = true;
+  flashAge.fill(Infinity);
+  flashCol.fill(0);
+  flashesDirty = true;
+  detPulse[0] = detPulse[1] = 0;
+  nextArrival = simTime + expSample(params.rate);
+}
+
+const inputs = {
+  wavelength: $('wavelength'),
+  separation: $('separation'),
+  slitWidth: $('slitWidth'),
+  distance: $('distance'),
+  rate: $('rate')
+};
+
+function readControls() {
+  params.wavelength = Number(inputs.wavelength.value);
+  params.d = Number(inputs.separation.value);
+  params.a = Number(inputs.slitWidth.value);
+  params.L = Number(inputs.distance.value);
+  params.rate = rateFromSlider(Number(inputs.rate.value));
+}
+
+function onOpticsChange() {
+  readControls();
+  updateLabels();
+  applyWavelengthColor();
+  layoutBarrier();
+  layoutScreen();
+  rebuildDistribution();
+  updateFanUniforms();
+  needsClear = true;
+}
+
+for (const key of ['wavelength', 'separation', 'slitWidth', 'distance']) inputs[key].addEventListener('input', onOpticsChange);
+inputs.rate.addEventListener('input', () => {
+  readControls();
+  updateLabels();
+  nextArrival = simTime + expSample(params.rate);
+});
+
+$('runBtn').addEventListener('click', () => {
+  params.running = !params.running;
+  $('runBtn').textContent = params.running ? 'Pause' : 'Resume';
+});
+$('clearBtn').addEventListener('click', () => { needsClear = true; });
+$('measurementBtn').addEventListener('click', () => {
+  params.measured = !params.measured;
+  rebuildDistribution();
+  updateMode();
+  needsClear = true;
+});
+$('viewBtn').addEventListener('click', () => {
+  userMovedCamera = false;
+  fitCamera();
+});
+
+/* ---------------- Camera and resize ---------------- */
+// Seen from behind the source, so the slits and the detector face both point at the camera
+const VIEW_TARGET = new THREE.Vector3(1.4, 1.5, 0);
+const VIEW_DIR = new THREE.Vector3(-0.7, 0.64, 0.42).normalize();
+const FIT_POINTS = [];
+for (const [x, hy, hz] of [[LASER_X - 0.65, 0.4, 0.4], [0, BARRIER_H / 2 + 0.2, BARRIER_W / 2], [screenXFor(2), DISPLAY_H / 2 + 0.15, DISPLAY_W / 2 + 0.17]]) {
+  for (const sy of [-1, 1]) for (const sz of [-1, 1]) FIT_POINTS.push(new THREE.Vector3(x, BEAM_Y + sy * hy, sz * hz));
+}
+const projected = new THREE.Vector3();
+
+// Binary search for the closest distance that keeps the whole setup (screen at its farthest) in frame
+function fitCamera() {
+  controls.target.copy(VIEW_TARGET);
+  let near = 4, far = 44;
+  for (let i = 0; i < 20; i++) {
+    const mid = (near + far) / 2;
+    camera.position.copy(VIEW_TARGET).addScaledVector(VIEW_DIR, mid);
+    camera.lookAt(VIEW_TARGET);
+    camera.updateMatrixWorld();
+    const fits = FIT_POINTS.every((p) => {
+      projected.copy(p).project(camera);
+      return Math.abs(projected.x) < 0.9 && Math.abs(projected.y) < 0.82 && projected.z < 1;
+    });
+    if (fits) far = mid; else near = mid;
+  }
+  camera.position.copy(VIEW_TARGET).addScaledVector(VIEW_DIR, far);
+  controls.update();
+}
+
+function resize() {
+  const w = sceneEl.clientWidth, h = sceneEl.clientHeight;
+  if (!w || !h) return;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  if (!userMovedCamera) fitCamera();
+}
+
+/* ---------------- Main loop ---------------- */
+const clock = new THREE.Clock();
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MAX_PER_FRAME = 400;
+let lastTexUpload = -Infinity, lastChartDraw = -Infinity;
+
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.1);   // a tab left in the background must not dump a huge backlog
+  const now = performance.now();
+
+  if (needsClear) { clearDetector(); needsClear = false; }
+
+  if (params.running) {
+    simTime += dt;
+    let n = 0;
+    while (nextArrival <= simTime && n < MAX_PER_FRAME) {
+      detectOne();
+      nextArrival += expSample(params.rate);
+      n++;
+    }
+    if (nextArrival < simTime) nextArrival = simTime + expSample(params.rate);
+    if (n) chartDirty = true;
+  }
+
+  updateFlashes(dt);
+  for (let i = 0; i < 2; i++) {
+    detPulse[i] *= Math.exp(-dt * 10);
+    detMats[i].emissiveIntensity = 0.3 + 3 * detPulse[i];
+  }
+  const u = fanMat.uniforms;
+  u.uVis.value += ((params.measured ? 0 : 1) - u.uVis.value) * Math.min(1, dt * 5);
+  if (!reduceMotion) u.uTime.value = (u.uTime.value + dt) % 1000;
+
+  if (texDirty && now - lastTexUpload > 33) {
+    detTex.needsUpdate = true;
+    texDirty = false;
+    lastTexUpload = now;
+  }
+  if (chartDirty && now - lastChartDraw > 120) {
+    drawChart();
+    updateStats();
+    chartDirty = false;
+    lastChartDraw = now;
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+/* ---------------- Start ---------------- */
+readControls();
+buildDetectorBase();
+applyWavelengthColor();
+layoutBarrier();
+layoutScreen();
+rebuildDistribution();
+updateFanUniforms();
+updateLabels();
+updateMode();
+clearDetector();
+new ResizeObserver(resize).observe(sceneEl);
+new ResizeObserver(resizeChart).observe(chart);
+resize();
+renderer.setAnimationLoop(tick);
+window.__doubleSlitReady = true;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,932 @@
+<!doctype html><html><head><meta charset=utf8>
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BONES">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script src="../../assets/bones.js" data-root="../../" defer></script>
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Single Atom in an Ion Trap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Michroma&display=swap">
+<style>
+/* Layout: a full-width dark viewer, like looking through the chamber window, with instrument-panel controls and readouts beneath. One column on phones, two on wide screens. */
+:root{
+  --void:#06070c;
+  --bg:#0b0c12;
+  --surface:#12141d;
+  --raise:#1a1d29;
+  --line:#2a2e41;
+  --ink:#e9e8f4;
+  --muted:#a1a4bd;
+  --laser:#8f82ff;
+  --laser-ink:#cbc4ff;
+  --laser-soft:rgba(143,130,255,.14);
+  --ir:#d65a70;
+  --vapor:#e3b765;
+  --steel:#c4c8d6;
+  --tag-bg:rgba(14,15,23,.86);
+  --f-display:"Michroma","Eurostile","Trebuchet MS",sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:20px 56px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:10px;max-width:70ch}
+.eyebrow{margin:0;font-family:var(--f-mono);font-size:12px;letter-spacing:.03em;color:var(--muted)}
+h1{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(21px,5.2vw,38px);line-height:1.3;letter-spacing:.01em;text-wrap:balance}
+.lede{margin:0;color:var(--muted);max-width:64ch}
+h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:12px;line-height:1.5;letter-spacing:.14em;text-transform:uppercase;color:var(--laser-ink);text-wrap:balance}
+
+/* Viewer */
+.viewer{position:relative;height:min(64vh,660px);min-height:340px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--void)}
+.viewer canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}
+.hud{position:absolute;inset:0;pointer-events:none}
+.readout{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:3px}
+.regime{font-family:var(--f-display);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--laser-ink)}
+.viewsize{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.scalebar{position:absolute;left:12px;bottom:12px;display:flex;flex-direction:column;gap:5px;font-family:var(--f-mono);font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
+.scalebar .bar{display:block;height:7px;width:80px;border:1.5px solid var(--ink);border-top:0}
+.hint{position:absolute;right:12px;bottom:12px;font-family:var(--f-mono);font-size:11px;line-height:1.5;color:var(--muted);text-align:right}
+.tags{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.tag{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;font-family:var(--f-body);font-size:12px;font-weight:700;line-height:1;color:var(--ink);background:var(--tag-bg);border:1px solid var(--line);border-radius:999px;padding:6px 9px;white-space:nowrap;will-change:transform}
+.tag::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:8px;background:var(--muted)}
+.tag[aria-current="true"]{border-color:var(--laser);color:var(--laser-ink)}
+.fallback{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+.fallback p{max-width:40ch;margin:0}
+
+/* Zoom controls */
+.zoombar{display:flex;flex-direction:column;gap:10px}
+.stops{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.stops::-webkit-scrollbar{display:none}
+.stop{flex:1 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:8px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 13px/1.1 var(--f-body);cursor:pointer;text-align:left}
+.stop small{font-family:var(--f-mono);font-weight:400;font-size:11px;color:var(--muted)}
+.stop[aria-pressed="true"]{border-color:var(--laser);background:var(--laser-soft)}
+.zoom{display:flex;align-items:center;gap:12px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.zoom input{flex:1;min-width:0}
+input[type=range]{accent-color:var(--laser);height:28px;margin:0}
+.caption{margin:0;max-width:70ch}
+.caption b{color:var(--laser-ink)}
+
+/* Panels */
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+@media (min-width:880px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel p{margin:0}
+.info-head{display:flex;flex-direction:column;gap:4px}
+.info h3{margin:0;font-size:20px;line-height:1.3}
+.info .body{display:flex;flex-direction:column;gap:10px;max-width:66ch}
+.info .body p{margin:0}
+.tip{font-size:13px;color:var(--muted)}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.facts li{font-family:var(--f-mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.switches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:var(--raise);color:var(--ink);font:700 13px/1 var(--f-body);cursor:pointer}
+.sw .led{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
+.sw[aria-pressed="false"]{color:var(--muted);background:transparent}
+.sw[aria-pressed="false"] .led{background:transparent;box-shadow:none;border:1.5px solid var(--muted)}
+.status{color:var(--muted)}
+
+/* Exposure simulator */
+.sim-body{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:520px){.sim-body{grid-template-columns:minmax(0,190px) minmax(0,1fr);align-items:start}}
+.sensor{margin:0;display:flex;flex-direction:column;gap:6px}
+.sensor canvas{display:block;width:100%;max-width:240px;aspect-ratio:1;image-rendering:pixelated;image-rendering:crisp-edges;border:1px solid var(--line);border-radius:4px;background:var(--void)}
+.sensor figcaption{font-size:12px;color:var(--muted)}
+.ctls{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ctl{display:flex;flex-direction:column;gap:0}
+.ctl-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px}
+.ctl output{font-family:var(--f-mono);font-size:13px;color:var(--laser-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.stats{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 14px;margin:0;padding-top:12px;border-top:1px solid var(--line)}
+.stats dt{color:var(--muted);font-size:14px}
+.stats dd{margin:0;font-family:var(--f-mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.verdict{font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ghost{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--raise);color:var(--ink);font:700 13px/1 var(--f-body);cursor:pointer}
+.note{font-size:13px;color:var(--muted)}
+
+/* Sizes */
+.sizes ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.sizes li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;align-items:baseline}
+.sizes .nm small{color:var(--muted);font-size:12px;margin-left:6px}
+.sizes .val{font-family:var(--f-mono);font-size:13px;color:var(--laser-ink);font-variant-numeric:tabular-nums}
+.sizes .track{grid-column:1/-1;height:6px;border-radius:3px;background:var(--raise);overflow:hidden}
+.sizes .track i{display:block;height:100%;width:var(--w);background:var(--laser);border-radius:3px}
+footer{font-size:13px;color:var(--muted);max-width:76ch}
+footer p{margin:0}
+:focus-visible{outline:2px solid var(--laser-ink);outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Interactive model of David Nadlinger's 2018 photo · University of Oxford</p>
+    <h1>Single Atom in an Ion Trap</h1>
+    <p class="lede">Drag to look around. Pinch or scroll to zoom, or use the scale buttons to dive from the lab bench down to the atom. Tap any label to see what it is.</p>
+  </header>
+
+  <div class="viewer" id="viewer">
+    <canvas id="scene" aria-label="3D model of the ion trap. Use the scale buttons below the view to change the zoom."></canvas>
+    <div class="hud" id="hud">
+      <div class="readout"><span class="regime" id="regime">Trap</span><span class="viewsize" id="viewsize"></span></div>
+      <div class="scalebar"><span id="sbLabel">1 mm</span><span class="bar" id="sbBar"></span></div>
+      <div class="hint">drag to orbit<br>pinch or scroll to zoom</div>
+    </div>
+    <div class="tags" id="tags"></div>
+  </div>
+
+  <div class="zoombar">
+    <div class="stops" role="group" aria-label="Jump to a scale">
+      <button class="stop" type="button" data-stop="lab" aria-pressed="false">Lab<small>~40 cm</small></button>
+      <button class="stop" type="button" data-stop="trap" aria-pressed="true">Trap<small>~7 mm</small></button>
+      <button class="stop" type="button" data-stop="blur" aria-pressed="false">Image blur<small>~25 µm</small></button>
+      <button class="stop" type="button" data-stop="jiggle" aria-pressed="false">Ion's jiggle<small>~400 nm</small></button>
+      <button class="stop" type="button" data-stop="atom" aria-pressed="false">Atom<small>~2 nm</small></button>
+    </div>
+    <label class="zoom" for="zoom"><span>Zoom</span><input id="zoom" type="range" min="0" max="1000" step="1" value="300"></label>
+  </div>
+
+  <p class="caption" id="caption"></p>
+
+  <div class="grid">
+    <div class="col">
+      <section class="panel info" aria-live="polite">
+        <div class="info-head">
+          <h2>Selected part</h2>
+          <h3 id="infoTitle">The strontium ion</h3>
+        </div>
+        <div class="body" id="infoBody"></div>
+        <ul class="facts" id="infoFacts"></ul>
+        <p class="tip">Tap a label in the view to switch parts.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="sw-h">
+        <h2 id="sw-h">Run the experiment</h2>
+        <div class="switches">
+          <button class="sw" type="button" id="sw-laser" aria-pressed="true"><span class="led" style="--c:var(--laser)"></span>422 nm cooling laser</button>
+          <button class="sw" type="button" id="sw-repump" aria-pressed="true"><span class="led" style="--c:var(--ir)"></span>1092 nm repump laser</button>
+          <button class="sw" type="button" id="sw-trap" aria-pressed="true"><span class="led" style="--c:var(--steel)"></span>Trap voltage</button>
+          <button class="sw" type="button" id="sw-beams" aria-pressed="true"><span class="led" style="--c:var(--laser-ink)"></span>Beam paths</button>
+          <button class="sw" type="button" id="sw-labels" aria-pressed="true"><span class="led" style="--c:var(--ink)"></span>Labels</button>
+        </div>
+        <p class="status" id="status" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <section class="panel sim" aria-labelledby="sim-h">
+      <h2 id="sim-h">Why it took a long exposure</h2>
+      <p>The ion throws its light in every direction, and the lens catches only a sliver. Stopping the lens down so both needle tips stay sharp cuts that sliver further. This simulates the sensor pixels right around the ion. The settings are estimates you can change, not the exact ones used for the photo.</p>
+      <div class="sim-body">
+        <figure class="sensor">
+          <canvas id="sensor" width="33" height="33" aria-label="Simulated camera sensor showing the ion as a dot"></canvas>
+          <figcaption>Simulated sensor, 33 × 33 pixels around the ion</figcaption>
+        </figure>
+        <div class="ctls">
+          <label class="ctl" for="exp"><span class="ctl-top"><span>Shutter open</span><output id="o-exp"></output></span><input type="range" id="exp" min="0" max="1000" step="1" value="768"></label>
+          <label class="ctl" for="ap"><span class="ctl-top"><span>Aperture</span><output id="o-ap"></output></span><input type="range" id="ap" min="0" max="8" step="1" value="5"></label>
+          <label class="ctl" for="pow"><span class="ctl-top"><span>Laser intensity</span><output id="o-pow"></output></span><input type="range" id="pow" min="0" max="1000" step="1" value="500"></label>
+          <label class="ctl" for="dist"><span class="ctl-top"><span>Lens distance</span><output id="o-dist"></output></span><input type="range" id="dist" min="60" max="300" step="5" value="150"></label>
+        </div>
+      </div>
+      <dl class="stats">
+        <dt>Photons the ion scatters per second</dt><dd id="s-rate"></dd>
+        <dt>Scattered while the shutter is open</dt><dd id="s-scat"></dd>
+        <dt>Share the lens catches</dt><dd id="s-share"></dd>
+        <dt>Caught by the lens</dt><dd id="s-caught"></dd>
+        <dt>Recorded by the sensor (about 25%)</dt><dd id="s-rec"></dd>
+        <dt>Brightest pixel vs. noise</dt><dd id="s-peak"></dd>
+      </dl>
+      <div class="row">
+        <p class="verdict" id="verdict"></p>
+        <button class="ghost" type="button" id="reshoot">Take another frame</button>
+      </div>
+      <p class="note">Turning up the laser stops helping past a point. The ion can't absorb a new photon until it has re-emitted the last one, which caps it near 68 million photons per second.</p>
+    </section>
+  </div>
+
+  <section class="panel sizes" aria-labelledby="sz-h">
+    <h2 id="sz-h">Sizes, side by side</h2>
+    <ol>
+      <li><span class="nm">Gap between the needle tips</span><span class="val">2 mm</span><span class="track"><i style="--w:91%"></i></span></li>
+      <li><span class="nm">Blur spot in the photo<small>estimate</small></span><span class="val">~10 µm</span><span class="track"><i style="--w:62.5%"></i></span></li>
+      <li><span class="nm">Wavelength of the ion's light</span><span class="val">422 nm</span><span class="track"><i style="--w:45.3%"></i></span></li>
+      <li><span class="nm">The ion's jiggle after cooling<small>estimate</small></span><span class="val">~30 nm</span><span class="track"><i style="--w:31.8%"></i></span></li>
+      <li><span class="nm">The atom (outer electron cloud)</span><span class="val">~0.4 nm</span><span class="track"><i style="--w:7.5%"></i></span></li>
+    </ol>
+    <p class="note">Bars use a log scale, so each step to the right is ten times bigger. The needle gap is about 5 million times wider than the atom.</p>
+  </section>
+
+  <footer>
+    <p>Simplified model. The needle shapes, chamber, distances and camera settings are illustrative, and estimates are marked. The strontium physics is real: the 422 nm transition, the roughly 7.4 ns excited-state lifetime, and the 1092 nm repump. Photo: "Single Atom in an Ion Trap" by David Nadlinger, University of Oxford, overall winner of the 2018 EPSRC science photography competition.</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const reduceMotion = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+/* ---------- Strontium-ion numbers ---------- */
+const GAMMA = 1/7.39e-9;              // decay rate of the 5P1/2 state, per second
+const RMAX = GAMMA/2;                 // most photons one ion can scatter per second (~6.8e7)
+const scatterRate = s => RMAX*s/(2+s); // laser tuned half a linewidth below resonance
+const EFF = 0.25, BG = 15, READ = 3, WHITE = 900, PITCH = 6.4;
+const FSTOPS = [1.8,2,2.8,4,5.6,8,11,16,22];
+
+/* ---------- Parts ---------- */
+const PARTS = {
+  ion:{title:"The strontium ion",
+    body:"<p>One strontium atom with one electron removed (Sr<sup>+</sup>), so it carries a positive charge. That charge is what the trap's electric fields grab onto.</p><p>What you see glowing isn't the atom's surface. It's violet light the atom keeps absorbing and re-emitting, millions of times a second.</p>",
+    facts:["38 protons, 50 neutrons (Sr-88)","Charge +1","Glows at 422 nm"]},
+  needles:{title:"Needle electrodes",
+    body:"<p>Two sharpened metal needles with tips about 2 mm apart. A radio-frequency voltage on them creates an electric field that flips direction millions of times per second.</p><p>A charged particle can't settle anywhere in that field except the quiet spot between the tips, so the ion stays there. This is a Paul trap, named for Wolfgang Paul, who shared the 1989 Nobel Prize in Physics for the idea.</p>",
+    facts:["Tip gap ~2 mm","Radio-frequency drive"]},
+  laser:{title:"422 nm cooling laser",
+    body:"<p>Tuned to the exact violet color a strontium ion absorbs. The ion takes in a photon, holds the energy for about 7 nanoseconds, then releases a new photon in a random direction. Over and over, up to about 68 million times a second.</p><p>The laser is tuned just below that color, so the ion mostly absorbs light while it's moving toward the beam. Each absorbed photon nudges it backward and slows it down. That's laser cooling, and it gets the ion to about half a thousandth of a degree above absolute zero.</p>",
+    facts:["Wavelength 422 nm","Excited state lasts ~7.4 ns","Cools to ~0.5 mK"]},
+  repump:{title:"1092 nm repump laser",
+    body:"<p>About 1 time in 18, the excited ion drops into a side state (called 4D<sub>3/2</sub>) instead of falling straight back. From there it ignores violet light and goes dark, and it would sit there for about 0.4 seconds.</p><p>This infrared laser bumps it back into the cycle so the glow continues. It's invisible to your eyes. Switch it off below to see what happens.</p>",
+    facts:["Wavelength 1092 nm (infrared)","Needed ~1 in 18 cycles"]},
+  oven:{title:"Atom oven",
+    body:"<p>How a single atom gets there. In a common setup, a small tube holding strontium is heated until it gives off a thin stream of neutral atoms aimed at the trap center.</p><p>Two more lasers (461 nm and 405 nm, not drawn) knock an electron off one atom as it passes through. Now it's charged, and the trap catches it. The rest fly on through. Switch the trap off and back on to watch a reload.</p>",
+    facts:["Loads by photoionization"]},
+  chamber:{title:"Vacuum chamber",
+    body:"<p>The trap sits in ultra-high vacuum, around 10<sup>−11</sup> millibar. That's roughly a hundred trillion times lower pressure than the air you're breathing. In ordinary air, gas molecules would knock the ion loose almost instantly.</p><p>The steel chamber is drawn see-through here so you can look inside.</p>",
+    facts:["~10⁻¹¹ mbar"]},
+  viewport:{title:"Glass viewport",
+    body:"<p>The camera shoots through a window in the chamber wall. Other windows let the laser beams in and out.</p><p>In real life the beams are invisible. There's almost nothing in a vacuum for light to bounce off, so you only see a beam where it hits something. The beam paths in this model are drawn in so you can follow them.</p>",
+    facts:["Beams invisible in vacuum"]},
+  camera:{title:"The camera",
+    body:"<p>An ordinary DSLR: a Canon 5D Mark II with a 50 mm f/1.8 lens. Extension tubes between the body and lens move the lens farther from the sensor, which lets it focus closer and magnify more.</p><p>Two flashes with colored gels lit the trap hardware, and a long exposure gave the ion's faint light time to build up on the sensor.</p>",
+    facts:["Long exposure","Extension tubes for close focus"]},
+  blur:{title:"Edge of the blur",
+    body:"<p>No lens focuses light to a perfect point. Diffraction, tiny focus errors, and the size of the sensor's pixels spread the ion's light into a spot roughly 10 µm across at the trap. That figure is an estimate from typical lens optics.</p><p>Everything inside this circle becomes one dot in the photo. The atom is about 25,000 times smaller than this spot.</p>",
+    facts:["~10 µm (estimate)"]},
+  jiggle:{title:"The ion's jiggle",
+    body:"<p>Even after laser cooling, the ion never sits perfectly still. It wobbles back and forth over a few tens of nanometers. In reality it swings about a million times a second; here it's slowed way down.</p><p>That wobble is hundreds of times smaller than the blur, so it has almost no effect on the size of the dot in the photo.</p>",
+    facts:["~30 nm (estimate)","~1 million swings/s (estimate)"]},
+  wave:{title:"The light wave",
+    body:"<p>This is the violet light the ion scatters toward the camera. One full wave is 422 nm long, about a thousand times wider than the atom.</p><p>That's the core reason no camera using visible light can show what an atom looks like: the light is far too coarse. The wave's length is to scale; its height is just for show.</p>",
+    facts:["422 nm per wave"]},
+  cloud:{title:"Outer electron",
+    body:"<p>The ion's outermost electron doesn't circle like a planet. It exists as a cloud of probability about 0.4 nm across, and the dots flicker because the cloud only says where the electron is likely to be found.</p><p>This is the electron that absorbs and re-emits the violet light. Its glow is what made the dot in the photo.</p>",
+    facts:["~0.4 nm across"]},
+  nucleus:{title:"Nucleus and inner electrons",
+    body:"<p>At the center are 36 tightly bound inner electrons around a nucleus of 38 protons and 50 neutrons. The nucleus is less than 10 femtometers across, tens of thousands of times smaller than the electron cloud. Even at this zoom it would be far too small to see, so it's drawn as a marker.</p>",
+    facts:["37 electrons in total"]}
+};
+
+const CAPTIONS = {
+  lab:{name:"Lab", text:"The trap sits inside a steel vacuum chamber, drawn see-through here. The camera looks in through a glass window. The glowing point at the center is the ion's light."},
+  trap:{name:"Trap", text:"The needle tips are about 2 mm apart. The violet dot between them is the light from one ion, roughly how it shows up in the photo."},
+  blur:{name:"Image blur", text:"Zoom in and the dot stops shrinking. It's a blur about 10 µm wide made by the lens. It shows where the ion is, not what it looks like, and an ordinary camera can't resolve anything smaller."},
+  jiggle:{name:"Ion's jiggle", text:"You're now inside the blur. The ion wanders over a few tens of nanometers, even after laser cooling. The violet wave is one wavelength of its light, drawn to scale."},
+  atom:{name:"Atom", text:"The atom itself: a cloud of electrons about 0.4 nm across. That's roughly 25,000 times smaller than the blur in the photo, and about 1,000 times smaller than one wavelength of the light it gives off."}
+};
+
+/* ---------- Shared state ---------- */
+const S = {laser:true, repump:true, trap:true, beams:true, labels:true};
+let currentR = scatterRate(1);
+let ionState = "trapped";
+
+function selectPart(id){
+  const p = PARTS[id]; if(!p) return;
+  $("infoTitle").textContent = p.title;
+  $("infoBody").innerHTML = p.body;
+  $("infoFacts").innerHTML = p.facts.map(f => "<li>"+f+"</li>").join("");
+  document.querySelectorAll(".tag").forEach(t => t.setAttribute("aria-current", t.dataset.id === id ? "true" : "false"));
+}
+
+function setStatus(){
+  let msg;
+  if(!S.trap) msg = "Trap voltage off. Nothing holds the ion anymore, so it drifts off and is lost. Switch the trap back on to load a new one.";
+  else if(ionState === "loading") msg = "Loading. Neutral strontium atoms stream out of the oven. Two other lasers strip an electron from one as it crosses the center, and the trap catches it.";
+  else if(!S.laser) msg = "Cooling laser off. The ion is still in the trap, but with no light to absorb it stops glowing. Without cooling it also slowly heats up and jiggles more.";
+  else if(!S.repump) msg = "Repump laser off. Within moments the ion falls into its dark side state and stops responding to the violet light. It's still there, just dark.";
+  else msg = "Trapped and glowing. The ion is scattering about " + (currentR/1e6).toFixed(1) + " million photons per second (change it with the laser intensity slider).";
+  $("status").textContent = msg;
+}
+
+/* ---------- Exposure simulator ---------- */
+const sim = {exp:$("exp"), ap:$("ap"), pow:$("pow"), dist:$("dist")};
+const sensor = $("sensor"), sctx = sensor.getContext("2d"), SN = 33, C0 = 16;
+const img = sctx.createImageData(SN, SN);
+const L1 = Math.log10(1/4000), L2 = Math.log10(30);
+const expTime = () => Math.pow(10, L1 + (+sim.exp.value/1000)*(L2-L1));
+const satParam = () => Math.pow(10, Math.log10(0.05) + (+sim.pow.value/1000)*(Math.log10(20)-Math.log10(0.05)));
+function erf(x){ const s = Math.sign(x); x = Math.abs(x); const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x); return s*y; }
+const binFrac = (a,b,sig) => 0.5*(erf(b/(sig*Math.SQRT2)) - erf(a/(sig*Math.SQRT2)));
+function gauss(){ let u = 0; while(!u) u = Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random()); }
+function poisson(m){ if(m <= 0) return 0; if(m > 40) return Math.max(0, Math.round(m + Math.sqrt(m)*gauss()));
+  const L = Math.exp(-m); let k = 0, p = 1; do { k++; p *= Math.random(); } while(p > L); return k-1; }
+function fmtExp(t){ if(t < 0.4) return "1/" + Math.round(1/t) + " s"; return (t < 10 ? t.toFixed(1) : t.toFixed(0)).replace(/\.0$/,"") + " s"; }
+function fmtCount(n){
+  if(n >= 1e9) return (n/1e9).toFixed(1) + " billion";
+  if(n >= 1e6) return (n/1e6).toFixed(n >= 1e7 ? 0 : 1) + " million";
+  if(n >= 10) return Math.round(n).toLocaleString("en-US");
+  return n.toFixed(1);
+}
+function simulate(){
+  const t = expTime(), N = FSTOPS[+sim.ap.value], s = satParam(), D = +sim.dist.value;
+  const R = scatterRate(s); currentR = R;
+  const r = 50/N/2, th = Math.atan(r/D), coll = (1-Math.cos(th))/2;
+  const scattered = R*t, caught = scattered*coll, recorded = caught*EFF;
+  const sig = Math.hypot(1.0, 0.42*0.422*N*2/PITCH);
+  const peak = recorded*Math.pow(binFrac(-0.5,0.5,sig),2);
+  const noise = Math.sqrt(BG*t + READ*READ);
+  const fx = [];
+  for(let i=0;i<SN;i++) fx.push(binFrac(i-C0-0.5, i-C0+0.5, sig));
+  const base = [143,130,255], ground = [6,7,12];
+  for(let y=0;y<SN;y++) for(let x=0;x<SN;x++){
+    const mean = recorded*fx[x]*fx[y] + BG*t;
+    const val = Math.max(0, poisson(mean) + READ*gauss());
+    const b = Math.pow(val/WHITE, 0.45);
+    const over = Math.max(0, b-1);
+    const k = (y*SN+x)*4;
+    for(let c=0;c<3;c++){
+      const v = ground[c] + base[c]*Math.min(b,1) + (255-base[c])*Math.min(1, over*1.6);
+      img.data[k+c] = Math.max(0, Math.min(255, v));
+    }
+    img.data[k+3] = 255;
+  }
+  sctx.putImageData(img, 0, 0);
+  $("o-exp").textContent = fmtExp(t);
+  $("o-ap").textContent = "f/" + N;
+  $("o-pow").textContent = (s < 1 ? s.toFixed(2) : s.toFixed(1)) + "× saturation";
+  $("o-dist").textContent = D + " mm";
+  $("s-rate").textContent = (R/1e6).toFixed(1) + " million";
+  $("s-scat").textContent = fmtCount(scattered);
+  $("s-share").textContent = "1 in " + Math.round(1/coll).toLocaleString("en-US");
+  $("s-caught").textContent = fmtCount(caught);
+  $("s-rec").textContent = fmtCount(recorded);
+  $("s-peak").textContent = fmtCount(peak) + " vs " + noise.toFixed(1);
+  let v;
+  if(peak < 2*noise) v = "The ion is lost in the noise. Leave the shutter open longer or open the aperture.";
+  else if(peak < 6*noise) v = "A faint dot is just starting to show through the noise.";
+  else if(peak > WHITE) v = "A bright dot, with its center clipped to white.";
+  else v = "A clear dot.";
+  $("verdict").textContent = v;
+  setStatus();
+}
+Object.values(sim).forEach(i => i.addEventListener("input", simulate));
+$("reshoot").addEventListener("click", simulate);
+simulate();
+
+/* ---------- Switches ---------- */
+const swMap = {"sw-laser":"laser","sw-repump":"repump","sw-trap":"trap","sw-beams":"beams","sw-labels":"labels"};
+const swHooks = {};
+Object.keys(swMap).forEach(id => {
+  const b = $(id);
+  b.addEventListener("click", () => {
+    const k = swMap[id]; S[k] = !S[k]; b.setAttribute("aria-pressed", S[k] ? "true" : "false");
+    if(swHooks[k]) swHooks[k](S[k]);
+    setStatus();
+  });
+});
+
+selectPart("ion");
+$("caption").innerHTML = "<b>Trap.</b> " + CAPTIONS.trap.text;
+
+/* ---------- 3D ---------- */
+function fallback(msg){
+  const v = $("viewer");
+  $("hud").hidden = true;
+  v.insertAdjacentHTML("beforeend", '<div class="fallback"><p>' + msg + '</p></div>');
+}
+
+function init3D(){
+  const viewer = $("viewer"), canvas = $("scene");
+  if(!window.THREE || !THREE.OrbitControls) return fallback("The 3D library didn't load. Check your connection and reload the page. The exposure simulator below still works.");
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:"high-performance"}); }
+  catch(e){ return fallback("This browser couldn't start WebGL, which the 3D view needs. The exposure simulator below still works."); }
+  const pr = Math.min(window.devicePixelRatio || 1, 2);
+  renderer.setPixelRatio(pr);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  const rootStyle = getComputedStyle(document.documentElement);
+  const cssv = k => rootStyle.getPropertyValue(k).trim();
+  const col = hex => new THREE.Color(hex).convertSRGBToLinear();
+  renderer.setClearColor(col(cssv("--void")), 1);
+
+  const V = (x,y,z) => new THREE.Vector3(x,y,z);
+  const Y = V(0,1,0);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 8000);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.enablePan = false; controls.rotateSpeed = 0.7; controls.zoomSpeed = 2.2;
+  controls.minDistance = 1.2e-6; controls.maxDistance = 1400;
+
+  const LASER = col(cssv("--laser")), LASER_INK = col(cssv("--laser-ink")), IR = col(cssv("--ir")), VAPOR = col(cssv("--vapor"));
+
+  /* Environment for metal reflections */
+  (function(){
+    const c = document.createElement("canvas"); c.width = 512; c.height = 256; const g = c.getContext("2d");
+    const gr = g.createLinearGradient(0,0,0,256);
+    gr.addColorStop(0,"#2c3044"); gr.addColorStop(0.5,"#12141c"); gr.addColorStop(1,"#040508");
+    g.fillStyle = gr; g.fillRect(0,0,512,256);
+    g.fillStyle = "rgba(255,226,196,0.95)"; g.fillRect(70,58,96,44);
+    g.fillStyle = "rgba(168,182,255,0.85)"; g.fillRect(320,78,80,30);
+    g.fillStyle = "rgba(255,255,255,0.35)"; g.fillRect(0,22,512,5);
+    const t = new THREE.CanvasTexture(c); t.mapping = THREE.EquirectangularReflectionMapping; t.encoding = THREE.sRGBEncoding;
+    const pm = new THREE.PMREMGenerator(renderer);
+    scene.environment = pm.fromEquirectangular(t).texture; pm.dispose(); t.dispose();
+  })();
+
+  scene.add(new THREE.HemisphereLight(0x8b90b8, 0x0b0c12, 0.55));
+  const key = new THREE.DirectionalLight(0xffd8b8, 1.4); key.position.set(40,60,50); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x9eaaff, 1.0); rim.position.set(-50,25,-40); scene.add(rim);
+
+  const mSteel = new THREE.MeshStandardMaterial({color:col("#c9cdd9"), metalness:1, roughness:0.24, side:THREE.DoubleSide});
+  const mDark = new THREE.MeshStandardMaterial({color:col("#8a8f9e"), metalness:0.9, roughness:0.38, side:THREE.DoubleSide});
+  const mCeramic = new THREE.MeshStandardMaterial({color:col("#e8e4da"), metalness:0, roughness:0.75});
+
+  function radialTex(stops){
+    const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d");
+    const gr = g.createRadialGradient(64,64,0,64,64,64); stops.forEach(s => gr.addColorStop(s[0], s[1]));
+    g.fillStyle = gr; g.fillRect(0,0,128,128);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t;
+  }
+  const glowTex = radialTex([[0,"rgba(255,255,255,1)"],[0.07,"rgba(238,235,255,1)"],[0.2,"rgba(165,152,255,0.6)"],[0.48,"rgba(122,106,255,0.14)"],[1,"rgba(90,70,255,0)"]]);
+  const dotTex = radialTex([[0,"rgba(255,255,255,1)"],[0.35,"rgba(255,255,255,0.7)"],[1,"rgba(255,255,255,0)"]]);
+
+  /* ---- Trap hardware (units: millimeters, ion at the origin) ---- */
+  const trap = new THREE.Group(); scene.add(trap);
+  const prof = [[0.0005,0],[0.016,0.004],[0.028,0.02],[0.042,0.06],[0.075,0.25],[0.13,0.8],[0.21,2.0],[0.29,4],[0.34,7],[0.35,9],[0.35,19]]
+    .map(p => new THREE.Vector2(p[0], p[1]));
+  const needleGeo = new THREE.LatheGeometry(prof, 64);
+  const nR = new THREE.Mesh(needleGeo.clone().rotateZ(-Math.PI/2), mSteel); nR.position.x = 1; trap.add(nR);
+  const nL = new THREE.Mesh(needleGeo.clone().rotateZ(Math.PI/2), mSteel); nL.position.x = -1; trap.add(nL);
+  [-1,1].forEach(s => {
+    const cer = new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,16,40).rotateZ(Math.PI/2), mCeramic); cer.position.x = s*26; trap.add(cer);
+    const blk = new THREE.Mesh(new THREE.BoxGeometry(6,9,9), mDark); blk.position.x = s*37; trap.add(blk);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.6,30.5,24), mDark); post.position.set(s*37,-19.75,0); trap.add(post);
+  });
+  const ovenDir = V(0,-14,-10).normalize();
+  const oven = new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,8,28,1,true), mDark);
+  oven.quaternion.setFromUnitVectors(Y, ovenDir); oven.position.copy(ovenDir).multiplyScalar(13); trap.add(oven);
+  const ovenCap = new THREE.Mesh(new THREE.CylinderGeometry(0.85,0.85,0.4,28), mDark);
+  ovenCap.quaternion.copy(oven.quaternion); ovenCap.position.copy(ovenDir).multiplyScalar(17); trap.add(ovenCap);
+  const wireMat = new THREE.LineBasicMaterial({color:col("#7d6a52")});
+  [-0.5,0.5].forEach(o => {
+    const a = ovenDir.clone().multiplyScalar(17).add(V(o,0,0)), b = V(o*6,-35,a.z-6);
+    trap.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, V(o*1.5,a.y-4,a.z-2), b]), wireMat));
+  });
+
+  /* ---- Laser beams ---- */
+  const u = V(1,0,-1).normalize(), u2 = V(1,0.07,-1).normalize();
+  const segAlong = (dir,len) => new THREE.BufferGeometry().setFromPoints([dir.clone().multiplyScalar(-len), dir.clone().multiplyScalar(len)]);
+  const line422 = new THREE.Line(segAlong(u,95), new THREE.LineBasicMaterial({color:LASER, transparent:true, opacity:0.85, toneMapped:false}));
+  const line1092 = new THREE.Line(segAlong(u2,95), new THREE.LineDashedMaterial({color:IR, dashSize:1.1, gapSize:0.8, transparent:true, opacity:0.8, toneMapped:false}));
+  line1092.computeLineDistances();
+  const glowMat = (c,o) => new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false});
+  const glow422 = new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,190,20,1,true), glowMat(LASER,0.45));
+  glow422.quaternion.setFromUnitVectors(Y,u);
+  const glow1092 = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,190,20,1,true), glowMat(IR,0.16));
+  glow1092.quaternion.setFromUnitVectors(Y,u2);
+  scene.add(line422, line1092, glow422, glow1092);
+
+  /* ---- Vacuum chamber ---- */
+  const chamber = new THREE.Group(); scene.add(chamber);
+  const AP = 60, H = 70, FW = 2*AP*Math.tan(Math.PI/8), RV = AP/Math.cos(Math.PI/8);
+  const wallMat = new THREE.MeshStandardMaterial({color:col("#9aa1b4"), metalness:0.7, roughness:0.35, transparent:true, opacity:0.13, depthWrite:false, side:THREE.DoubleSide});
+  const edgeMat = new THREE.LineBasicMaterial({color:col("#59607c"), transparent:true, opacity:0.6});
+  const glassMat = new THREE.MeshStandardMaterial({color:col("#9fb2ff"), metalness:0.2, roughness:0.05, transparent:true, opacity:0.12, depthWrite:false, side:THREE.DoubleSide});
+  const flangeMat = new THREE.MeshStandardMaterial({color:col("#b8bccb"), metalness:1, roughness:0.3});
+  const panelGeo = new THREE.BoxGeometry(FW, H, 2.5), panelEdges = new THREE.EdgesGeometry(panelGeo);
+  for(let k=0;k<8;k++){
+    const a = k*Math.PI/4;
+    const p = new THREE.Mesh(panelGeo, wallMat); p.position.set(Math.sin(a)*AP, 0, Math.cos(a)*AP); p.rotation.y = a; chamber.add(p);
+    const e = new THREE.LineSegments(panelEdges, edgeMat); e.position.copy(p.position); e.rotation.y = a; chamber.add(e);
+    if(k === 0 || k === 2 || k === 3 || k === 7){
+      const vp = new THREE.Group(); vp.position.set(Math.sin(a)*(AP+1.5), 0, Math.cos(a)*(AP+1.5)); vp.rotation.y = a;
+      const gl = new THREE.Mesh(new THREE.CylinderGeometry(15,15,1.2,48).rotateX(Math.PI/2), glassMat); vp.add(gl);
+      vp.add(new THREE.Mesh(new THREE.TorusGeometry(18,2.4,12,48), flangeMat));
+      chamber.add(vp);
+    }
+  }
+  const plateGeo = new THREE.CylinderGeometry(RV+2, RV+2, 4, 8, 1, false, Math.PI/8);
+  [H/2+2, -H/2-2].forEach(y => {
+    const pl = new THREE.Mesh(plateGeo, wallMat); pl.position.y = y; chamber.add(pl);
+    const pe = new THREE.LineSegments(new THREE.EdgesGeometry(plateGeo), edgeMat); pe.position.y = y; chamber.add(pe);
+  });
+  const legGeo = new THREE.CylinderGeometry(4,4,87,20);
+  [[40,40],[-40,40],[40,-40],[-40,-40]].forEach(([x,z]) => { const l = new THREE.Mesh(legGeo, mDark); l.position.set(x,-39-43.5,z); chamber.add(l); });
+
+  /* Optical table: 25 mm hole grid */
+  (function(){
+    const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+    g.fillStyle = "#232634"; g.fillRect(0,0,64,64);
+    g.fillStyle = "#0b0c12"; g.beginPath(); g.arc(32,32,6,0,Math.PI*2); g.fill();
+    g.strokeStyle = "rgba(255,255,255,0.08)"; g.lineWidth = 1.5; g.beginPath(); g.arc(32,32,7.5,0,Math.PI*2); g.stroke();
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(40,32); t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const table = new THREE.Mesh(new THREE.PlaneGeometry(1000,800), new THREE.MeshStandardMaterial({map:t, roughness:0.85, metalness:0.15}));
+    table.rotation.x = -Math.PI/2; table.position.set(0,-130,100); scene.add(table);
+  })();
+
+  /* ---- Camera (generic DSLR with extension tubes) ---- */
+  const camAxis = V(0,0.12,1).normalize();
+  const dslr = new THREE.Group(); dslr.position.copy(camAxis).multiplyScalar(125); scene.add(dslr); dslr.lookAt(0,0,0);
+  const mBody = new THREE.MeshStandardMaterial({color:col("#1e1f25"), roughness:0.55, metalness:0.25});
+  const mRub = new THREE.MeshStandardMaterial({color:col("#121317"), roughness:0.9, metalness:0});
+  const mLens = new THREE.MeshStandardMaterial({color:col("#26385e"), roughness:0.04, metalness:0.9});
+  const mChrome = new THREE.MeshStandardMaterial({color:col("#d8dbe2"), roughness:0.18, metalness:1});
+  const cylZ = (r,len,mat,z) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,48).rotateX(Math.PI/2), mat); m.position.z = z; dslr.add(m); return m; };
+  cylZ(34,66,mBody,-33); cylZ(35.5,14,mRub,-40); cylZ(15,1,mLens,0.3); cylZ(34.5,2,mChrome,-1);
+  let z0 = -66;
+  [12,20,36].forEach(L => { cylZ(31,L,mBody,z0-L/2); cylZ(31.6,1.2,mChrome,z0-L); z0 -= L; });
+  cylZ(29,4,mChrome,z0-2);
+  const bodyZ = z0-4-37;
+  const body = new THREE.Mesh(new THREE.BoxGeometry(146,106,74), mBody); body.position.set(0,18,bodyZ); dslr.add(body);
+  const hump = new THREE.Mesh(new THREE.BoxGeometry(66,30,58), mBody); hump.position.set(0,84,bodyZ+3); dslr.add(hump);
+  const grip = new THREE.Mesh(new THREE.BoxGeometry(30,98,84), mRub); grip.position.set(-62,14,bodyZ+6); dslr.add(grip);
+  const btn = new THREE.Mesh(new THREE.CylinderGeometry(5,5,4,24), mChrome); btn.position.set(-60,73,bodyZ+20); dslr.add(btn);
+  dslr.updateMatrixWorld(true);
+  const bodyWorld = dslr.localToWorld(V(0,18,bodyZ));
+  const bodyBottom = bodyWorld.y - 52;
+  const cpost = new THREE.Mesh(new THREE.CylinderGeometry(8,8,bodyBottom+130,24), mDark);
+  cpost.position.set(bodyWorld.x, (bodyBottom-130)/2, bodyWorld.z); scene.add(cpost);
+  const cbase = new THREE.Mesh(new THREE.CylinderGeometry(22,22,5,32), mDark); cbase.position.set(bodyWorld.x,-127.5,bodyWorld.z); scene.add(cbase);
+  const camTagPos = dslr.localToWorld(V(0,104,bodyZ+3));
+
+  /* ---- Ion, its light, and the small-scale views ---- */
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false}));
+  scene.add(glow);
+
+  function randDir(out){
+    const z = Math.random()*2-1, t = Math.random()*Math.PI*2, r = Math.sqrt(1-z*z);
+    return (out || new THREE.Vector3()).set(r*Math.cos(t), z, r*Math.sin(t));
+  }
+  const NPH = 180, phPos = new Float32Array(NPH*3);
+  const phs = Array.from({length:NPH}, () => ({dir:randDir(), o:new THREE.Vector3(), age:Math.random()*1.8}));
+  const phGeo = new THREE.BufferGeometry(); phGeo.setAttribute("position", new THREE.BufferAttribute(phPos,3));
+  const phMat = new THREE.PointsMaterial({color:LASER_INK, size:3.2*pr, sizeAttenuation:false, map:dotTex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, toneMapped:false});
+  const photons = new THREE.Points(phGeo, phMat); photons.frustumCulled = false; scene.add(photons);
+
+  const NV = 80, vPos = new Float32Array(NV*3);
+  const vps = Array.from({length:NV}, () => ({o:new THREE.Vector3(), dir:new THREE.Vector3(), age:-1, sp:7}));
+  const vGeo = new THREE.BufferGeometry(); vGeo.setAttribute("position", new THREE.BufferAttribute(vPos,3));
+  const vMat = new THREE.PointsMaterial({color:VAPOR, size:3.4*pr, sizeAttenuation:false, map:dotTex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, toneMapped:false});
+  const vapor = new THREE.Points(vGeo, vMat); vapor.frustumCulled = false; vapor.visible = false; scene.add(vapor);
+
+  const ringPts = []; for(let i=0;i<96;i++){ const a = i/96*Math.PI*2; ringPts.push(V(Math.cos(a)*0.005, Math.sin(a)*0.005, 0)); }
+  const ring = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(ringPts), new THREE.LineDashedMaterial({color:LASER_INK, dashSize:0.0007, gapSize:0.0004, transparent:true, opacity:0.9, toneMapped:false}));
+  ring.computeLineDistances(); ring.frustumCulled = false;
+  const ringG = new THREE.Group(); ringG.add(ring); scene.add(ringG);
+
+  const NT = 420, trPos = new Float32Array(NT*3), trCol = new Float32Array(NT*3);
+  const trGeo = new THREE.BufferGeometry();
+  trGeo.setAttribute("position", new THREE.BufferAttribute(trPos,3)); trGeo.setAttribute("color", new THREE.BufferAttribute(trCol,3));
+  const trail = new THREE.Line(trGeo, new THREE.LineBasicMaterial({vertexColors:true, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false}));
+  trail.frustumCulled = false; scene.add(trail);
+  const hist = Array.from({length:NT}, () => new THREE.Vector3()); let histHead = 0;
+
+  const dotGeo = new THREE.BufferGeometry(); dotGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(3),3));
+  const ionDot = new THREE.Points(dotGeo, new THREE.PointsMaterial({color:col("#f1eeff"), size:7*pr, sizeAttenuation:false, map:dotTex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, toneMapped:false}));
+  ionDot.frustumCulled = false; scene.add(ionDot);
+
+  const LAM = 4.22e-4, NW = 240, wPos = new Float32Array(NW*3);
+  const wGeo = new THREE.BufferGeometry(); wGeo.setAttribute("position", new THREE.BufferAttribute(wPos,3));
+  const wave = new THREE.Line(wGeo, new THREE.LineBasicMaterial({color:LASER, transparent:true, opacity:0.8, toneMapped:false}));
+  wave.frustumCulled = false; scene.add(wave);
+
+  const atom = new THREE.Group(); scene.add(atom);
+  function gammaR(mean){ const a = mean/1.5; return -(a/2)*Math.log(Math.random()*Math.random()*Math.random()+1e-12); }
+  function cloud(n, mean, color, size){
+    const arr = new Float32Array(n*3), g = new THREE.BufferGeometry(), tmp = new THREE.Vector3();
+    const fill = i => { randDir(tmp).multiplyScalar(gammaR(mean)); arr[i*3]=tmp.x; arr[i*3+1]=tmp.y; arr[i*3+2]=tmp.z; };
+    for(let i=0;i<n;i++) fill(i);
+    g.setAttribute("position", new THREE.BufferAttribute(arr,3));
+    const pts = new THREE.Points(g, new THREE.PointsMaterial({color, size, sizeAttenuation:true, map:dotTex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, toneMapped:false}));
+    pts.frustumCulled = false; pts.userData = {fill, n, arr};
+    atom.add(pts); return pts;
+  }
+  const outer = cloud(2200, 2e-7, LASER_INK, 1.7e-8);
+  const inner = cloud(1100, 5e-8, col("#ffe0b8"), 1.1e-8);
+  const nucGeo = new THREE.BufferGeometry(); nucGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(3),3));
+  const nucleus = new THREE.Points(nucGeo, new THREE.PointsMaterial({color:col("#ffd39a"), size:5*pr, sizeAttenuation:false, map:dotTex, transparent:true, depthWrite:false, toneMapped:false}));
+  nucleus.frustumCulled = false; atom.add(nucleus);
+
+  /* ---- Ion state ---- */
+  const ion = {pos:new THREE.Vector3(), vel:new THREE.Vector3(), dir:new THREE.Vector3(), heat:1, glow:1, flash:0, loadT:0, vaporT:99};
+  const ph6 = Array.from({length:6}, () => Math.random()*6.283);
+  function jig(t, heat, out){
+    const A = 5.2e-5*heat*(1+0.18*Math.sin(0.37*t));
+    return out.set(
+      A*(0.72*Math.sin(1.95*t+ph6[0]) + 0.34*Math.sin(5.1*t+ph6[1])),
+      A*(0.62*Math.sin(2.7*t+ph6[2]) + 0.36*Math.sin(6.6*t+ph6[3])),
+      A*(0.66*Math.sin(2.3*t+ph6[4]) + 0.33*Math.sin(5.9*t+ph6[5])));
+  }
+  const CAPTURE_T = 1.9;
+  function startLoading(){
+    ionState = "loading"; ion.loadT = 0; ion.vaporT = 0; ion.pos.set(0,0,0);
+    vps.forEach(p => { p.age = -Math.random()*1.4; });
+  }
+  swHooks.trap = on => {
+    if(!on){
+      if(ionState === "trapped"){ ionState = "escaping"; randDir(ion.dir); ion.dir.y = Math.abs(ion.dir.y)*0.5+0.2; ion.dir.normalize(); ion.vel.set(0,0,0); }
+      else if(ionState === "loading"){ ionState = "gone"; ion.vaporT = 99; }
+    } else startLoading();
+  };
+
+  let tAnim = 0;
+  function updateIon(dt){
+    if(ionState === "trapped"){
+      if(!S.laser) ion.heat = Math.min(4, ion.heat + dt*0.25); else ion.heat += (1-ion.heat)*Math.min(1, dt*1.5);
+      jig(tAnim, ion.heat, ion.pos);
+      hist[histHead].copy(ion.pos); histHead = (histHead+1) % NT;
+    } else if(ionState === "escaping"){
+      ion.vel.addScaledVector(ion.dir, dt*30); ion.pos.addScaledVector(ion.vel, dt);
+      if(ion.pos.length() > 45){ ionState = "gone"; setStatus(); }
+    } else if(ionState === "loading"){
+      ion.loadT += dt;
+      if(ion.loadT >= CAPTURE_T){
+        ionState = "trapped"; ion.flash = 1; ion.heat = 1.6;
+        jig(tAnim, ion.heat, ion.pos); hist.forEach(h => h.copy(ion.pos));
+        setStatus();
+      }
+    }
+    if(ion.vaporT < 99) ion.vaporT += dt;
+    const present = ionState === "trapped" || ionState === "escaping";
+    if(present && S.laser && S.repump) ion.glow = Math.min(1, ion.glow + dt*5);
+    else if(!S.laser || !present) ion.glow = Math.max(0, ion.glow - dt*10);
+    else ion.glow = Math.max(0, ion.glow - dt*1.6) * (0.75 + 0.25*Math.random());
+    ion.flash = Math.max(0, ion.flash - dt*2.2);
+  }
+
+  /* ---- Scale bands (log-space fades) ---- */
+  const lg = Math.log10;
+  function band(d, lo0, lo1, hi1, hi0){
+    const L = lg(d); let v = 1;
+    const r = (a,b) => Math.min(1, Math.max(0, (L-lg(a))/(lg(b)-lg(a))));
+    if(lo0 != null) v *= r(lo0, lo1);
+    if(hi0 != null) v *= 1 - r(hi1, hi0);
+    return v;
+  }
+
+  const camRight = new THREE.Vector3(), camUp = new THREE.Vector3(), tmpV = new THREE.Vector3();
+  function updateVisuals(d, dt){
+    const present = ionState === "trapped" || ionState === "escaping";
+    const lit = ion.glow;
+    glow.position.copy(ion.pos);
+    const gs = Math.max(0.010, d*0.016)*(1 + ion.flash*2.5);
+    glow.scale.set(gs, gs, 1);
+    glow.material.opacity = Math.min(1, lit + ion.flash) * (0.07 + 0.93*band(d,0.0015,0.008,null,null)) * band(d,3e-6,4e-5,null,null);
+    glow.visible = present && glow.material.opacity > 0.002;
+
+    const phOp = lit * band(d,0.06,0.4,null,null);
+    photons.visible = present && phOp > 0.01;
+    if(photons.visible){
+      phMat.opacity = phOp;
+      const sp = d*0.55;
+      for(let i=0;i<NPH;i++){
+        const p = phs[i]; p.age += dt;
+        if(p.age > 1.8){ p.age -= 1.8; randDir(p.dir); p.o.copy(ion.pos); }
+        phPos[i*3] = p.o.x + p.dir.x*sp*p.age; phPos[i*3+1] = p.o.y + p.dir.y*sp*p.age; phPos[i*3+2] = p.o.z + p.dir.z*sp*p.age;
+      }
+      phGeo.attributes.position.needsUpdate = true;
+    }
+
+    const vOp = band(d,0.5,2,null,null);
+    vapor.visible = ion.vaporT < 3.6 && vOp > 0.01;
+    if(vapor.visible){
+      vMat.opacity = vOp*0.9;
+      const mouth = ovenDir.clone().multiplyScalar(9);
+      for(let i=0;i<NV;i++){
+        const p = vps[i]; p.age += dt;
+        const life = 26/p.sp;
+        if(p.age >= life || (p.age >= 0 && p.o.lengthSq() === 0)){
+          if(ion.vaporT < 2.4){
+            p.age = p.age >= life ? p.age - life : 0;
+            p.o.copy(mouth).add(V((Math.random()-0.5)*0.6,(Math.random()-0.5)*0.6,(Math.random()-0.5)*0.6));
+            p.dir.copy(ovenDir).multiplyScalar(-1).add(V((Math.random()-0.5)*0.1,(Math.random()-0.5)*0.1,(Math.random()-0.5)*0.1)).normalize();
+            p.sp = 6 + Math.random()*3;
+          } else p.age = -99;
+        }
+        if(p.age < 0){ vPos[i*3] = 1e7; vPos[i*3+1] = 1e7; vPos[i*3+2] = 1e7; continue; }
+        vPos[i*3] = p.o.x + p.dir.x*p.sp*p.age; vPos[i*3+1] = p.o.y + p.dir.y*p.sp*p.age; vPos[i*3+2] = p.o.z + p.dir.z*p.sp*p.age;
+      }
+      vGeo.attributes.position.needsUpdate = true;
+    }
+
+    const bl = S.beams ? band(d,0.15,0.6,null,null) : 0;
+    line422.visible = S.laser && bl > 0.01; line422.material.opacity = 0.85*bl;
+    line1092.visible = S.repump && bl > 0.01; line1092.material.opacity = 0.8*bl;
+    const bg = S.beams ? band(d,0.3,1.5,90,260) : 0;
+    glow422.visible = S.laser && bg > 0.01; glow422.material.opacity = 0.45*bg;
+    glow1092.visible = S.repump && bg > 0.01; glow1092.material.opacity = 0.16*bg;
+
+    ringG.quaternion.copy(camera.quaternion);
+    const rOp = band(d,0.004,0.012,0.12,0.45);
+    ring.visible = present && rOp > 0.01; ring.material.opacity = 0.9*rOp;
+
+    const tOp = band(d,2e-5,6e-5,1.5e-3,5e-3);
+    trail.visible = ionState === "trapped" && tOp > 0.01;
+    if(trail.visible){
+      for(let i=0;i<NT;i++){
+        const h = hist[(histHead+i) % NT], k = i/(NT-1), c = Math.pow(k,1.6)*tOp;
+        trPos[i*3] = h.x; trPos[i*3+1] = h.y; trPos[i*3+2] = h.z;
+        trCol[i*3] = LASER.r*c; trCol[i*3+1] = LASER.g*c; trCol[i*3+2] = LASER.b*c;
+      }
+      trGeo.attributes.position.needsUpdate = true; trGeo.attributes.color.needsUpdate = true;
+    }
+    const dOp = band(d,4e-6,1.5e-5,1.5e-3,5e-3);
+    ionDot.visible = ionState === "trapped" && dOp > 0.01; ionDot.material.opacity = dOp;
+    const da = dotGeo.attributes.position.array; da[0] = ion.pos.x; da[1] = ion.pos.y; da[2] = ion.pos.z; dotGeo.attributes.position.needsUpdate = true;
+
+    const wOp = band(d,4e-5,1.2e-4,1.5e-3,5e-3);
+    wave.visible = S.laser && wOp > 0.01;
+    if(wave.visible){
+      wave.material.opacity = 0.8*wOp;
+      const amp = 0.9e-4, phase = tAnim*1.6;
+      for(let i=0;i<NW;i++){
+        const s = (i/(NW-1) - 0.5)*5*LAM, y = amp*Math.sin(2*Math.PI*s/LAM - phase);
+        wPos[i*3] = u.x*s; wPos[i*3+1] = y; wPos[i*3+2] = u.z*s;
+      }
+      wGeo.attributes.position.needsUpdate = true;
+    }
+
+    const aOp = band(d,null,null,6e-6,2.5e-5);
+    atom.visible = ionState === "trapped" && aOp > 0.01;
+    if(atom.visible){
+      atom.position.copy(ion.pos);
+      outer.material.opacity = 0.75*aOp; inner.material.opacity = 0.85*aOp; nucleus.material.opacity = aOp;
+      [outer, inner].forEach(p => { const {fill, n} = p.userData; const m = Math.ceil(n*0.04); for(let j=0;j<m;j++) fill((Math.random()*n)|0); p.geometry.attributes.position.needsUpdate = true; });
+    }
+  }
+
+  /* ---- Labels ---- */
+  const tags = [
+    {id:"ion", text:"Strontium ion", range:[0.6,120], need:() => ionState === "trapped" || ionState === "escaping",
+      anchor:(d,o) => o.copy(ion.pos).addScaledVector(camUp, d*0.02)},
+    {id:"needles", text:"Needle electrodes", range:[3,45], anchor:(d,o) => o.set(-1.7,0.45,0)},
+    {id:"laser", text:"422 nm laser", range:[3,3000], need:() => S.laser && S.beams,
+      anchor:(d,o) => d > 60 ? o.copy(u).multiplyScalar(72).add(V(0,6,0)) : o.copy(u).multiplyScalar(1.9).add(V(0,0.28,0))},
+    {id:"repump", text:"1092 nm repump", range:[3,60], need:() => S.repump && S.beams, anchor:(d,o) => o.copy(u2).multiplyScalar(-1.9).add(V(0,-0.32,0))},
+    {id:"oven", text:"Atom oven", range:[7,90], anchor:(d,o) => o.copy(ovenDir).multiplyScalar(16.5)},
+    {id:"chamber", text:"Vacuum chamber", range:[70,3000], anchor:(d,o) => o.set(-40,38,-40)},
+    {id:"viewport", text:"Viewport", range:[70,3000], anchor:(d,o) => o.set(0,-14,62)},
+    {id:"camera", text:"Camera", range:[70,3000], anchor:(d,o) => o.copy(camTagPos)},
+    {id:"blur", text:"Edge of the blur", range:[0.005,0.4], need:() => ionState === "trapped",
+      anchor:(d,o) => o.set(0,0,0).addScaledVector(camRight,0.005*Math.cos(1.0)).addScaledVector(camUp,0.005*Math.sin(1.0))},
+    {id:"jiggle", text:"Ion's path, slowed", range:[3e-5,3e-3], need:() => ionState === "trapped",
+      anchor:(d,o) => o.set(0,0,0).addScaledVector(camRight,-8e-5).addScaledVector(camUp,7e-5)},
+    {id:"wave", text:"422 nm light wave", range:[5e-5,3e-3], need:() => S.laser,
+      anchor:(d,o) => o.copy(u).multiplyScalar(LAM*1.25).add(V(0,1.0e-4,0))},
+    {id:"cloud", text:"Outer electron", range:[0,2.2e-5], need:() => ionState === "trapped",
+      anchor:(d,o) => o.copy(ion.pos).addScaledVector(camRight,2.6e-7).addScaledVector(camUp,2.6e-7)},
+    {id:"nucleus", text:"Nucleus", range:[0,2.2e-5], need:() => ionState === "trapped",
+      anchor:(d,o) => o.copy(ion.pos).addScaledVector(camUp,-1.2e-7)}
+  ];
+  const tagLayer = $("tags");
+  tags.forEach(t => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "tag"; b.textContent = t.text;
+    b.dataset.id = t.id; b.hidden = true; b.setAttribute("aria-current", t.id === "ion" ? "true" : "false");
+    b.addEventListener("click", () => selectPart(t.id));
+    tagLayer.appendChild(b); t.el = b;
+  });
+  function updateTags(d, w, h){
+    for(const t of tags){
+      let show = S.labels && d >= t.range[0] && d <= t.range[1] && (!t.need || t.need());
+      if(show){
+        t.anchor(d, tmpV); tmpV.project(camera);
+        if(tmpV.z > 1 || tmpV.z < -1) show = false;
+        else {
+          const x = (tmpV.x*0.5+0.5)*w, y = (-tmpV.y*0.5+0.5)*h;
+          if(x < 10 || x > w-10 || y < 40 || y > h-6) show = false;
+          else t.el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) translate(-50%,calc(-100% - 9px))";
+        }
+      }
+      if(t.el.hidden === show) t.el.hidden = !show;
+    }
+  }
+
+  /* ---- Scale stops and zoom ---- */
+  const STOPS = {
+    lab:{d:() => Math.max(520, 640/Math.max(camera.aspect,0.3)), az:62, el:24},
+    trap:{d:() => 9, az:14, el:10},
+    blur:{d:() => 0.035, az:14, el:10},
+    jiggle:{d:() => 6e-4, az:14, el:10},
+    atom:{d:() => 2.6e-6, az:14, el:10}
+  };
+  const ZMAX = 1400, ZMIN = 1.2e-6;
+  const zoomEl = $("zoom");
+  const dToZ = d => Math.round((lg(ZMAX)-lg(d))/(lg(ZMAX)-lg(ZMIN))*1000);
+  const zToD = z => Math.pow(10, lg(ZMAX) - (lg(ZMAX)-lg(ZMIN))*z/1000);
+  let anim = null, zoomDragging = false;
+  function goTo(id, instant){
+    const s = STOPS[id], d = s.d();
+    const from = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+    const toPhi = Math.PI/2 - s.el*Math.PI/180, toTh = s.az*Math.PI/180;
+    let dth = ((toTh - from.theta) % (2*Math.PI) + 3*Math.PI) % (2*Math.PI) - Math.PI;
+    const span = Math.abs(lg(d) - lg(Math.max(from.radius,1e-9)));
+    anim = {t:0, dur:(instant || reduceMotion) ? 0 : Math.min(3.4, 1.1 + 0.27*span),
+      lr0:Math.log(Math.max(from.radius,1e-9)), lr1:Math.log(d), p0:from.phi, p1:toPhi, t0:from.theta, dt:dth};
+  }
+  function stepAnim(dt){
+    anim.t += dt;
+    const k = anim.dur === 0 ? 1 : Math.min(1, anim.t/anim.dur);
+    const e = k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k+2,3)/2;
+    const sph = new THREE.Spherical(Math.exp(anim.lr0 + (anim.lr1-anim.lr0)*e), anim.p0 + (anim.p1-anim.p0)*e, anim.t0 + anim.dt*e);
+    camera.position.setFromSpherical(sph).add(controls.target);
+    camera.lookAt(controls.target);
+    if(k >= 1) anim = null;
+  }
+  controls.addEventListener("start", () => { anim = null; });
+  document.querySelectorAll(".stop").forEach(b => b.addEventListener("click", () => goTo(b.dataset.stop)));
+  zoomEl.addEventListener("input", () => {
+    anim = null;
+    const off = camera.position.clone().sub(controls.target).setLength(zToD(+zoomEl.value));
+    camera.position.copy(controls.target).add(off);
+  });
+  zoomEl.addEventListener("pointerdown", () => { zoomDragging = true; });
+  window.addEventListener("pointerup", () => { zoomDragging = false; });
+
+  const REG = [["lab",60],["trap",0.6],["blur",0.004],["jiggle",2e-5],["atom",0]];
+  const regimeOf = d => { for(const [id,min] of REG) if(d > min) return id; return "atom"; };
+  let lastReg = "";
+  const sbBar = $("sbBar"), sbLabel = $("sbLabel"), viewsize = $("viewsize"), regimeEl = $("regime"), captionEl = $("caption");
+  const stopBtns = Array.from(document.querySelectorAll(".stop"));
+  function fmtLen(mm){
+    const units = [[1000,"m"],[1,"mm"],[1e-3,"µm"],[1e-6,"nm"],[1e-9,"pm"]];
+    for(const [f,un] of units){ if(mm >= f*0.9999){ const v = mm/f; return (v >= 10 ? v.toFixed(0) : v.toFixed(1)).replace(/\.0$/,"") + " " + un; } }
+    return (mm/1e-9).toFixed(2) + " pm";
+  }
+  const fovR = camera.fov*Math.PI/180;
+  let lastSB = "";
+  function updateHUD(d, h){
+    const viewH = 2*d*Math.tan(fovR/2), pxPer = h/viewH, raw = 90/pxPer;
+    const p = Math.pow(10, Math.floor(lg(raw))); let n = p;
+    [1,2,5].forEach(m => { if(m*p <= raw*1.0001) n = m*p; });
+    sbBar.style.width = (n*pxPer).toFixed(1) + "px";
+    const sbt = fmtLen(n), vst = "View height " + fmtLen(viewH);
+    if(sbt + vst !== lastSB){ sbLabel.textContent = sbt; viewsize.textContent = vst; lastSB = sbt + vst; }
+    const reg = regimeOf(d);
+    if(reg !== lastReg){
+      lastReg = reg; regimeEl.textContent = CAPTIONS[reg].name;
+      captionEl.innerHTML = "<b>" + CAPTIONS[reg].name + ".</b> " + CAPTIONS[reg].text;
+      stopBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.stop === reg ? "true" : "false"));
+    }
+    if(!zoomDragging){ const z = dToZ(d); if(+zoomEl.value !== z) zoomEl.value = z; }
+  }
+
+  /* ---- Resize, visibility, loop ---- */
+  let W = 1, Hh = 1;
+  function resize(){
+    W = Math.max(1, viewer.clientWidth); Hh = Math.max(1, viewer.clientHeight);
+    renderer.setSize(W, Hh, false); camera.aspect = W/Hh; camera.updateProjectionMatrix();
+  }
+  resize();
+  if(window.ResizeObserver) new ResizeObserver(resize).observe(viewer); else window.addEventListener("resize", resize);
+  let onScreen = true;
+  if(window.IntersectionObserver) new IntersectionObserver(es => { onScreen = es[0].isIntersecting; }).observe(viewer);
+
+  goTo("trap", true); stepAnim(0);
+  const followTarget = new THREE.Vector3(), delta = new THREE.Vector3();
+  let last = performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(!onScreen || document.hidden){ last = now; return; }
+    const rawDt = Math.min(0.05, (now-last)/1000); last = now;
+    const dt = rawDt*(reduceMotion ? 0.4 : 1);
+    tAnim += dt;
+    updateIon(dt);
+    if(anim) stepAnim(rawDt); else controls.update();
+    let d = camera.position.distanceTo(controls.target);
+    const f = ionState === "trapped" ? band(d,null,null,4e-6,2e-5) : 0;
+    followTarget.copy(ion.pos).multiplyScalar(f);
+    delta.copy(followTarget).sub(controls.target);
+    if(delta.lengthSq() > 0){ controls.target.add(delta); camera.position.add(delta); }
+    camera.near = Math.max(d*0.002, 1e-12);
+    camera.far = Math.min(8000, Math.max(d*400, 1e-3));
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld();
+    camRight.setFromMatrixColumn(camera.matrixWorld, 0); camUp.setFromMatrixColumn(camera.matrixWorld, 1);
+    updateVisuals(d, dt);
+    renderer.render(scene, camera);
+    updateTags(d, W, Hh);
+    updateHUD(d, Hh);
+  }
+  requestAnimationFrame(frame);
+}
+
+try { init3D(); } catch(e){ console.error(e); fallback("Something went wrong starting the 3D view. Try reloading the page. The exposure simulator below still works."); }
+})();
+</script>
+
+</body></html>
