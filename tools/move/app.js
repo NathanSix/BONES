@@ -309,7 +309,7 @@ function initJC() {
   const box = $('jc-chart'), r = $('jc-r');
   let C = null, mk = null, ml = null;
   const draw = (w) => {
-    C = chartFrame(box, w, { label: 'Relative risk of death by minutes of strength work per week', x0: 0, x1: 180, y0: 0.75, y1: 1.1, yt: [0.8, 0.9, 1.0, 1.1], yf: (v) => v.toFixed(1), xt: [0, 30, 60, 90, 120, 150, 180], xf: (v) => v + ' min' });
+    C = chartFrame(box, w, { label: 'Relative risk of death by minutes of strength work per week', x0: 0, x1: 180, y0: 0.75, y1: 1.1, yt: [0.8, 0.9, 1.0, 1.1], yf: (v) => v.toFixed(1), xt: w < 520 ? [0, 60, 120, 180] : [0, 30, 60, 90, 120, 150, 180], xf: (v) => (w < 520 ? String(v) : v + ' min') });
     svgEl('rect', { x: C.X(30), y: C.m.t, width: C.X(60) - C.X(30), height: C.h - C.m.t - C.m.b, class: 'zone' }, C.svg);
     const zl = svgEl('text', { x: C.X(45), y: C.m.t + 14, 'text-anchor': 'middle', class: 'zone-l' }, C.svg); zl.textContent = 'Lowest risk';
     svgEl('line', { x1: C.m.l, x2: C.w - C.m.r, y1: C.Y(1), y2: C.Y(1), class: 'ref' }, C.svg);
@@ -324,9 +324,15 @@ function initJC() {
     const v = +r.value, y = v <= 140 ? interp(JC, v) : interp(JC_HI, v);
     $('jc-out').textContent = v + ' min';
     const pct = Math.round((y - 1) * 100);
-    $('jc-rr').textContent = v > 140 ? 'Unclear' : v === 0 ? '0%' : (pct <= 0 ? '−' : '+') + Math.abs(pct) + '%';
-    $('jc-wk').textContent = v === 0 ? 'None' : v <= 60 ? `2 × ${Math.round(v / 2)}` : `${Math.ceil(v / 30)} × ${Math.round(v / Math.ceil(v / 30))}`;
-    if (C) { mk.setAttribute('cx', C.X(v)); mk.setAttribute('cy', C.Y(y)); ml.setAttribute('x', clamp(C.X(v), 40, C.w - 40)); ml.setAttribute('y', C.Y(y) - 14); ml.textContent = v > 140 ? 'Too few people to tell' : 'RR ' + y.toFixed(2); }
+    // 0 minutes is the comparison point itself, so it gets no percentage.
+    $('jc-rr').textContent = v === 0 ? 'Baseline' : v > 140 ? 'Unclear' : pct < 0 ? `${-pct}% lower` : 'No change';
+    $('jc-rr-t').textContent = v === 0 ? 'No strength work. Every other point on the curve is compared with this one.'
+      : v > 140 ? 'Too few people lifted this much to say whether the risk rises or falls.'
+      : 'risk of death than people who did no strength work';
+    const n = v <= 60 ? 2 : Math.ceil(v / 30), WORD = { 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six' };
+    $('jc-wk').textContent = v === 0 ? 'None' : `${n} × ${Math.round(v / n)}`;
+    $('jc-wk-t').textContent = v === 0 ? 'Move the slider to add strength work.' : `minutes, as ${WORD[n] || n} sessions a week`;
+    if (C) { mk.setAttribute('cx', C.X(v)); mk.setAttribute('cy', C.Y(y)); ml.setAttribute('x', clamp(C.X(v), 40, C.w - 40)); ml.setAttribute('y', C.Y(y) - 14); ml.textContent = v > 140 ? 'Too few people to tell' : v === 0 ? 'Baseline' : 'RR ' + y.toFixed(2); }
   };
   r.addEventListener('input', upd);
   responsive(box, draw);
@@ -351,7 +357,7 @@ function initSteps() {
   const upd = () => {
     const v = +r.value, y = interp(STP, v), [p0, p1] = PLATEAU[age];
     $('st-out').textContent = fmt(v);
-    $('st-rr').textContent = v <= STP[0][0] ? 'Baseline' : '−' + Math.round((1 - y) * 100) + '%';
+    $('st-rr').textContent = v <= STP[0][0] ? 'Baseline' : Math.round((1 - y) * 100) + '% lower';
     $('st-zone').textContent = v < p0 ? 'Still steep' : v <= p1 ? 'Flattening' : 'Past the bend';
     $('st-zone-t').textContent = `For ${age === 'under' ? 'under-60s' : 'adults 60 and over'}, risk stopped falling at about ${fmt(p0)} to ${fmt(p1)} steps.`;
     if (C) {
