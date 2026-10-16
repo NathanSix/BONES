@@ -567,6 +567,9 @@ document.addEventListener('keydown', function (e) {
 });
 
 /* ---------- Loop: ease travel, snap gently to a nearby stop, redraw ---------- */
+/* Skip drawing while the sky is off screen; a pending redraw waits until it is back. */
+var skyOn = true;
+if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { skyOn = es[0].isIntersecting; }).observe(cv);
 function frame(now) {
   if (zt !== null) {
     var t = Math.min(1, (now - tStart) / tDur), e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -576,7 +579,7 @@ function frame(now) {
     lastInput = 0; var s = nearest(); if (s && Math.abs(s.e - z) > 0.02) go(s.e);
   }
   var waving = !REDUCE && Math.abs(-6.3 - z) < 1.3;
-  if (dirty || waving) { render(now); updateHud(); renderCard(); dirty = false; }
+  if ((dirty || waving) && skyOn) { render(now); updateHud(); renderCard(); dirty = false; }
   requestAnimationFrame(frame);
 }
 

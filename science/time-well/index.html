@@ -753,9 +753,19 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
     new IntersectionObserver(es => { wellVisible = es[0].isIntersecting; }).observe(well);
   }
   if (!reduce) {
-    let prev = performance.now();
+    let prev = performance.now(), raf = 0;
     const floorHand = $('#floorHand'), penHand = $('#penHand');
+    // Only animate while one of the moving figures is on screen; stop the loop otherwise.
+    const movers = [well, floorHand, penHand, $('#sat'), $('#ball')].map(el => el && (el.ownerSVGElement || el)).filter(Boolean);
+    const seen = new Set(movers);
+    const start = () => { if (!raf && seen.size) { prev = performance.now(); raf = requestAnimationFrame(frame); } };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) seen.add(e.target); else seen.delete(e.target); }); start(); });
+      movers.forEach(el => io.observe(el));
+    }
     const frame = now => {
+      raf = 0;
+      if (!seen.size) return;
       const dt = Math.min(now - prev, 100); prev = now;
       if (wellVisible) drawWell(now);
       const base = (now / 1000) * 90;
@@ -768,9 +778,9 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
       }
       const cyc = (now / 1000) % (T + 0.7);
       placeBall(Math.min(cyc, T));
-      requestAnimationFrame(frame);
+      raf = requestAnimationFrame(frame);
     };
-    requestAnimationFrame(frame);
+    start();
   } else {
     placeBall(T / 2);
   }

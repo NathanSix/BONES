@@ -500,12 +500,18 @@ dd{margin:0}
     cC.textContent = caught;
     cL.textContent = germs.filter(g => g.state === 'free').length;
   }
+  // Run only while the game is on screen and playing; restart when either changes.
+  let onScreen = true, raf = 0;
   function loop(){
-    if (running) { step(); draw(); }
-    requestAnimationFrame(loop);
+    raf = 0;
+    if (!running || !onScreen) return;
+    step(); draw();
+    raf = requestAnimationFrame(loop);
   }
+  function kick(){ if (!raf && running && onScreen) raf = requestAnimationFrame(loop); }
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { onScreen = es[0].isIntersecting; kick(); }).observe(cv);
   playBtn.textContent = running ? 'Pause' : 'Play';
-  playBtn.addEventListener('click', () => { running = !running; playBtn.textContent = running ? 'Pause' : 'Play'; });
+  playBtn.addEventListener('click', () => { running = !running; playBtn.textContent = running ? 'Pause' : 'Play'; kick(); });
   document.getElementById('gNormal').addEventListener('click', () => start('normal'));
   document.getElementById('gMirror').addEventListener('click', () => start('mirror'));
   start('normal');
