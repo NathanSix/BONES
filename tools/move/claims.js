@@ -1,6 +1,6 @@
 /* Every graded claim on the page. rules: 'health' uses the five BONES tiers; 'data' is for records and
    reference figures; 'history' for things that happened. t: '1'..'5', or 'u' for never properly tested. */
-const REVIEWED = 'Sources checked 16 Oct 2026 · Grade proposed by BONES';
+const REVIEWED = 'Sources checked 22 Oct 2026 · Grade proposed by BONES';
 const TIERS = {
   health: { 1: 'Replicated', 2: 'Single trial or meta-analysis', 3: 'Observational', 4: 'Contested', 5: 'Debunked', u: 'Untested' },
   history: { 1: 'Strong', 2: 'Moderate', 3: 'Observational', 4: 'Contested', 5: 'Not supported', u: 'Untested' },
@@ -93,10 +93,10 @@ const CLAIMS = {
     text: 'In the five to seven years after menopause, women can lose up to 20% or more of their bone density.',
     why: 'A widely cited upper range. Individual losses vary a lot.',
     src: [BHOF] },
-  'b-sarco': { rules: 'data', t: '3', ctype: 'MEASURE', design: 'Estimate reported by Harvard Health Publishing',
-    text: 'After about 30, men can lose as much as 3 to 5% of their muscle mass per decade.',
-    why: 'An estimate summarized from studies of aging muscle. The rate depends heavily on activity, so it is graded as an estimate.',
-    src: [['Harvard Men’s Health Watch: Declining muscle mass is part of aging, but not inevitable', 'https://www.health.harvard.edu/press_releases/declining-muscle-mass-is-part-of-aging-but-not-inevitable-from-the-march-2016-harvard-mens-health-watch']] },
+  'b-sarco': { rules: 'data', t: '2', ctype: 'MEASURE', design: 'MRI scans of 468 men and women aged 18 to 88',
+    text: 'Muscle as a share of body weight starts falling in people’s 20s. The actual amount of muscle doesn’t drop noticeably until about 50, and most of the loss is in the legs.',
+    why: 'Muscle was measured directly by MRI, which is a strength. It compares people of different ages at one time rather than following the same people, so it shows the typical pattern, not any one person’s rate.',
+    src: [['Janssen, Heymsfield, Wang and Ross 2000. Skeletal muscle mass and distribution in 468 men and women aged 18 to 88 yr. Journal of Applied Physiology', 'https://pubmed.ncbi.nlm.nih.gov/10904038/']] },
 
   /* ---------- 03 Lifts ---------- */
   'l-mindose': { rules: 'health', t: '2', ctype: 'EFFECT', design: 'Systematic reviews of training studies in resistance-trained adults',
@@ -110,17 +110,17 @@ const CLAIMS = {
   'l-grip': { rules: 'health', t: '3', ctype: 'ASSOC', design: 'Prospective cohort, 139,691 adults in 17 countries, about 4 years',
     text: 'Each 5 kg lower grip strength was linked to 16% higher risk of death from any cause. Grip predicted death better than systolic blood pressure.',
     why: 'A very large international cohort. Grip is a marker of overall strength and health, so this is a link, not evidence that squeezing things makes you live longer.',
-    src: [['Leong et al. 2015. Prognostic value of grip strength: findings from the Prospective Urban Rural Epidemiology (PURE) study. The Lancet', 'https://pubmed.ncbi.nlm.nih.gov/25982160/'], ['Healio summary', 'https://www.healio.com/news/cardiology/20150821/grip-strength-may-predict-risk-for-mortality-cvd']] },
+    src: [['Leong et al. 2015. Prognostic value of grip strength: findings from the Prospective Urban Rural Epidemiology (PURE) study. The Lancet', 'https://pubmed.ncbi.nlm.nih.gov/25982160/']] },
 
   /* ---------- 04 Walking ---------- */
   'w-manpo': { rules: 'history', t: '2', ctype: 'STATUS', design: 'Well-documented marketing history',
-    text: 'The 10,000-step goal began as the name of a Japanese pedometer, the manpo-kei (“10,000-step meter”), sold after the 1964 Tokyo Olympics.',
-    why: 'Consistently reported by researchers and journalists. The number came before the evidence, not from it.',
-    src: [['ScienceAlert: Do you really need to take 10,000 steps per day?', 'https://www.sciencealert.com/do-you-really-need-to-take-10-000-steps-per-day'], DING_NEWS] },
+    text: 'The 10,000-step goal began as the name of a Japanese pedometer, the manpo-kei (“10,000-step meter”), sold in 1965, the year after the Tokyo Olympics.',
+    why: 'Described by step-count researchers in a peer-reviewed paper as a marketing figure. The number came before the evidence, not from it.',
+    src: [['Lee et al. 2019. Association of step volume and intensity with all-cause mortality in older women. JAMA Internal Medicine (introduction)', 'https://doi.org/10.1001/jamainternmed.2019.0899'], ['Harvard Health blog by the study’s lead author: 10,000 steps a day, or fewer? (2019)', 'https://www.health.harvard.edu/blog/10000-steps-a-day-or-fewer-2019071117305']] },
   'w-saint': { rules: 'health', t: '3', ctype: 'ASSOC', design: 'US national cohort, about 4,800 adults 40 and over, steps measured by accelerometer',
     text: 'Compared with 4,000 steps a day, 8,000 steps was linked to 51% lower risk of death, and 12,000 to 65% lower.',
     why: 'Device-measured steps in a national sample. Observational, so a link rather than proof.',
-    src: [['National Cancer Institute: Higher daily step count linked with lower all-cause mortality (Saint-Maurice et al. 2020, JAMA)', 'https://www.cancer.gov/news-events/press-releases/2020/daily-step-count-mortality']] },
+    src: [['Saint-Maurice et al. 2020. Association of daily step count and step intensity with mortality among US adults. JAMA', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7093766/'], ['National Cancer Institute summary', 'https://www.cancer.gov/news-events/press-releases/2020/daily-step-count-mortality']] },
   'w-cadence': { rules: 'data', t: '2', ctype: 'MEASURE', design: 'Narrative review of lab and field studies',
     text: 'About 100 steps a minute is a reasonable rule of thumb for moderate-intensity walking in healthy adults. About 130 may mark vigorous.',
     why: 'The authors call it a heuristic, a practical estimate rather than a precise cutoff. It varies with height, fitness and age.',
@@ -128,7 +128,7 @@ const CLAIMS = {
   'w-intensity': { rules: 'health', t: '4', ctype: 'ASSOC', design: 'Two large step studies with conflicting results',
     text: 'Whether walking faster adds benefit beyond the total number of steps is unsettled.',
     why: 'In one US cohort, step pace showed no link with death once total steps were counted. In the 15-cohort meta-analysis, a faster best half hour was linked to lower risk, but other pace measures were not.',
-    src: [['National Cancer Institute summary of Saint-Maurice et al. 2020', 'https://www.cancer.gov/news-events/press-releases/2020/daily-step-count-mortality'], PALUCH] },
+    src: [['Saint-Maurice et al. 2020. Association of daily step count and step intensity with mortality among US adults. JAMA', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7093766/'], PALUCH] },
   'w-hadza': { rules: 'data', t: '2', ctype: 'MEASURE', design: 'GPS tracking of Hadza hunter-gatherers, Tanzania',
     text: 'Hadza men walked about 11.4 km a day and women about 5.8 km.',
     why: 'Directly measured with GPS in one careful field study. One population, so not the whole human range.',
@@ -150,11 +150,11 @@ const CLAIMS = {
   'r-falls': { rules: 'health', t: '1', ctype: 'EFFECT', design: 'Cochrane review of 108 randomized trials, 23,407 people',
     text: 'In older adults living at home, exercise cut the rate of falls by about 23%. Programs built mainly on balance and functional exercises had high-certainty evidence.',
     why: 'Many independent randomized trials, pooled by Cochrane and rated high certainty. This is about as strong as exercise evidence gets.',
-    src: [['Sherrington et al. 2019. Exercise for preventing falls in older people living in the community. Cochrane Database of Systematic Reviews (Cochrane news summary)', 'https://www.cochrane.org/about-us/news/new-cochrane-review-assesses-benefits-and-harms-exercise-preventing-falls-older-people-living']] },
+    src: [['Sherrington et al. 2019. Exercise for preventing falls in older people living in the community. Cochrane Database of Systematic Reviews', 'https://doi.org/10.1002/14651858.CD012424.pub2'], ['Cochrane news summary', 'https://www.cochrane.org/about-us/news/new-cochrane-review-assesses-benefits-and-harms-exercise-preventing-falls-older-people-living']] },
   'r-sitrise': { rules: 'health', t: '3', ctype: 'ASSOC', design: 'Cohort of 2,002 adults aged 51 to 80, followed about 6 years',
     text: 'Each extra point on the sit-to-rise test was linked to 21% lower risk of death. The lowest scorers had five to six times the risk of the highest.',
     why: 'One clinic cohort in Brazil, adjusted for age, sex and weight. The test reflects overall strength, balance and flexibility, so the score is a marker, not a cause.',
-    src: [['Brito et al. 2012. Ability to sit and rise from the floor as a predictor of all-cause mortality. European Journal of Preventive Cardiology (ScienceDaily summary)', 'https://www.sciencedaily.com/releases/2012/12/121213085202.htm']] }
+    src: [['Brito et al. 2012. Ability to sit and rise from the floor as a predictor of all-cause mortality. European Journal of Preventive Cardiology', 'https://doi.org/10.1177/2047487312471759'], ['European Society of Cardiology press release', 'https://escardio.org/The-ESC/Press-Office/Press-releases/Ability-to-sit-and-rise-from-the-floor-is-closely-correlated-with-all-cause-mort']] }
   ,
   /* ---------- 06 Primates (Draft) ---------- */
   'p-strength': { rules: 'data', t: '2', ctype: 'MEASURE', design: 'Lab measurements of single chimpanzee muscle fibers, fed into whole-muscle computer models, plus a review of earlier strength data',
