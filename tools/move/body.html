@@ -17,6 +17,7 @@
         <a href="#lifts" data-ch="lifts"><i>03</i><span>Four lifts</span></a>
         <a href="#walk" data-ch="walk"><i>04</i><span>Walking</span></a>
         <a href="#range" data-ch="range"><i>05</i><span>Mobility</span></a>
+        <a href="#primates" data-ch="primates"><i>06</i><span>Primates</span></a>
       </nav>
     </div>
   </div>
@@ -67,6 +68,11 @@
         <span class="n"><span>05</span><span class="gl"><svg aria-hidden="true"><use href="#g-range"/></svg></span></span>
         <div><h3>Mobility</h3><p>Range is only useful if you can control it. Plus a two-minute test.</p></div>
         <span class="go">Mobility<svg viewBox="0 0 16 16" aria-hidden="true"><use href="#g-arrow"/></svg></span>
+      </a>
+      <a class="ch-card" href="#primates" style="--ch: var(--h-science)">
+        <span class="n"><span>06 · Draft</span><span class="gl"><svg aria-hidden="true"><use href="#g-branch"/></svg></span></span>
+        <div><h3>How primates move</h3><p>What our relatives say about what our bodies are built for, and the ape myths to drop.</p></div>
+        <span class="go">Primates<svg viewBox="0 0 16 16" aria-hidden="true"><use href="#g-arrow"/></svg></span>
       </a>
     </nav>
 
@@ -409,7 +415,92 @@
       </div>
     </section>
 
-    <nav class="pager" aria-label="Chapter navigation"><a href="#walk" class="prev"><span class="label">Previous · 04</span><b>Walking and the step count</b></a><a href="#top" class="next"><span class="label">Back to</span><b>Contents</b></a></nav>
+    <nav class="pager" aria-label="Chapter navigation"><a href="#walk" class="prev"><span class="label">Previous · 04</span><b>Walking and the step count</b></a><a href="#primates" class="next"><span class="label">Next · 06</span><b>How primates move</b></a></nav>
+  </div>
+</section>
+
+<!-- ================= 06 PRIMATES ================= -->
+<section class="view chapter" id="v-primates" data-view="primates" data-title="How primates move" style="--ch: var(--h-science)" hidden aria-labelledby="primates-title">
+  <div class="wrap">
+    <header class="ch-head">
+      <span class="ph" aria-hidden="true"><svg><use href="#g-branch"/></svg></span>
+      <p class="label">Chapter 06 · Primates <span class="draft-tag">Draft</span></p>
+      <h1 id="primates-title">How primates move</h1>
+      <p class="lede">Our closest relatives swing, clamber, knuckle-walk and climb. Humans bet almost everything on walking. Looking at them shows what our bodies are built for, and where the “move like an ape” idea goes wrong.</p>
+      <div class="meta" data-meta></div>
+    </header>
+
+    <section class="sec" id="pr-movers" aria-labelledby="movers-title">
+      <div class="col">
+        <div class="sec-head"><p class="label eyebrow">Four ways to get around</p><h2 id="movers-title">Meet the relatives</h2></div>
+        <p class="read">Each of these apes moves in its own way, and its body is shaped to match. Pick one to see how it gets around and one thing researchers measured.</p>
+      </div>
+      <div class="wide fig" style="--ch: var(--h-science)">
+        <div class="fig-head"><h3>Who moves how</h3><div class="seg" id="mv-pick" role="group" aria-label="Choose a primate"><button type="button" data-mv="gibbon" aria-pressed="false">Gibbon</button><button type="button" data-mv="orang" aria-pressed="false">Orangutan</button><button type="button" data-mv="chimp" aria-pressed="true">Chimpanzee</button><button type="button" data-mv="human" aria-pressed="false">Human</button></div></div>
+        <div class="movers" id="mv-card" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="sec" id="pr-measured" aria-labelledby="measured-title">
+      <div class="col">
+        <div class="sec-head"><p class="label eyebrow">Us against them, measured</p><h2 id="measured-title">Chimps aren’t superhuman. We’re super walkers.</h2></div>
+        <p class="read">You’ll often hear that chimps are many times stronger than people. When researchers measured chimp muscle fibers and modeled whole muscles, a chimp muscle came out about 1.35 times as powerful as a human muscle of the same size. That’s a real edge, not a superpower. <button class="tier" data-claim="p-strength"></button></p>
+        <p class="read">The edge comes from the mix of fibers, not better fibers. About two thirds of chimp muscle is fast-twitch, built for bursts. Ours leans toward slow-twitch, built to keep going. <button class="tier" data-claim="p-fiber"></button></p>
+        <p class="read">Where we win is distance. Human walking costs about 75% less energy than a chimp walking, on two legs or four. Our longer legs and a hip that straightens fully explain most of the gap. <button class="tier" data-claim="p-walkcost"></button></p>
+      </div>
+      <div class="wide fig" style="--ch: var(--h-science)">
+        <div class="fig-head"><h3>Human and chimp, side by side</h3><div class="seg" id="vs-pick" role="group" aria-label="What to compare"><button type="button" data-vs="power" aria-pressed="true">Muscle power</button><button type="button" data-vs="walk" aria-pressed="false">Cost of walking</button></div></div>
+        <div class="vs" id="vs-bars"></div>
+        <p class="fig-cap" id="vs-cap"></p>
+      </div>
+    </section>
+
+    <section class="sec" id="pr-glute" aria-labelledby="glute-title">
+      <div class="col">
+        <div class="sec-head"><p class="label eyebrow">What walking leaves out</p><h2 id="glute-title">Your biggest muscle barely works on a walk</h2></div>
+        <p class="read">The gluteus maximus is the largest muscle in your body, and it is unusually big in humans. Recordings of its activity show it stays mostly quiet during level and uphill walking. It switches on hard when you run. <button class="tier" data-claim="p-glute"></button></p>
+        <p class="read">So walking, the thing we’re best at, doesn’t load the muscle that powers us out of a chair or up a hill. That’s part of why this guide pairs walking with the squat and hinge in <a href="#lifts">Chapter 03</a>, which take the hip through a deep bend under load.</p>
+      </div>
+    </section>
+
+    <section class="sec" id="pr-tissue" aria-labelledby="tissue-title">
+      <div class="col">
+        <div class="sec-head"><p class="label eyebrow">Use shapes the body</p><h2 id="tissue-title">The soft tissue keeps score</h2></div>
+        <p class="read">The Twa of Uganda climb trees for honey. Filmed while climbing, they bent their ankles to about 41 degrees, close to what wild chimps do. Their bones looked no different from anyone else’s. Their calf muscles did: the men who climbed had longer muscle fibers than men in a neighboring farming group who rarely climb. The same was true of climbing Agta and non-climbing Manobo in the Philippines. <button class="tier" data-claim="p-twa"></button></p>
+        <p class="read">The study can’t say whether climbing lengthened those fibers or whether the climbers were born with them. It does suggest that a lot of what feels like a fixed limit lives in muscle and tendon, not bone.</p>
+        <div class="sec-head"><p class="label eyebrow">Rest isn’t always rest</p><h2>Squatting is busier than sitting</h2></div>
+        <p class="read">Hadza hunter-gatherers in Tanzania spend about 10 hours a day not walking, roughly the same as people in the United States. The difference is how they rest. About two hours a day is spent squatting and more kneeling, and squatting keeps the leg muscles working well above chair sitting, in some muscles at 20 to 40% of walking levels. <button class="tier" data-claim="p-hadza-sit"></button></p>
+        <p class="read">Whether resting this way protects health hasn’t been tested. The researchers offer it as an idea worth testing, not a finding. <button class="tier" data-claim="p-sit-health"></button> Swapping some chair time for the floor costs nothing, and the deep squat hold in the <a href="#range">mobility routine</a> is the same position.</p>
+      </div>
+    </section>
+
+    <section class="sec" id="pr-myths" aria-labelledby="pmyth-title">
+      <div class="col">
+        <div class="sec-head"><p class="label eyebrow">Where the ape story goes wrong</p><h2 id="pmyth-title">Three things to be careful with</h2></div>
+      </div>
+      <ul class="short wide">
+        <li><b>Copying an ape doesn’t give you its body.</b><span>When nine adults swung arm over arm like gibbons, their swings were quicker and choppier than a pendulum, and only about 16 to 37% of the energy carried into the next swing. Arm length and grip strength mattered most. We kept the ability and lost the hardware. Hanging and swinging are good grip and shoulder work, not a return to anything. <button class="tier" data-claim="p-brachiate"></button></span></li>
+        <li><b>Walking upright may have started in the trees.</b><span>The old story says our ancestors stood up when they left the forest. Orangutans walk upright on the thinnest branches, holding on with their hands, and chimps living in open savanna still lean on trees. Neither proves how it happened, but the savanna story isn’t settled. <button class="tier" data-claim="p-trees"></button></span></li>
+        <li><b>“Born to run” is a strong idea, not a closed case.</b><span>Human bodies have many features that help long-distance running, and records from nearly 400 accounts of running prey down suggest it worked when people tried it. How much it shaped our evolution is still argued. <button class="tier" data-claim="p-run"></button></span></li>
+      </ul>
+    </section>
+
+    <section class="sec" aria-labelledby="pr-you-title">
+      <div class="col">
+        <div class="sec-head"><p class="label eyebrow">What this means for you</p><h2 id="pr-you-title">Adapt, don’t imitate</h2></div>
+        <p class="read">You don’t need to live like an ape or a forager. You need to cover what modern life leaves out.</p>
+      </div>
+      <ul class="routine wide">
+        <li><span class="t">Built for it</span><b>Walk most days</b><span>It’s the cheapest thing your body does and the movement it’s shaped around. <a href="#walk">Chapter 04</a>.</span></li>
+        <li><span class="t">What walking misses</span><b>Lift twice a week</b><span>Squat and hinge load the hip in a deep bend, which walking doesn’t. <a href="#lifts">Chapter 03</a>.</span></li>
+        <li><span class="t">Off the chair</span><b>Rest low sometimes</b><span>Squat, kneel or sit on the floor for part of your sitting time.</span></li>
+        <li><span class="t">For fun</span><b>Hang, climb, crawl</b><span>Good for grip, shoulders and play. Treat them as variety, not a cure.</span></li>
+      </ul>
+    </section>
+
+    <p class="verify wide"><strong>Draft. Check before launch.</strong> Claims here were graded from the papers’ abstracts and summaries. The orangutan claim rests on the journal’s press summary, and the “born to run” grade needs a published critique added for balance. Each paper needs a full read before this chapter goes live.</p>
+
+    <nav class="pager" aria-label="Chapter navigation"><a href="#range" class="prev"><span class="label">Previous · 05</span><b>Mobility</b></a><a href="#top" class="next"><span class="label">Back to</span><b>Contents</b></a></nav>
   </div>
 </section>
 </main>
@@ -421,7 +512,7 @@
     </div>
     <div>
       <h2>Chapters</h2>
-      <ul><li><a href="#little">How little you need</a></li><li><a href="#load">Why bones want weight</a></li><li><a href="#lifts">The four lifts</a></li><li><a href="#walk">Walking and the step count</a></li><li><a href="#range">Mobility</a></li></ul>
+      <ul><li><a href="#little">How little you need</a></li><li><a href="#load">Why bones want weight</a></li><li><a href="#lifts">The four lifts</a></li><li><a href="#walk">Walking and the step count</a></li><li><a href="#range">Mobility</a></li><li><a href="#primates">How primates move</a> (draft)</li></ul>
     </div>
     <div>
       <h2>About the grades</h2>

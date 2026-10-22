@@ -107,7 +107,7 @@ function chapterMeta(view) {
 
 /* ---------- Router: one chapter at a time ---------- */
 function safeInit(fn) { try { fn(); } catch (err) { console.error('component failed:', fn.name, err); } }
-const CHAPTERS = ['little', 'load', 'lifts', 'walk', 'range'];
+const CHAPTERS = ['little', 'load', 'lifts', 'walk', 'range', 'primates'];
 const inits = {};
 const started = {};
 let curView = null;
@@ -501,6 +501,41 @@ function initSitRise() {
   render();
 }
 inits.range = () => safeInit(initSitRise);
+
+/* ---------- 06: primates (Draft) ---------- */
+const MOVERS = {
+  gibbon: { name: 'Gibbon', how: 'Swings arm over arm beneath branches', built: 'Very long arms, hook-like hands, a light body', fact: 'People can swing like this, but our swings are choppy and waste most of their energy. We kept the move, not the build.', claim: 'p-brachiate' },
+  orang: { name: 'Orangutan', how: 'Clambers through the canopy on all four limbs, and walks upright on thin branches while holding on', built: 'Long arms, grasping feet, the heaviest tree-living ape', fact: 'Upright walking showed up most on the thinnest, bendiest branches, with the hands there for balance.', claim: 'p-orang' },
+  chimp: { name: 'Chimpanzee', how: 'Knuckle-walks on the ground between food trees, climbs to eat and sleep', built: 'Long arms, short legs, a hip that can’t straighten fully', fact: 'Day to day, ground travel used about ten times more energy than climbing.', claim: 'p-climbcost' },
+  human: { name: 'Human', how: 'Strides on two straight legs, for hours', built: 'Long legs, a hip that straightens fully, arched feet', fact: 'Our walk costs about a quarter of the energy a chimp spends to cover the same ground.', claim: 'p-walkcost' }
+};
+function initMovers() {
+  const box = $('mv-card');
+  box.innerHTML = Object.entries(MOVERS).map(([k, m]) => `<article class="mover" data-k="${k}" hidden><h4>${esc(m.name)}</h4>
+    <dl><dt>How it moves</dt><dd>${esc(m.how)}</dd><dt>Built for it</dt><dd>${esc(m.built)}</dd><dt>Measured</dt><dd>${esc(m.fact)} <button class="tier" data-claim="${m.claim}"></button></dd></dl></article>`).join('');
+  const show = (k) => $$('.mover', box).forEach((a) => { a.hidden = a.dataset.k !== k; });
+  seg($('mv-pick'), 'mv', show);
+  show('chimp');
+}
+const VS = {
+  power: { unit: 'Relative muscle power, human = 1', max: 1.6, ticks: [0, 0.5, 1, 1.5], rows: [['Human muscle', 1, '1.0'], ['Chimp muscle, same size', 1.35, '1.35×']],
+    cap: 'Model estimate from measured fibers. The scale starts at zero, so the bars show the real gap: about a third more, not several times.' },
+  walk: { unit: 'Energy to walk the same distance, chimp = 100', max: 110, ticks: [0, 25, 50, 75, 100], rows: [['Chimp, on four legs or two', 100, '100'], ['Human', 25, '25']],
+    cap: 'Based on “about 75% less.” Measured per distance and body size in a small group of chimps. The scale starts at zero.' }
+};
+function initVs() {
+  const box = $('vs-bars');
+  const draw = (k) => {
+    const V = VS[k];
+    box.innerHTML = `<p class="label">${esc(V.unit)}</p>` + V.rows.map(([l, v, t], i) => `<div class="vs-row"><span class="vs-l">${esc(l)}</span><div class="vs-tr"><span class="vs-f${i ? ' alt' : ''}" style="width:${(v / V.max * 100).toFixed(1)}%"></span></div><b>${esc(t)}</b></div>`).join('')
+      + `<div class="vs-ax">${V.ticks.map((t) => `<i style="left:${(t / V.max * 100).toFixed(1)}%">${t}</i>`).join('')}</div>`;
+    $('vs-cap').textContent = V.cap;
+  };
+  seg($('vs-pick'), 'vs', draw);
+  draw('power');
+}
+inits.primates = () => [initMovers, initVs].forEach(safeInit);
+
 
 /* ================= Look: palettes, type and the 1985 switch (same as Fuel) ================= */
 const PALETTES = [

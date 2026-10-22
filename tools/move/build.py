@@ -23,6 +23,8 @@ GLYPHS = {
     'g-steps': '<path d="M7 4c2 0 2.6 2 2.6 4.5S8.8 13 7.4 13 5 11 5 8.5 5.4 4 7 4zM6 15.5h3v1.5a1.5 1.5 0 0 1-3 0z"/><path d="M16.6 8c1.6 0 2.4 2.5 2.4 5s-.8 4.5-2.2 4.5S14.4 15.5 14.4 13 15 8 16.6 8zM15 19.5h3v.5a1.5 1.5 0 0 1-3 0z"/>',
     # 05 range: an arc of motion around a joint
     'g-range': '<circle cx="6" cy="18" r="1.6"/><path d="M6 18 19 18"/><path d="M6 18 15 7.5"/><path d="M14 18a8 8 0 0 0-2.8-6.1" stroke-dasharray="1.5 2.2"/>',
+    # 06 primates: an arm hanging from a branch
+    'g-branch': '<path d="M2.5 5.5c4 1 8 1 11 .2s5-.7 8 .3"/><path d="M15 6.6c-.8 2.3-1.2 4.5-1.5 6.6"/><circle cx="12.6" cy="15.6" r="2.2"/><path d="M12.4 17.8v3.7"/><path d="M15.2 6.4l1.3-1"/>',
 }
 sprite = ('<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>'
           + rd('shared/mark.svg').strip() + rd('shared/arrow.svg').strip()
@@ -31,7 +33,7 @@ sprite = ('<svg width="0" height="0" style="position:absolute" aria-hidden="true
 out = '\n'.join([
     head,
     '<title>BONES Move</title>',
-    '<meta name="description" content="How little exercise you need, why bones want weight, four lifts from no equipment to a barbell, walking and mobility, with every claim graded by evidence.">',
+    '<meta name="description" content="How little exercise you need, why bones want weight, four lifts from no equipment to a barbell, walking, mobility and how primates move, with every claim graded by evidence.">',
     rd('shared/fonts.html').strip(),
     '<style id="move-style">\n' + rd('shared/shell.css') + '\n' + rd('move/style.css') + '\n</style>',
     sprite,
