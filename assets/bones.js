@@ -9,29 +9,98 @@
   var root = (me && me.getAttribute('data-root')) || './';
   var rootURL = new URL(root, location.href).href;
 
-  /* One palette per kind of page, set before first paint so nothing flashes.
-     Body pages (everything about being human) are Paper. Universe pages (science/) are Black.
-     A page can override with data-realm="paper" or "black" on this script tag.
+  /* Palette, set before first paint so nothing flashes.
+     Universe pages (science/) are always Black. Body pages (everything about being human) are
+     Paper in light mode and Black in dark mode. Light or dark follows the phone's own setting
+     until the reader taps the sun/moon switch; a choice that matches the device setting is
+     forgotten, so the page goes back to following the device.
+     A page can override its kind with data-realm="paper" or "black" on this script tag.
      The old Tune panel let visitors pick from five palettes; those choices are cleared once,
      along with the stored neon look, which no longer has a visible switch to turn it off. */
   var realm = (me && me.getAttribute('data-realm')) ||
     (/\/science\//.test(location.pathname) ? 'black' : 'paper');
   window.BONES = window.BONES || {};
   window.BONES.realm = realm;
-  document.documentElement.setAttribute('data-palette', realm);
-  try {
-    if (!window.localStorage.getItem('bones-look-v2')) {
-      ['bones-palette', 'bones-type', 'bones-dim'].forEach(function (k) { window.localStorage.removeItem(k); });
-      window.localStorage.setItem('bones-look-v2', '1');
-    }
-  } catch (e) { /* storage blocked: nothing stored to clear */ }
-  function themeColor() {
-    var c = realm === 'paper' ? '#ECE9E2' : '#000000';
-    var metas = document.querySelectorAll('meta[name="theme-color"]');
-    for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', c);
+  function store(k, v) {
+    try {
+      if (v === undefined) return window.localStorage.getItem(k);
+      if (v === null) window.localStorage.removeItem(k); else window.localStorage.setItem(k, v);
+    } catch (e) { /* storage blocked: the choice lasts until the page closes */ }
+    return null;
   }
-  themeColor();
-  document.addEventListener('DOMContentLoaded', themeColor);
+  if (!store('bones-look-v2')) {
+    ['bones-palette', 'bones-type', 'bones-dim'].forEach(function (k) { store(k, null); });
+    store('bones-look-v2', '1');
+  }
+  var darkMQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  var picked = null; /* fallback when storage is blocked */
+  function deviceScheme() { return darkMQ && darkMQ.matches ? 'dark' : 'light'; }
+  function scheme() {
+    var s = store('bones-scheme') || picked;
+    return s === 'dark' || s === 'light' ? s : deviceScheme();
+  }
+  function palette() { return realm === 'black' ? 'black' : (scheme() === 'dark' ? 'black' : 'paper'); }
+  function applyScheme() {
+    var pal = palette();
+    document.documentElement.setAttribute('data-palette', pal);
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', pal === 'paper' ? '#ECE9E2' : '#000000');
+    var dark = scheme() === 'dark';
+    var btns = document.querySelectorAll('[data-bones-scheme]');
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].setAttribute('aria-checked', String(dark));
+      btns[j].title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+  }
+  function setScheme(s) {
+    picked = s;
+    store('bones-scheme', s === deviceScheme() ? null : s);
+    applyScheme();
+    try { document.dispatchEvent(new CustomEvent('bones:scheme', { detail: { scheme: s, palette: palette() } })); } catch (e) { }
+  }
+  /* The switch: a sun in light mode, a moon in dark mode. Pages without their own slot get it
+     added by addScheme() below; Home builds it into its top bar with BONES.schemeHtml(). */
+  var SCHEME_CSS = '.bones-scheme{display:inline-grid;place-items:center;width:36px;height:36px;padding:0;margin:0;border-radius:999px;' +
+    'border:1px solid var(--line,rgba(127,127,127,.4));background:transparent;color:var(--fg,currentColor);cursor:pointer;flex:none;position:relative}' +
+    '.bones-scheme::after{content:"";position:absolute;inset:-5px}' +
+    '.bones-scheme:hover{border-color:var(--fg,currentColor)}' +
+    '.bones-scheme:focus-visible{outline:2px solid var(--accent,currentColor);outline-offset:2px}' +
+    '.bones-scheme svg{width:18px;height:18px;grid-area:1/1;transition:opacity .25s,transform .35s cubic-bezier(.2,.7,.2,1)}' +
+    '.bones-scheme .moon{opacity:0;transform:rotate(-40deg) scale(.6)}' +
+    '.bones-scheme[aria-checked="true"] .sun{opacity:0;transform:rotate(40deg) scale(.6)}' +
+    '.bones-scheme[aria-checked="true"] .moon{opacity:1;transform:none}' +
+    '@media (prefers-reduced-motion:reduce){.bones-scheme svg{transition:none}}';
+  function schemeHtml() {
+    if (realm === 'black') return '';
+    var dark = scheme() === 'dark';
+    return '<button class="bones-scheme" type="button" role="switch" data-bones-scheme aria-label="Dark mode" aria-checked="' + dark + '" title="' + (dark ? 'Switch to light mode' : 'Switch to dark mode') + '">' +
+      '<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>' +
+      '<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>';
+  }
+  window.BONES.scheme = scheme;
+  window.BONES.palette = palette;
+  window.BONES.setScheme = setScheme;
+  window.BONES.schemeHtml = schemeHtml;
+  applyScheme();
+  if (darkMQ) {
+    var follow = function () { if (!store('bones-scheme')) applyScheme(); };
+    if (darkMQ.addEventListener) darkMQ.addEventListener('change', follow); else if (darkMQ.addListener) darkMQ.addListener(follow);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('[data-bones-scheme]') : null;
+    if (b) setScheme(scheme() === 'dark' ? 'light' : 'dark');
+  });
+  function addScheme() {
+    if (realm === 'black') return;
+    var st = document.createElement('style'); st.id = 'bones-scheme-style'; st.textContent = SCHEME_CSS;
+    document.head.appendChild(st);
+    if (document.querySelector('[data-bones-scheme]') || (me && me.getAttribute('data-scheme') === 'own')) { applyScheme(); return; }
+    /* Fuel and Move: the empty actions slot in the top bar. Chapter pages: the end of the top bar. */
+    var slot = document.querySelector('.top-actions') || document.querySelector('header.top .top-in');
+    if (slot) { slot.insertAdjacentHTML('beforeend', schemeHtml()); }
+    applyScheme();
+  }
+  window.BONES.addScheme = addScheme;
 
   /* Same-tab navigation inside the site. Capture phase, so it runs before the browser
      acts on target="_blank" in links that scripts build after the page loads. */
@@ -69,6 +138,11 @@
       var strip = document.createElement('div');
       strip.style.cssText = 'padding:10px max(16px, env(safe-area-inset-left, 0px)) 0;position:relative;z-index:5';
       strip.appendChild(a);
+      if (realm !== 'black') {
+        strip.style.display = 'flex'; strip.style.alignItems = 'center'; strip.style.justifyContent = 'space-between';
+        strip.style.paddingRight = 'max(16px, env(safe-area-inset-right, 0px))';
+        strip.insertAdjacentHTML('beforeend', schemeHtml());
+      }
       document.body.insertBefore(strip, document.body.firstChild);
       return;
     }
@@ -95,6 +169,9 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addHome);
   else addHome();
+  /* After addHome, so a page that gets the home strip gets the switch there instead. */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addScheme);
+  else addScheme();
 
   /* ---------- Evidence: a grade chip jumps to its claim's full evidence ----------
      Each page lists its graded claims in an evidence section (built with

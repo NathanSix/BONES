@@ -44,11 +44,16 @@ Shared files:
     `assets/fonts/LICENSE-atkinson-hyperlegible.txt`).
   - **Overpass Mono** for labels, numbers and grade chips.
   No page loads fonts from Google any more.
-- One palette per kind of page, set by `assets/bones.js` before the page paints: body pages are
-  **Paper**, universe pages (everything under `science/`) are **Black**. A page can override this
-  with `data-realm="paper"` or `data-realm="black"` on its `bones.js` script tag. There is no Tune
-  panel and no visible neon switch; the 1985 neon look is a hidden easter egg (the Konami code on
-  a keyboard) on Home, Fuel and Move.
+- Palette, set by `assets/bones.js` before the page paints. Universe pages (everything under
+  `science/`) are always **Black**. Body pages are **Paper** in light mode and **Black** in dark
+  mode. Light or dark follows the phone's own setting until the reader taps the sun/moon switch
+  in the top bar; the choice carries across pages (`bones-scheme` in localStorage), and picking
+  the same mode as the device clears it so the page follows the device again. `bones.js` places
+  the switch in `.top-actions` (Fuel, Move), at the end of the chapter top bar, or in the
+  "BONES" home strip; Home builds it into its own top bar with `BONES.schemeHtml()`. A page can
+  override its kind with `data-realm="paper"` or `data-realm="black"` on its `bones.js` script
+  tag. There is no Tune panel; the 1985 neon look is a hidden easter egg (the Konami code on a
+  keyboard) on Home, Fuel and Move.
 - Build notes in the wireframe show only in the editor, never to visitors.
 - Every page has a title ending in "| BONES", a description and a link-preview picture.
   The text lives in `tools/share/pages.json`. After changing it, run

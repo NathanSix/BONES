@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="BONES">
 <meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: dark)">
-<script src="assets/bones.js" data-root="./"></script>
+<script src="assets/bones.js" data-root="./" data-scheme="own"></script>
 <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>BONES | A structure for living</title>
 <style id="bones-fonts">@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:300;font-display:swap;src:url(assets/fonts/2cbdc26d13.woff2) format("woff2")}
@@ -1545,7 +1545,7 @@ function topHtml() {
   const curTop = (() => { const p = page(ui.page); return p && p.parent ? p.parent : ui.page; })();
   return `<div class="wrap"><a class="brand" href="#home" aria-label="${esc(L('home'))}"><svg class="tb-mark" viewBox="236 57 278 286" aria-hidden="true"><path fill="currentColor" d="${LOGO.outer}"/>${LOGO.holes.map((h) => `<path class="tb-hole" d="${h.d}"/>`).join('')}</svg><span class="brand-word">BONES</span></a>
     <nav class="topnav" aria-label="${esc(L('mainNav'))}">${navs.map((p) => `<a href="#${esc(p.id)}"${pAttr(p.id)}${p.id === curTop ? ' aria-current="page"' : ''}>${esc(p.navLabel || p.title)}</a>`).join('')}</nav>
-    <div class="top-actions">${langPickerHtml()}${ui.preview ? '<button class="btn" type="button" data-act="preview-back">Back to editor</button>' : ''}${ed.can && !ui.editing && !ui.preview ? (SRC ? `<button class="btn" type="button" disabled title="${esc(L('editInEnglish'))}">Edit</button>` : '<button class="btn" type="button" data-act="edit">Edit</button>') : ''}<button class="btn" type="button" data-act="index" aria-expanded="${ui.indexOpen}">${esc(L('index'))}</button></div></div>`;
+    <div class="top-actions">${langPickerHtml()}${window.BONES && window.BONES.schemeHtml ? window.BONES.schemeHtml() : ''}${ui.preview ? '<button class="btn" type="button" data-act="preview-back">Back to editor</button>' : ''}${ed.can && !ui.editing && !ui.preview ? (SRC ? `<button class="btn" type="button" disabled title="${esc(L('editInEnglish'))}">Edit</button>` : '<button class="btn" type="button" data-act="edit">Edit</button>') : ''}<button class="btn" type="button" data-act="index" aria-expanded="${ui.indexOpen}">${esc(L('index'))}</button></div></div>`;
 }
 function footHtml() {
   return `<div class="wrap foot"><div class="about"><svg aria-hidden="true"><use href="#i-mark" width="100%" height="100%"/></svg>${T('p', 'site.footer', '', 'Footer line')}</div>
@@ -1585,7 +1585,7 @@ const PALETTES = [
   { id: 'grey', name: 'Greybox', c: ['#EDEDED', '#222222', '#4A4A4A'] }
 ];
 const TYPES = [{ id: 'mono', name: 'Overpass Mono', s: 'Mono throughout' }, { id: 'serif', name: 'Serif reading', s: 'Plex Serif body' }];
-function curPalette() { return (window.BONES && window.BONES.realm) || 'paper'; }
+function curPalette() { return window.BONES && window.BONES.palette ? window.BONES.palette() : 'paper'; }
 function curType() { return 'mono'; }
 function tuneHtml() {
   const pal = curPalette(); const ty = curType();

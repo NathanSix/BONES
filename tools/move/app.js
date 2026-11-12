@@ -541,11 +541,11 @@ inits.primates = () => [initMovers, initVs].forEach(safeInit);
 const lk = (k, v) => { try { if (v === undefined) return localStorage.getItem('bones-' + k); if (v === null) localStorage.removeItem('bones-' + k); else localStorage.setItem('bones-' + k, v); } catch (e) { return null; } return null; };
 const ROOT = document.documentElement;
 const isDim = () => lk('dim') === 'neon';
-/* One palette per kind of page, chosen in assets/bones.js: Paper here. The 1985 neon look is a
-   hidden easter egg (the Konami code on a keyboard); there is no visible switch or Tune panel. */
+/* Paper or Black from the light/dark switch in assets/bones.js. The 1985 neon look is a
+   hidden easter egg (the Konami code on a keyboard); there is no Tune panel. */
 function applyLook() {
   if (isDim()) ROOT.setAttribute('data-dim', 'neon'); else ROOT.removeAttribute('data-dim');
-  ROOT.setAttribute('data-palette', (window.BONES && window.BONES.realm) || 'paper');
+  ROOT.setAttribute('data-palette', window.BONES && window.BONES.palette ? window.BONES.palette() : 'paper');
   ROOT.removeAttribute('data-type');
 }
 function initLook() {
