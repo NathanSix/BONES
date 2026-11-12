@@ -3,7 +3,7 @@
    Libraries and fonts from the CDNs the pages use: cache first. Their URLs are pinned to a
    version, so a cached copy never goes stale, and pages that need three.js keep working
    offline once they have been opened. */
-const CACHE = 'bones-v3';
+const CACHE = 'bones-v4';
 const CDN = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'unpkg.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', () => self.skipWaiting());

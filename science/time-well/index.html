@@ -1,5 +1,7 @@
-<!doctype html><html lang="en"><head><meta charset=utf8>
+<!doctype html><html lang="en"><head>
+<meta charset=utf8>
 <meta name="robots" content="noindex, nofollow">
+<!-- share --><meta name="description" content="Mass slows down time near it, and so does moving fast. The effects are real, atomic clocks have measured them, and they are very, very small."><meta property="og:site_name" content="BONES"><meta property="og:type" content="website"><meta property="og:title" content="The Time Well | BONES"><meta property="og:description" content="Mass slows down time near it, and so does moving fast. The effects are real, atomic clocks have measured them, and they are very, very small."><meta property="og:url" content="https://nathansix.github.io/BONES/science/time-well/"><meta property="og:image" content="https://nathansix.github.io/BONES/assets/share/time-well.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="The Time Well, from BONES"><meta name="twitter:card" content="summary_large_image"><!-- /share -->
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
@@ -9,11 +11,19 @@
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <script src="../../assets/bones.js" data-root="../../"></script>
-<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>The Time Well</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><style id="bones-fonts">@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:300;font-display:swap;src:url(../../assets/fonts/2cbdc26d13.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/9ab8a5e0a4.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../../assets/fonts/4b55b2660e.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../../assets/fonts/28a8fa2102.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/46070de9c0.woff2) format("woff2")}
+@font-face{font-family:"Bones Display";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/32fab23d11.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400-italic.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700-italic.woff2) format("woff2")}
+html{font-synthesis:none}</style>
+</head><body>
+<title>The Time Well | BONES</title>
 <style>
 /* Layout: one narrow column; each section is labeled by its physical scale, descending from deep space to a tossed ball */
 :root{
@@ -29,9 +39,9 @@
   --fast-soft:rgba(242,181,74,.14);
   --slow-soft:rgba(94,196,230,.14);
   --ink-soft:rgba(232,236,246,.08);
-  --font-display:"Chakra Petch","Trebuchet MS",sans-serif;
+  --font-display:"Bones Display","Trebuchet MS",sans-serif;
   --font-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
-  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --font-mono:"Overpass Mono",ui-monospace,Menlo,Consolas,monospace;
   color-scheme:dark;
 }
 html{background:var(--void)}
@@ -212,7 +222,7 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
       <div class="scene">
         <svg viewBox="0 0 320 232" role="img" aria-label="Side view: a ruler from 0 to 2 meters, a table at 0.75 meters with a watch on the floor beneath it, and a movable clock you can raise with the slider.">
           <line x1="36" y1="36" x2="36" y2="206" stroke="var(--line)" stroke-width="2"/>
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
+          <g font-family="Overpass Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
             <line x1="32" y1="206" x2="40" y2="206" stroke="var(--dim)"/><text x="28" y="209">0</text>
             <line x1="32" y1="163.5" x2="40" y2="163.5" stroke="var(--dim)"/><text x="28" y="166.5">0.5</text>
             <line x1="32" y1="121" x2="40" y2="121" stroke="var(--dim)"/><text x="28" y="124">1 m</text>
@@ -225,20 +235,20 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
             <rect x="168" y="148" width="5" height="58"/>
             <rect x="287" y="148" width="5" height="58"/>
           </g>
-          <text x="230" y="136" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">table, 0.75 m</text>
+          <text x="230" y="136" font-family="Overpass Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">table, 0.75 m</text>
           <g transform="translate(230 194)">
             <circle r="11" fill="var(--void)" stroke="var(--slow)" stroke-width="1.6"/>
             <line id="floorHand" x1="0" y1="0" x2="0" y2="-8" stroke="var(--slow)" stroke-width="2" stroke-linecap="round"/>
             <circle r="1.6" fill="var(--slow)"/>
           </g>
-          <text x="230" y="222" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--slow)" text-anchor="middle">floor watch</text>
+          <text x="230" y="222" font-family="Overpass Mono, monospace" font-size="10" fill="var(--slow)" text-anchor="middle">floor watch</text>
           <line id="penGuide" x1="40" y1="142" x2="80" y2="142" stroke="var(--fast)" stroke-dasharray="3 3" opacity=".7"/>
           <g id="penClock" transform="translate(98 142)">
             <circle r="15" fill="var(--fast-soft)"/>
             <circle r="12" fill="var(--void)" stroke="var(--fast)" stroke-width="1.8"/>
             <line id="penHand" x1="0" y1="0" x2="0" y2="-9" stroke="var(--fast)" stroke-width="2.2" stroke-linecap="round"/>
             <circle r="1.8" fill="var(--fast)"/>
-            <text x="0" y="-21" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--fast)">your clock</text>
+            <text x="0" y="-21" text-anchor="middle" font-family="Overpass Mono, monospace" font-size="10" fill="var(--fast)">your clock</text>
           </g>
         </svg>
       </div>
@@ -293,7 +303,7 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
             </defs>
             <circle cx="140" cy="140" r="54" fill="var(--earth)" opacity=".1"/>
             <circle cx="140" cy="140" r="30" fill="url(#earthG)"/>
-            <text x="140" y="144" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--void)">Earth</text>
+            <text x="140" y="144" text-anchor="middle" font-family="Overpass Mono, monospace" font-size="10" fill="var(--void)">Earth</text>
             <circle id="ring" cx="140" cy="140" r="81" fill="none" stroke="var(--dim)" stroke-width="1" opacity=".55"/>
             <g id="sat">
               <circle r="11" fill="var(--slow)" opacity=".18" id="satHalo"/>
@@ -340,24 +350,24 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
           <ellipse cx="150" cy="128" rx="108" ry="16" fill="none" stroke="var(--ink)" opacity=".3"/>
           <line x1="150" y1="128" x2="150" y2="50" stroke="var(--ink)" stroke-width="1.2"/>
           <line x1="150" y1="128" x2="246" y2="128" stroke="var(--ink)" stroke-width="1.2"/>
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--ink)">
+          <g font-family="Overpass Mono, monospace" font-size="10" fill="var(--ink)">
             <text x="156" y="92">6,357 km</text>
             <text x="198" y="122" text-anchor="middle">6,378 km</text>
           </g>
           <path d="M32 134 A122 22 0 0 0 243.5 142.1" fill="none" stroke="var(--slow)" stroke-width="2"/>
           <polygon points="252.3,140.2 243.4,146.7 241.6,137.9" fill="var(--slow)"/>
-          <text x="40" y="160" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--slow)">spin</text>
+          <text x="40" y="160" font-family="Overpass Mono, monospace" font-size="10" fill="var(--slow)">spin</text>
           <g transform="translate(150 40)">
             <circle r="10" fill="var(--void)" stroke="var(--ink)" stroke-width="1.5"/>
             <line x1="0" y1="0" x2="0" y2="-7" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/>
           </g>
-          <text x="134" y="36" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--ink)">pole</text>
+          <text x="134" y="36" text-anchor="end" font-family="Overpass Mono, monospace" font-size="10" fill="var(--ink)">pole</text>
           <g transform="translate(258 128)">
             <circle r="10" fill="var(--void)" stroke="var(--ink)" stroke-width="1.5"/>
             <line x1="0" y1="0" x2="0" y2="-7" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/>
           </g>
-          <text x="258" y="108" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--ink)">equator</text>
-          <text x="150" y="248" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--dim)">bulge exaggerated about 50 times</text>
+          <text x="258" y="108" text-anchor="middle" font-family="Overpass Mono, monospace" font-size="10" fill="var(--ink)">equator</text>
+          <text x="150" y="248" text-anchor="middle" font-family="Overpass Mono, monospace" font-size="9" fill="var(--dim)">bulge exaggerated about 50 times</text>
         </svg>
       </div>
       <div class="readout">
@@ -384,7 +394,7 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
       <div class="scene">
         <svg viewBox="0 0 320 214" role="img" aria-label="A ball's arc from throw to catch. A dashed gold arc shows the path a real ball takes. A solid arc shows the path you chose.">
           <line x1="36" y1="28" x2="36" y2="196" stroke="var(--line)" stroke-width="2"/>
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
+          <g font-family="Overpass Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
             <line x1="32" y1="196" x2="40" y2="196" stroke="var(--dim)"/><text x="28" y="199">0</text>
             <line x1="32" y1="140" x2="40" y2="140" stroke="var(--dim)"/><text x="28" y="143">4</text>
             <line x1="32" y1="84" x2="40" y2="84" stroke="var(--dim)"/><text x="28" y="87">8</text>
@@ -395,7 +405,7 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
           <path id="myArc" fill="none" stroke="var(--ink)" stroke-width="2"/>
           <circle cx="56" cy="196" r="4" fill="none" stroke="var(--dim)"/>
           <circle cx="296" cy="196" r="4" fill="none" stroke="var(--dim)"/>
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">
+          <g font-family="Overpass Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">
             <text x="56" y="211">throw</text><text x="296" y="211">catch</text>
           </g>
           <circle id="ball" cx="56" cy="190" r="6" fill="var(--ink)"/>
@@ -407,19 +417,19 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
       </div>
       <div class="scene">
         <svg viewBox="0 0 320 182" role="img" aria-label="Graph of extra time on the ball's clock against the arc's peak height. It rises to a maximum at 4.9 meters, then falls and goes negative past about 9.8 meters.">
-          <text x="44" y="14" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)">extra time on the ball's clock (as)</text>
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
+          <text x="44" y="14" font-family="Overpass Mono, monospace" font-size="10" fill="var(--dim)">extra time on the ball's clock (as)</text>
+          <g font-family="Overpass Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="end">
             <text x="38" y="33">+400</text><text x="38" y="95">0</text><text x="38" y="157">−400</text>
           </g>
           <line x1="44" y1="30" x2="44" y2="154" stroke="var(--line)"/>
           <line x1="44" y1="92" x2="308" y2="92" stroke="var(--dim)" opacity=".6"/>
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">
+          <g font-family="Overpass Mono, monospace" font-size="10" fill="var(--dim)" text-anchor="middle">
             <text x="44" y="172">0 m</text><text x="132" y="172">4</text><text x="220" y="172">8</text><text x="300" y="172">12 m</text>
           </g>
           <path id="curveF" fill="none" stroke="var(--fast)" stroke-width="2"/>
           <path id="curveS" fill="none" stroke="var(--slow)" stroke-width="2"/>
           <line id="peakLine" stroke="var(--fast)" stroke-dasharray="3 3" opacity=".7"/>
-          <text id="peakLabel" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--fast)" text-anchor="middle">real arc, 4.9 m</text>
+          <text id="peakLabel" font-family="Overpass Mono, monospace" font-size="10" fill="var(--fast)" text-anchor="middle">real arc, 4.9 m</text>
           <circle id="plotDot" r="6" fill="var(--ink)" stroke="var(--panel)" stroke-width="2"/>
         </svg>
       </div>
@@ -548,7 +558,7 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
       ctx.strokeStyle = COL.slow; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.stroke();
     }
     ctx.globalAlpha = 1;
-    ctx.font = '600 10px "JetBrains Mono", ui-monospace, monospace';
+    ctx.font = '600 10px "Overpass Mono", ui-monospace, monospace';
     ctx.fillStyle = COL.dim; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     if (ey + er + 16 < H) ctx.fillText('EARTH', cx, ey + er + 6);
     const sec = t / 1000;
@@ -787,4 +797,9 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 })();
 </script>
 
+<style id="bones-type">
+/* BONES type system: Bones Display for short titles, Atkinson Hyperlegible for reading, Overpass Mono for labels and numbers. */
+h3{font-family:var(--font-body);font-weight:700;letter-spacing:0}
+.alt .big{font-family:var(--font-mono);font-weight:600}
+</style>
 </body></html>

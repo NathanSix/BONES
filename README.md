@@ -2,7 +2,8 @@
 
 A structure for living. A free, evidence-graded library of health, fitness and science.
 
-This repository is the test copy of the site, served by GitHub Pages. It is not indexed by
+This repository is the test copy of the site, served by GitHub Pages at
+https://nathansix.github.io/BONES/ (the address is case-sensitive: `BONES` in capitals). It is not indexed by
 search engines (every page carries `noindex`), but anyone with the link can open it.
 
 ## Layout
@@ -36,9 +37,23 @@ Shared files:
   It always tries the network first, so testers see the latest version.
 - `manifest.webmanifest` and `assets/icons/` let the site be added to a phone home screen.
   The icons are the white mark on black; rebuild them with `node tools/icons/make.js`.
-- `assets/fonts/` holds the shared typefaces, so each page no longer carries its own copy.
-- Pages open in the Black palette. The Tune panel (on Home, Fuel and Move) changes it, and the
-  choice carries across pages.
+- `assets/fonts/` holds the three BONES typefaces, shared by every page:
+  - **Bones Display** for short titles (one to three words).
+  - **Atkinson Hyperlegible** for anything people read: body text, ledes, buttons, captions.
+    It was designed by the Braille Institute for legibility (SIL Open Font License, in
+    `assets/fonts/LICENSE-atkinson-hyperlegible.txt`).
+  - **Overpass Mono** for labels, numbers and grade chips.
+  No page loads fonts from Google any more.
+- One palette per kind of page, set by `assets/bones.js` before the page paints: body pages are
+  **Paper**, universe pages (everything under `science/`) are **Black**. A page can override this
+  with `data-realm="paper"` or `data-realm="black"` on its `bones.js` script tag. There is no Tune
+  panel and no visible neon switch; the 1985 neon look is a hidden easter egg (the Konami code on
+  a keyboard) on Home, Fuel and Move.
+- Build notes in the wireframe show only in the editor, never to visitors.
+- Every page has a title ending in "| BONES", a description and a link-preview picture.
+  The text lives in `tools/share/pages.json`. After changing it, run
+  `python3 tools/share/meta.py` (writes the tags), `python3 tools/move/build.py` (Move), and
+  `node tools/share/make.js` (redraws the pictures in `assets/share/`; needs Playwright).
 - `404.html` is shown for addresses that don't exist.
 
 ## Move
@@ -59,4 +74,5 @@ with `?editor=on` at the end of the address. `?editor=off` hides it again.
 
 Edits made that way stay in that one browser until they are saved. Save downloads an HTML
 file; changes become part of the site when that file replaces `index.html` in this
-repository.
+repository. The saved file has a bare head (no app icons, share tags or `bones.js`), so
+copy the edited content into the existing `index.html` rather than swapping the whole file.

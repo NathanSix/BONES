@@ -1,5 +1,7 @@
-<!doctype html><html lang="en"><head><meta charset=utf8>
+<!doctype html><html lang="en"><head>
+<meta charset=utf8>
 <meta name="robots" content="noindex, nofollow">
+<!-- share --><meta name="description" content="An interactive model of David Nadlinger&#x27;s 2018 photo of a single atom held in an ion trap. Dive from the lab bench down to the atom."><meta property="og:site_name" content="BONES"><meta property="og:type" content="website"><meta property="og:title" content="Single Atom in an Ion Trap | BONES"><meta property="og:description" content="An interactive model of David Nadlinger&#x27;s 2018 photo of a single atom held in an ion trap. Dive from the lab bench down to the atom."><meta property="og:url" content="https://nathansix.github.io/BONES/science/one-atom/"><meta property="og:image" content="https://nathansix.github.io/BONES/assets/share/one-atom.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="One Atom, from BONES"><meta name="twitter:card" content="summary_large_image"><!-- /share -->
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
@@ -9,11 +11,19 @@
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <script src="../../assets/bones.js" data-root="../../"></script>
-<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Single Atom in an Ion Trap</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Michroma&display=swap">
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><style id="bones-fonts">@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:300;font-display:swap;src:url(../../assets/fonts/2cbdc26d13.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/9ab8a5e0a4.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../../assets/fonts/4b55b2660e.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../../assets/fonts/28a8fa2102.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/46070de9c0.woff2) format("woff2")}
+@font-face{font-family:"Bones Display";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/32fab23d11.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400-italic.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700-italic.woff2) format("woff2")}
+html{font-synthesis:none}</style>
+</head><body>
+<title>Single Atom in an Ion Trap | BONES</title>
 <style>
 /* Layout: a full-width dark viewer, like looking through the chamber window, with instrument-panel controls and readouts beneath. One column on phones, two on wide screens. */
 :root{
@@ -31,9 +41,9 @@
   --vapor:#e3b765;
   --steel:#c4c8d6;
   --tag-bg:rgba(14,15,23,.86);
-  --f-display:"Michroma","Eurostile","Trebuchet MS",sans-serif;
+  --f-display:"Bones Display","Eurostile","Trebuchet MS",sans-serif;
   --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --f-mono:"Overpass Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -929,4 +939,8 @@ try { init3D(); } catch(e){ console.error(e); fallback("Something went wrong sta
 })();
 </script>
 
+<style id="bones-type">
+/* BONES type system: Bones Display for short titles, Atkinson Hyperlegible for reading, Overpass Mono for labels and numbers. */
+h2,.regime{font-family:var(--f-mono);font-weight:600}
+</style>
 </body></html>

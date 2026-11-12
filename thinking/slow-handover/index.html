@@ -1,20 +1,28 @@
 <!doctype html><html lang="en"><head><meta charset=utf8>
 <meta name="robots" content="noindex, nofollow">
+<!-- share --><meta name="description" content="The AI risk most likely to catch us isn&#x27;t a robot uprising. It&#x27;s a long series of sensible decisions, each handing a little more of the wheel to machines."><meta property="og:site_name" content="BONES"><meta property="og:type" content="website"><meta property="og:title" content="The Slow Handover | BONES"><meta property="og:description" content="The AI risk most likely to catch us isn&#x27;t a robot uprising. It&#x27;s a long series of sensible decisions, each handing a little more of the wheel to machines."><meta property="og:url" content="https://nathansix.github.io/BONES/thinking/slow-handover/"><meta property="og:image" content="https://nathansix.github.io/BONES/assets/share/slow-handover.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="The Slow Handover, from BONES"><meta name="twitter:card" content="summary_large_image"><!-- /share -->
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BONES">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#ECE9E2" media="(prefers-color-scheme: dark)">
 <script src="../../assets/bones.js" data-root="../../"></script>
 <meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>The Slow Handover</title>
+<title>The Slow Handover | BONES</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300;400;600;700&display=swap">
+<style id="bones-fonts">@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:300;font-display:swap;src:url(../../assets/fonts/2cbdc26d13.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/9ab8a5e0a4.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../../assets/fonts/4b55b2660e.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../../assets/fonts/28a8fa2102.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/46070de9c0.woff2) format("woff2")}
+@font-face{font-family:"Bones Display";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/32fab23d11.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400-italic.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700-italic.woff2) format("woff2")}</style>
 <style>
 /* Layout: one reading column with a full-bleed "space" hero, then a hub of modules (ladder, decay, audit, toolkit, notes).
    Color: BONES paper neutrals, Thinking pillar hue (lens) as --hue. Evidence tiers reuse BONES t1..t5. */
@@ -27,7 +35,7 @@
   --hue: var(--h-thinking);
   --hue-soft: rgba(17,108,106,0.12);
   --f-display: "Bones Display", "Overpass Mono", ui-monospace, Menlo, monospace;
-  --f-ui: "Overpass Mono", ui-monospace, Menlo, Consolas, monospace;
+  --f-ui: "Overpass Mono", ui-monospace, Menlo, Consolas, monospace; --f-read: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --s-label: 0.6875rem; --s-small: 0.8125rem; --s-ui: 0.9375rem; --s-read: 1rem;
   --s-h1: clamp(2rem, 7vw, 3.75rem); --s-h2: clamp(1.25rem, 3.4vw, 1.75rem);
   --r: 6px; --r-card: 12px;
@@ -55,13 +63,13 @@
 }
 
 * { box-sizing: border-box; }
-body { background: var(--bg); color: var(--fg); font-family: var(--f-ui); font-size: var(--s-read); font-weight: 300; line-height: 1.65; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-read); font-size: var(--s-read); font-weight: 300; line-height: 1.65; }
 .wrap { max-width: 920px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.15; text-wrap: balance; margin: 0; }
 h2 { font-size: var(--s-h2); }
 h3 { font-size: 1rem; }
 p { margin: 0; max-width: 65ch; }
-.label { font-size: var(--s-label); text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; }
+.label { font-size: var(--s-label); text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; font-family: var(--f-ui); }
 a { color: var(--hue); }
 button { font-family: var(--f-ui); }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--hue); outline-offset: 2px; }
@@ -69,19 +77,19 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hue); outli
 /* Hero */
 .hero { background: var(--space); color: var(--on-space); }
 .hero .wrap { padding-block: 56px 48px; display: grid; gap: 18px; }
-.crumb { font-size: var(--s-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--on-space-muted); }
+.crumb { font-size: var(--s-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--on-space-muted); font-family: var(--f-ui); }
 .crumb b { color: var(--on-space); font-weight: 600; }
 .hero h1 { font-size: var(--s-h1); letter-spacing: -0.01em; }
 .hero .lede { font-size: 1.05rem; color: var(--on-space); max-width: 58ch; }
 .hero .sub { color: var(--on-space-muted); font-size: var(--s-ui); max-width: 58ch; }
-.draft { display: inline-flex; align-self: start; gap: 8px; align-items: center; border: 1px dashed var(--on-space-muted); color: var(--on-space-muted); border-radius: 999px; padding: 4px 12px; font-size: var(--s-label); letter-spacing: 0.1em; text-transform: uppercase; justify-self: start; }
+.draft { display: inline-flex; align-self: start; gap: 8px; align-items: center; border: 1px dashed var(--on-space-muted); color: var(--on-space-muted); border-radius: 999px; padding: 4px 12px; font-size: var(--s-label); letter-spacing: 0.1em; text-transform: uppercase; justify-self: start; font-family: var(--f-ui); }
 
 main .wrap { padding-block: 40px 72px; display: grid; gap: 64px; }
 section { display: grid; gap: 20px; }
 .sec-head { display: grid; gap: 8px; }
 
 /* Tier chips */
-.tier { display: inline-flex; align-items: center; gap: 6px; font-size: var(--s-label); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; white-space: nowrap; }
+.tier { display: inline-flex; align-items: center; gap: 6px; font-size: var(--s-label); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; white-space: nowrap; font-family: var(--f-ui); }
 .tier::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 .tier.doc { color: var(--t1); } .tier.stu { color: var(--t2); } .tier.arg { color: var(--t3); } .tier.spec { color: var(--t4); }
 
@@ -89,9 +97,9 @@ section { display: grid; gap: 20px; }
 .risks { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
 .risk { background: var(--surface); padding: 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
 .risk.focus { background: var(--hue-soft); }
-.risk .n { font-size: var(--s-label); color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+.risk .n { font-size: var(--s-label); color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; font-family: var(--f-ui); }
 .risk p { font-size: var(--s-small); }
-.risk .here { font-size: var(--s-label); color: var(--hue); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.risk .here { font-size: var(--s-label); color: var(--hue); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--f-ui); }
 @media (max-width: 680px) { .risks { grid-template-columns: 1fr; } }
 
 /* Ladder */
@@ -101,15 +109,15 @@ section { display: grid; gap: 20px; }
 .rung:hover { border-color: var(--hue); }
 .rung[aria-selected="true"] { border-color: var(--hue); background: var(--hue-soft); }
 .rung:focus-visible { outline: 2px solid var(--hue); outline-offset: 2px; }
-.rung .num { font-weight: 700; color: var(--hue); font-variant-numeric: tabular-nums; }
+.rung .num { font-weight: 700; color: var(--hue); font-variant-numeric: tabular-nums; font-family: var(--f-ui); }
 .rung .nm { font-weight: 600; font-size: var(--s-ui); }
-.rung .nm small { display: block; font-weight: 300; color: var(--muted); font-size: var(--s-label); letter-spacing: 0.06em; text-transform: uppercase; }
+.rung .nm small { display: block; font-weight: 300; color: var(--muted); font-size: var(--s-label); letter-spacing: 0.06em; text-transform: uppercase; font-family: var(--f-ui); }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: 22px; display: grid; gap: 18px; min-width: 0; }
 .panel h3 { font-size: var(--s-h2); }
 .meters { display: grid; gap: 12px; }
 .meter { display: grid; gap: 6px; }
 .meter .row { display: flex; justify-content: space-between; gap: 12px; font-size: var(--s-small); }
-.meter .row b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.meter .row b { font-weight: 600; font-variant-numeric: tabular-nums; font-family: var(--f-ui); }
 .bar { height: 8px; border-radius: 999px; background: var(--hatch); overflow: hidden; }
 .bar i { display: block; height: 100%; border-radius: inherit; background: var(--hue); width: 0; transition: width .5s var(--ease); }
 .bar.warn i { background: var(--t4); }
@@ -142,9 +150,9 @@ input[type=range] { width: 100%; accent-color: var(--hue); }
 .arow { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--line); }
 .arow:last-of-type { border-bottom: 0; }
 .arow .q { font-size: var(--s-ui); min-width: 0; }
-.arow .q small { display: block; color: var(--muted); font-size: var(--s-label); letter-spacing: 0.05em; }
+.arow .q small { display: block; color: var(--muted); font-size: var(--s-label); letter-spacing: 0.05em; font-family: var(--f-ui); }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
-.seg button { all: unset; cursor: pointer; padding: 6px 12px; font-size: var(--s-label); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--muted); }
+.seg button { all: unset; cursor: pointer; padding: 6px 12px; font-size: var(--s-label); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--muted); font-family: var(--f-ui); }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-pressed="true"] { background: var(--hue); color: var(--surface); }
 .seg button:focus-visible { outline: 2px solid var(--hue); outline-offset: -2px; }

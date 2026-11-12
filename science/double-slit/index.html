@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="robots" content="noindex, nofollow">
+<!-- share --><meta name="description" content="Fire photons through two slits one at a time. Each lands at one random spot, and the fringes only appear in the statistics."><meta property="og:site_name" content="BONES"><meta property="og:type" content="website"><meta property="og:title" content="The Double-Slit Experiment | BONES"><meta property="og:description" content="Fire photons through two slits one at a time. Each lands at one random spot, and the fringes only appear in the statistics."><meta property="og:url" content="https://nathansix.github.io/BONES/science/double-slit/"><meta property="og:image" content="https://nathansix.github.io/BONES/assets/share/double-slit.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Double Slit, from BONES"><meta name="twitter:card" content="summary_large_image"><!-- /share -->
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
@@ -14,13 +15,13 @@
 <script src="../../assets/bones.js" data-root="../../" data-home="bl:58"></script>
 
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Interactive Double-Slit Experiment</title>
+<title>The Double-Slit Experiment | BONES</title>
 <style>
   :root{color-scheme:dark;--bg:#071019;--line:#20394a;--text:#e9f8ff;--muted:#9db4c2;--cyan:#55ddff;--accent:#ffc857;--wave:#36ff36}
   *{box-sizing:border-box}
   [hidden]{display:none!important}
   html,body{height:100%}
-  body{margin:0;background:radial-gradient(circle at 55% 5%,#123149 0%,var(--bg) 48%,#03080d 100%);color:var(--text);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+  body{margin:0;background:radial-gradient(circle at 55% 5%,#123149 0%,var(--bg) 48%,#03080d 100%);color:var(--text);font:14px/1.4 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
   #app{height:100vh;height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) 350px}
   #scene{position:relative;min-width:0;height:100%;overflow:hidden}
   #scene canvas{display:block;width:100%;height:100%;outline:none}
@@ -66,6 +67,17 @@
     .badge{bottom:10px;left:10px;font-size:11px}
   }
 </style>
+<style id="bones-fonts">@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:300;font-display:swap;src:url(../../assets/fonts/2cbdc26d13.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/9ab8a5e0a4.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../../assets/fonts/4b55b2660e.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../../assets/fonts/28a8fa2102.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/46070de9c0.woff2) format("woff2")}
+@font-face{font-family:"Bones Display";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/32fab23d11.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400-italic.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700-italic.woff2) format("woff2")}
+html{font-synthesis:none}</style>
 </head>
 <body>
 <div id="app">
@@ -679,7 +691,7 @@ function drawChart() {
   ctx.stroke();
 
   ctx.fillStyle = '#9db4c2';
-  ctx.font = '10px system-ui, sans-serif';
+  ctx.font = '10px "Overpass Mono", monospace';
   ctx.textAlign = 'left';
   ctx.fillText(`\u2212${SCREEN_HALF_MM} mm`, 4, h - 5);
   ctx.textAlign = 'center';

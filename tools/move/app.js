@@ -538,51 +538,17 @@ inits.primates = () => [initMovers, initVs].forEach(safeInit);
 
 
 /* ================= Look: palettes, type and the 1985 switch (same as Fuel) ================= */
-const PALETTES = [
-  { id: 'black', name: 'Black', c: ['#000000', '#ECE8E1', '#9DBBDD'] },
-  { id: 'auto', name: 'Match device', c: ['#ECE9E2', '#000000', '#9DBBDD'] },
-  { id: 'paper', name: 'Paper', c: ['#ECE9E2', '#1C1B18', '#2E4C6E'] },
-  { id: 'dot', name: 'Blue dot', c: ['#0A1220', '#E4E8EE', '#E2B04A'] },
-  { id: 'field', name: 'Field', c: ['#E3E6DC', '#1D231B', '#46633A'] },
-  { id: 'marrow', name: 'Marrow', c: ['#EFEBE6', '#211B19', '#8E2C22'] },
-  { id: 'grey', name: 'Greybox', c: ['#EDEDED', '#222222', '#4A4A4A'] }
-];
-const TYPES = [{ id: 'mono', name: 'Overpass Mono', s: 'Mono throughout' }, { id: 'serif', name: 'Serif reading', s: 'Plex Serif body' }];
 const lk = (k, v) => { try { if (v === undefined) return localStorage.getItem('bones-' + k); if (v === null) localStorage.removeItem('bones-' + k); else localStorage.setItem('bones-' + k, v); } catch (e) { return null; } return null; };
 const ROOT = document.documentElement;
 const isDim = () => lk('dim') === 'neon';
+/* One palette per kind of page, chosen in assets/bones.js: Paper here. The 1985 neon look is a
+   hidden easter egg (the Konami code on a keyboard); there is no visible switch or Tune panel. */
 function applyLook() {
   if (isDim()) ROOT.setAttribute('data-dim', 'neon'); else ROOT.removeAttribute('data-dim');
-  const pal = lk('palette') || 'black', ty = lk('type') || 'mono';
-  if (pal === 'auto') ROOT.removeAttribute('data-palette'); else ROOT.setAttribute('data-palette', pal);
-  if (ty === 'mono') ROOT.removeAttribute('data-type'); else ROOT.setAttribute('data-type', ty);
-  const sw = document.querySelector('.dim-switch');
-  if (sw) { const on = isDim(); sw.setAttribute('aria-checked', String(on)); sw.title = on ? 'Return to the prime dimension' : 'Enter the alternate dimension'; sw.querySelector('.ds-label').textContent = on ? '1985' : 'Prime'; }
-  renderTune();
-}
-let tuneOpen = false;
-function renderTune() {
-  const box = $('tune-panel'); if (!box) return;
-  box.hidden = !tuneOpen; $('tune-btn').setAttribute('aria-expanded', String(tuneOpen));
-  if (!tuneOpen) return;
-  const pal = lk('palette') || 'black', ty = lk('type') || 'mono';
-  box.innerHTML = `<div><h2>Palette</h2>${isDim() ? '<p class="fine" style="margin-bottom:8px">Palettes apply in the prime dimension.</p>' : ''}<div class="swatches">${PALETTES.map((p) => `<button class="sw" type="button" data-pal="${p.id}" aria-pressed="${p.id === pal}"><i aria-hidden="true">${p.c.map((c) => `<b style="background:${c}"></b>`).join('')}</i>${p.name}</button>`).join('')}</div></div>
-    <div><h2>Type</h2><div class="opts">${TYPES.map((t) => `<button class="opt" type="button" data-ty="${t.id}" aria-pressed="${t.id === ty}"><span>${t.name}</span><span class="s">${t.s}</span></button>`).join('')}</div></div>`;
+  ROOT.setAttribute('data-palette', (window.BONES && window.BONES.realm) || 'paper');
+  ROOT.removeAttribute('data-type');
 }
 function initLook() {
-  const acts = document.querySelector('.top-actions');
-  acts.innerHTML = '<button class="dim-switch" type="button" role="switch" aria-label="Alternate dimension" aria-checked="false"><span class="ds-track" aria-hidden="true"><span class="ds-knob"></span></span><span class="ds-label">Prime</span></button>';
-  document.body.insertAdjacentHTML('beforeend', '<button class="tune-btn" id="tune-btn" type="button" aria-expanded="false" aria-controls="tune-panel">Tune</button><div class="tune" id="tune-panel" role="dialog" aria-label="Look" hidden></div>');
-  $('tune-btn').addEventListener('click', (e) => { e.stopPropagation(); tuneOpen = !tuneOpen; renderTune(); });
-  $('tune-panel').addEventListener('click', (e) => {
-    e.stopPropagation();
-    const p = e.target.closest('[data-pal]'), t = e.target.closest('[data-ty]');
-    if (p) { lk('palette', p.dataset.pal === 'black' ? null : p.dataset.pal); applyLook(); }
-    if (t) { lk('type', t.dataset.ty === 'mono' ? null : t.dataset.ty); applyLook(); }
-  });
-  document.addEventListener('click', () => { if (tuneOpen) { tuneOpen = false; renderTune(); } });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && tuneOpen) { tuneOpen = false; renderTune(); $('tune-btn').focus(); } });
-  acts.querySelector('.dim-switch').addEventListener('click', flipDim);
   applyLook();
 }
 let flipping = false;
@@ -608,6 +574,14 @@ async function flipDim() {
     await Promise.all([run(top, [{ transform: 'translateY(0)' }, { transform: 'translateY(-100%)' }], open), run(bot, [{ transform: 'translateY(0)' }, { transform: 'translateY(100%)' }], open)]);
   } catch (err) { if ((lk('dim') === 'neon') !== !!to) set(); } finally { anims.forEach((a) => a.cancel()); ROOT.classList.remove('glitching'); ov.remove(); flipping = false; }
 }
+const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiAt = 0;
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest && e.target.closest('input, textarea, select')) return;
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  konamiAt = k === KONAMI[konamiAt] ? konamiAt + 1 : (k === KONAMI[0] ? 1 : 0);
+  if (konamiAt === KONAMI.length) { konamiAt = 0; flipDim(); }
+});
 
 /* ================= Boot ================= */
 function initKey() {

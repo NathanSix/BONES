@@ -1,5 +1,7 @@
-<!doctype html><html lang="en"><head><meta charset=utf8>
+<!doctype html><html lang="en"><head>
+<meta charset=utf8>
 <meta name="robots" content="noindex, nofollow">
+<!-- share --><meta name="description" content="Why left and right molecules matter, told with hands, keys and germs."><meta property="og:site_name" content="BONES"><meta property="og:type" content="website"><meta property="og:title" content="The Handedness Book | BONES"><meta property="og:description" content="Why left and right molecules matter, told with hands, keys and germs."><meta property="og:url" content="https://nathansix.github.io/BONES/science/mirror-molecules/"><meta property="og:image" content="https://nathansix.github.io/BONES/assets/share/mirror-molecules.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="The Handedness Book, from BONES"><meta name="twitter:card" content="summary_large_image"><!-- /share -->
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
@@ -9,10 +11,19 @@
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <script src="../../assets/bones.js" data-root="../../"></script>
-<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>The Handedness Book</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Lexend:wght@400;600&display=swap">
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><style id="bones-fonts">@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:300;font-display:swap;src:url(../../assets/fonts/2cbdc26d13.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/9ab8a5e0a4.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../../assets/fonts/4b55b2660e.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../../assets/fonts/28a8fa2102.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/46070de9c0.woff2) format("woff2")}
+@font-face{font-family:"Bones Display";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/32fab23d11.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400-italic.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700-italic.woff2) format("woff2")}
+html{font-synthesis:none}</style>
+</head><body>
+<title>The Handedness Book | BONES</title>
 <style>
 /* Layout: a picture book. One idea per page, big picture first, two or three short sentences under it. */
 :root{
@@ -30,8 +41,8 @@
   --metal:#c4ccd8;
   --metal-dark:#8b95a6;
   --skin:#f6cfa6;
-  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
-  --body:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Bones Display","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]):not([data-palette]){
@@ -479,7 +490,7 @@ dd{margin:0}
       ctx.moveTo(ex, ey); ctx.lineTo(ex + Math.cos(a + .6) * 8, ey + Math.sin(a + .6) * 8);
       ctx.stroke();
     }
-    ctx.fillStyle = C.left; ctx.font = '600 15px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = C.left; ctx.font = '700 15px "Atkinson Hyperlegible", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('guard', gd.x, gd.y);
   }
   function drawGerm(g){
@@ -489,7 +500,7 @@ dd{margin:0}
     ctx.fillStyle = col;
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-13, -7, 26, 14, 7) : ctx.rect(-13,-7,26,14); ctx.fill();
     ctx.rotate(-g.rot);
-    ctx.fillStyle = '#fff'; ctx.font = '800 11px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff'; ctx.font = '700 11px "Atkinson Hyperlegible", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(mode === 'normal' ? 'L' : 'R', 0, 1);
     ctx.restore();
   }
@@ -519,4 +530,11 @@ dd{margin:0}
 })();
 </script>
 
+<style id="bones-type">
+/* BONES type system: Bones Display for short titles, Atkinson Hyperlegible for reading, Overpass Mono for labels and numbers. */
+h1{font-size:clamp(1.7rem,7.5vw,3rem);font-weight:400}
+h2{font-weight:400}
+button,.say,.tile b,.rule b,.bar,.counts strong,.big,dt{font-family:var(--body);font-weight:700}
+.pnum{font-family:"Overpass Mono",ui-monospace,Menlo,monospace;font-weight:600}
+</style>
 </body></html>

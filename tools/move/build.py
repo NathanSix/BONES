@@ -7,9 +7,15 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 T = ROOT / 'tools'
 rd = lambda p: (T / p).read_text(encoding='utf-8')
 
-# Head: the same twelve lines every BONES page starts with (taken from Fuel so they stay in sync)
-head = (ROOT / 'fuel' / 'index.html').read_text(encoding='utf-8').split('\n')[:12]
-head = '\n'.join(head)
+# Head: the same opening lines every BONES page starts with, taken from Fuel so they stay in sync.
+# Everything up to and including the viewport line; Fuel's own share tags are swapped for Move's.
+import sys
+sys.path.insert(0, str(T / 'share'))
+import meta
+fuel = (ROOT / 'fuel' / 'index.html').read_text(encoding='utf-8').split('\n')
+end = next(i for i, l in enumerate(fuel) if l.startswith('<meta name=viewport'))
+head = '\n'.join(l for l in fuel[:end + 1] if not l.startswith('<!-- share -->'))
+head = meta.apply(head, meta.BY_ID['move']).rstrip('\n')
 
 G = '<symbol id="{id}" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{d}</g></symbol>'
 GLYPHS = {
@@ -32,8 +38,7 @@ sprite = ('<svg width="0" height="0" style="position:absolute" aria-hidden="true
 
 out = '\n'.join([
     head,
-    '<title>BONES Move</title>',
-    '<meta name="description" content="How little exercise you need, why bones want weight, four lifts from no equipment to a barbell, walking, mobility and how primates move, with every claim graded by evidence.">',
+    '<title>' + meta.BY_ID['move']['title'] + '</title>',
     rd('shared/fonts.html').strip(),
     '<style id="move-style">\n' + rd('shared/shell.css') + '\n' + rd('move/style.css') + '\n</style>',
     sprite,

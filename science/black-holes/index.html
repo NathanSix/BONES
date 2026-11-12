@@ -1,5 +1,7 @@
-<!doctype html><html lang="en"><head><meta charset=utf8>
+<!doctype html><html lang="en"><head>
+<meta charset=utf8>
 <meta name="robots" content="noindex, nofollow">
+<!-- share --><meta name="description" content="A black hole drawn live from Einstein&#x27;s equations. Every pixel follows its own ray of light back through curved spacetime, plus hands-on relativity labs."><meta property="og:site_name" content="BONES"><meta property="og:type" content="website"><meta property="og:title" content="Event Horizon | BONES"><meta property="og:description" content="A black hole drawn live from Einstein&#x27;s equations. Every pixel follows its own ray of light back through curved spacetime, plus hands-on relativity labs."><meta property="og:url" content="https://nathansix.github.io/BONES/science/black-holes/"><meta property="og:image" content="https://nathansix.github.io/BONES/assets/share/black-holes.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Event Horizon, from BONES"><meta name="twitter:card" content="summary_large_image"><!-- /share -->
 <link rel="manifest" href="../../manifest.webmanifest">
 <link rel="icon" href="../../assets/icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
@@ -9,12 +11,19 @@
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <script src="../../assets/bones.js" data-root="../../"></script>
-<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Event Horizon Observatory</title>
-<meta name="description" content="A real-time GPU ray tracer of a Schwarzschild black hole with thin accretion disk, plus interactive general relativity labs.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><style id="bones-fonts">@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:300;font-display:swap;src:url(../../assets/fonts/2cbdc26d13.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/9ab8a5e0a4.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../../assets/fonts/4b55b2660e.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../../assets/fonts/28a8fa2102.woff2) format("woff2")}
+@font-face{font-family:"Overpass Mono";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/46070de9c0.woff2) format("woff2")}
+@font-face{font-family:"Bones Display";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/32fab23d11.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url(../../assets/fonts/atkinson-400-italic.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:700;font-display:swap;src:url(../../assets/fonts/atkinson-700-italic.woff2) format("woff2")}
+html{font-synthesis:none}</style>
+</head><body>
+<title>Event Horizon | BONES</title>
 <style>
 /* Layout: a full-bleed observatory viewport (live ray tracer) with a docked instrument rail,
    then a physics bench of tabbed experiments: figure + chart on the left, controls and readouts on the right. */
@@ -40,9 +49,9 @@
   --series-3: #d55181;
   --grid: #1a1f29;
   --axis: #323947;
-  --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: "Bones Display", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Overpass Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --t-xs: 0.6875rem;
   --t-sm: 0.8125rem;
   --t-md: 0.9375rem;
@@ -3771,4 +3780,9 @@ void main() {
 })();
 
 </script>
+<style id="bones-type">
+/* BONES type system: Bones Display for short titles, Atkinson Hyperlegible for reading, Overpass Mono for labels and numbers. */
+.dive-title,.h3{font-family:var(--font-body);font-style:normal;font-weight:700;letter-spacing:0}
+.title,.h2,.gl-fail h2{font-style:normal}
+</style>
 </body></html>

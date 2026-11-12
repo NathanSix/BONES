@@ -9,12 +9,29 @@
   var root = (me && me.getAttribute('data-root')) || './';
   var rootURL = new URL(root, location.href).href;
 
-  /* Palette before first paint, so pages don't flash light. Black is the default; the Tune
-     panel on pages that have one stores another choice under the same key. */
+  /* One palette per kind of page, set before first paint so nothing flashes.
+     Body pages (everything about being human) are Paper. Universe pages (science/) are Black.
+     A page can override with data-realm="paper" or "black" on this script tag.
+     The old Tune panel let visitors pick from five palettes; those choices are cleared once,
+     along with the stored neon look, which no longer has a visible switch to turn it off. */
+  var realm = (me && me.getAttribute('data-realm')) ||
+    (/\/science\//.test(location.pathname) ? 'black' : 'paper');
+  window.BONES = window.BONES || {};
+  window.BONES.realm = realm;
+  document.documentElement.setAttribute('data-palette', realm);
   try {
-    var pal = window.localStorage.getItem('bones-palette') || 'black';
-    if (pal !== 'auto') document.documentElement.setAttribute('data-palette', pal);
-  } catch (e) { document.documentElement.setAttribute('data-palette', 'black'); }
+    if (!window.localStorage.getItem('bones-look-v2')) {
+      ['bones-palette', 'bones-type', 'bones-dim'].forEach(function (k) { window.localStorage.removeItem(k); });
+      window.localStorage.setItem('bones-look-v2', '1');
+    }
+  } catch (e) { /* storage blocked: nothing stored to clear */ }
+  function themeColor() {
+    var c = realm === 'paper' ? '#ECE9E2' : '#000000';
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', c);
+  }
+  themeColor();
+  document.addEventListener('DOMContentLoaded', themeColor);
 
   /* Same-tab navigation inside the site. Capture phase, so it runs before the browser
      acts on target="_blank" in links that scripts build after the page loads. */
